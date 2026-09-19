@@ -217,5 +217,30 @@ class TestPlatformSpecifics(unittest.TestCase):
         self.assertIn("沉淀钩子", r2.stdout.decode("utf-8"))
 
 
+class TestHeaderDocumentation(unittest.TestCase):
+    """AC：每个适配器文件头必须写清 平台 / hook 文档 / stdin 映射 / stdout 格式。"""
+
+    REQUIRED_SECTIONS = ("## 平台", "## Hook 文档", "stdin 字段映射表", "stdout 格式说明")
+
+    def test_every_adapter_header_is_documented(self):
+        for a in ADAPTERS:
+            with self.subTest(adapter=a):
+                head = (HOOKS_DIR / f"{a}.py").read_text(encoding="utf-8")
+                # 只查文件头（首个函数/import 之前的文档块）
+                doc = head.split('"""')[1] if head.count('"""') >= 2 else head
+                for section in self.REQUIRED_SECTIONS:
+                    self.assertIn(section, doc, f"{a}: header missing {section!r}")
+
+    def test_every_adapter_documents_env_vars(self):
+        for a in ADAPTERS:
+            with self.subTest(adapter=a):
+                text = (HOOKS_DIR / f"{a}.py").read_text(encoding="utf-8")
+                doc = text.split('"""')[1] if text.count('"""') >= 2 else text
+                self.assertIn("AGENT_KB_PATH", doc)
+                self.assertIn("AGENT_KB_DEBUG", doc)
+                # 必须真的 import adapter_base 才能生效
+                self.assertIn("from adapter_base import", text)
+
+
 if __name__ == "__main__":
     unittest.main()
