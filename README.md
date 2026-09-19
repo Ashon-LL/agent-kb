@@ -72,6 +72,31 @@
 
 ---
 
+## 平台支持
+
+| 平台 | Hook 适配器 | 状态 |
+|---|---|---|
+| Trae | trae_zcode_adapter.py | ✅ |
+| ZCode | trae_zcode_adapter.py | ✅ |
+| Codex CLI | codex_adapter.py | ✅ |
+| Claude Desktop | claude_adapter.py | ✅ 派单 #1 |
+| Qoder | qoder_adapter.py | ✅ 派单 #1 |
+| Hermes | hermes_adapter.py | ✅ 派单 #2 |
+| PI | pi_adapter.py | ✅ 派单 #2 |
+| OpenCode | opencode_adapter.py | ✅ 派单 #2 |
+| OpenClaw | openclaw_adapter.py | ✅ 派单 #2 |
+| WorkBuddy | workbuddy_adapter.py | ✅ 派单 #2 |
+| Kimi Code | kimi_adapter.py | ✅ 派单 #2 |
+
+> **emit 格式来源**：每个适配器文件头都注明该平台 hook 输出格式的官方文档链接。
+> 已核实：Claude Desktop、Qoder、Kimi Code、WorkBuddy/CodeBuddy、OpenClaw（TS 插件桥接）、OpenCode（TS 插件桥接）。
+> 未核实（骨架待补）：Hermes、PI —— 文件头标 `# TODO: emit format not verified`。
+>
+> **桥接说明**：OpenCode、OpenClaw 原生扩展点是 JS/TS 插件，本项目的 Python 适配器作为
+> 子进程桥供插件 shell 调用；其余平台为原生 stdin/stdout hook。
+
+---
+
 ## 安装
 
 ### Windows 一键安装（推荐）
@@ -156,7 +181,15 @@ agent-kb/
 ├── hooks/
 │   ├── kb_core.py               # 平台无关逻辑
 │   ├── trae_zcode_adapter.py    # Trae / ZCode 适配器
-│   └── codex_adapter.py         # Codex CLI 适配器
+│   ├── codex_adapter.py         # Codex CLI 适配器
+│   ├── claude_adapter.py        # Claude Desktop 适配器
+│   ├── qoder_adapter.py         # Qoder 适配器
+│   ├── hermes_adapter.py        # Hermes 适配器（emit 待核实）
+│   ├── pi_adapter.py            # PI (Perplexity) 适配器（emit 待核实）
+│   ├── opencode_adapter.py      # OpenCode 适配器（TS 插件桥）
+│   ├── openclaw_adapter.py      # OpenClaw 适配器（TS 插件桥）
+│   ├── workbuddy_adapter.py     # WorkBuddy / CodeBuddy 适配器
+│   └── kimi_adapter.py          # Kimi Code 适配器
 ├── commands/                    # ZCode 风格命令（Trae 由 Skill description 触发）
 │   ├── kb.md
 │   └── kb-harvest.md
@@ -168,10 +201,18 @@ agent-kb/
 ├── schema/
 │   ├── entry.md                 # 条目格式模板
 │   └── INDEX-template.md
-├── templates/                   # 各平台 hooks.json 模板（含占位符）
+├── templates/                   # 各平台 hooks 模板（含占位符）
 │   ├── trae-hooks.json
 │   ├── zcode-hooks.json
-│   └── codex-hooks.json
+│   ├── codex-hooks.json
+│   ├── claude-hooks.json
+│   ├── qoder-hooks.json
+│   ├── hermes-hooks.json
+│   ├── pi-hooks.json
+│   ├── opencode-hooks.json
+│   ├── openclaw-hooks.json
+│   ├── workbuddy-hooks.json
+│   └── kimi-hooks.json          # Kimi 为 TOML 占位，见文件内 _toml_template
 ├── scripts/
 │   └── install.ps1              # 一键安装
 └── docs/
