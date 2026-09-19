@@ -243,7 +243,10 @@ python scripts/smoke_test.py
 `smoke_test.py` 覆盖三个场景：SessionStart 注入开工钩子（并核对 INDEX.md 条目数）、
 UserPromptSubmit 带触发词注入沉淀钩子、UserPromptSubmit 不带触发词静默放行。
 
-CI 已在 `.cnb.yml` 注册 push / PR 门禁，两条流水线不通过即红灯。
+CI 已在 `.cnb.yml` 注册 push / PR 门禁（`unit tests` + `smoke test`），任一 Stage 不过即红灯。
+
+> CI 跑在 `python:3.11-slim` 镜像上。缺省镜像不含 `python3`，
+> 若改成不指定 `docker.image`，脚本会以 `sh: python3: command not found`（退出码 127）挂掉。
 
 ---
 

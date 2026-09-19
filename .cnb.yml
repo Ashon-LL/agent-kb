@@ -1,6 +1,6 @@
-# agent-kb 云原生 CI —— NPC 派单通道 + 测试门禁
+# agent-kb 云原生 CI —— 测试门禁 + NPC 派单通道
 #
-# 1) push / PR 时跑单测 + 冒烟脚本（纯 Python，零第三方依赖）
+# 1) push / PR 时跑单测 + 冒烟脚本（纯标准库 Python，零第三方依赖）
 # 2) POST api_trigger_npc 事件给 CodeBuddy NPC，让它在 feat 分支上做增量开发
 #
 # 派单命令：
@@ -11,6 +11,23 @@
 # 或用本仓现成脚本：
 #   python .analysis/dispatch_npc.py <任务书.md> feat
 
+# ── 测试环境 ──────────────────────────────────────────────
+# ⛔ 不得依赖缺省镜像：缺省镜像里没有 python3，
+#    脚本会以 `sh: python3: command not found`（127）挂掉。
+#    python:3.11-slim 自带 python3，且无需额外装包。
+.test-python: &test-python
+  docker:
+    image: python:3.11-slim
+
+# ── 测试步骤（push / PR 共用） ────────────────────────────
+.test-stages: &test-stages
+  - name: unit tests
+    script: python3 -m unittest discover tests/ -v
+    timeout: 10m
+  - name: smoke test
+    script: python3 scripts/smoke_test.py
+    timeout: 10m
+
 # 通用测试流水线：任何分支的 push / PR 都跑
 #
 # ⛔ docker.image 必须显式指定带 Python 的镜像：
@@ -18,21 +35,13 @@
 # 脚本写 `python3` 会直接 `python3: command not found`（退出码 127）。
 "**":
   push:
-    - docker:
-        image: python:3.11-slim
-      stages:
-        - name: unit tests
-          script: python3 -m unittest discover tests/ -v
-        - name: smoke test
-          script: python3 scripts/smoke_test.py
+    - name: unit-and-smoke
+      <<: *test-python
+      stages: *test-stages
   pull_request:
-    - docker:
-        image: python:3.11-slim
-      stages:
-        - name: unit tests
-          script: python3 -m unittest discover tests/ -v
-        - name: smoke test
-          script: python3 scripts/smoke_test.py
+    - name: unit-and-smoke
+      <<: *test-python
+      stages: *test-stages
 
 feat:
   api_trigger_npc:
