@@ -1,8 +1,7 @@
-# agent-kb 云原生 CI —— NPC 派单通道
+# agent-kb 云原生 CI —— NPC 派单通道 + 测试门禁
 #
-# 纯 Skill + 脚本 + 文档项目，无编译/测试门禁。
-# 唯一用途：POST api_trigger_npc 事件给 CodeBuddy NPC，
-# 让它在 feat 分支上做增量开发。
+# 1) push / PR 时跑单测 + 冒烟脚本（纯 Python，零第三方依赖）
+# 2) POST api_trigger_npc 事件给 CodeBuddy NPC，让它在 feat 分支上做增量开发
 #
 # 派单命令：
 #   cnb build start-build --repo apigogo/agent-kb --event api_trigger_npc \
@@ -11,6 +10,21 @@
 #
 # 或用本仓现成脚本：
 #   python .analysis/dispatch_npc.py <任务书.md> feat
+
+# 通用测试流水线：任何分支的 push / PR 都跑
+"**":
+  push:
+    - stages:
+        - name: unit tests
+          script: python3 -m unittest discover tests/ -v
+        - name: smoke test
+          script: python3 scripts/smoke_test.py
+  pull_request:
+    - stages:
+        - name: unit tests
+          script: python3 -m unittest discover tests/ -v
+        - name: smoke test
+          script: python3 scripts/smoke_test.py
 
 feat:
   api_trigger_npc:
@@ -32,7 +46,7 @@ feat:
             systemPrompt: |
               你是 agent-kb 项目的自动化 NPC「CodeBuddy」。
               严格按 userPrompt 中的任务书执行：先读任务书与验收清单再动手；
-              遵守「开工即推、增量推送（≥3 次）」纪律；
+              遵守「开工即推、增量推送（≥3 次）」纪律。
               结果通过 PR 回报；遇权限不足（403）立即回贴求授权，不要静默放弃。
               平台 2h 硬边界不可逾越，每完成一个可编译/可验证小步就 commit push。
             # ⛔ userPrompt 必须保持变量引用（$userPrompt），不得写死字面量
