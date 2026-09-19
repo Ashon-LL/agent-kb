@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "& 'PYTHON_EXECUTABLE' 'HOOKS_DIR\\trae_zcode_adapter.py'",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "& 'PYTHON_EXECUTABLE' 'HOOKS_DIR\\trae_zcode_adapter.py'",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

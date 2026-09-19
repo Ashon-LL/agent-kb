@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "PYTHON_EXECUTABLE HOOKS_DIR/codex_adapter.py"
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "command": "PYTHON_EXECUTABLE HOOKS_DIR/codex_adapter.py"
+      }
+    ]
+  }
+}
