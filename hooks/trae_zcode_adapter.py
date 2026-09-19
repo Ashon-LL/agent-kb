@@ -2,37 +2,55 @@
 """Trae / ZCode 平台 Hook 适配器。
 
 ## 平台
-Trae / ZCode —— 配置位置 `~/.trae/hooks.json`（Windows）或 `~/.zcode/hooks.json`。
+Trae（CN 版，ByteDance）与 ZCode —— 两者 hooks 契约**完全一致**，共用一个适配器。
 
 ## Hook 文档
-- 配置样例：`templates/trae-hooks.json` / `templates/zcode-hooks.json`
+- Trae hooks 文档：https://docs.trae.ai/ide/hooks
+- 配置位置：`~/.trae-cn/hooks.json`（Trae）/ `~/.zcode/hooks.json`（ZCode），
+  注册在**顶层 `hooks` 键**下。本仓库 `templates/trae-hooks.json` /
+  `templates/zcode-hooks.json` 可直接落盘。
 
-## stdin / stdout 契约
+## 与 Claude/Codex 的关键差异（本文件存在的理由）
 
-Trae / ZCode 与 Claude Code 家族同形：
+1. **命令是 PowerShell 调用式**：hooks.json 里写
+   `"& 'PYTHON_EXECUTABLE' 'HOOKS_DIR\\trae_zcode_adapter.py'"`。
+   Windows 下 Trae/ZCode 用 PowerShell 起进程，**不是** POSIX 风格
+   （对比 WorkBuddy 走 Git Bash，要用 `python3 xxx.py`）。
 
-stdin（回调 JSON）:
+2. **事件名 `SessionStart` / `UserPromptSubmit`，均无 matcher** ——
+   触发词过滤靠适配器内部正则补位。
 
-    {"hook_event_name": "SessionStart", "session_id": "...", "prompt": "..."}
+3. **stdin 字段名是 `hook_event_name`**（与 Claude 家族一致）。
 
-stdout（消费 JSON，走 `hookSpecificOutput.additionalContext` 注入上下文）:
+4. **stdout 走 `hookSpecificOutput.additionalContext`**，`hookEventName` 需回填。
 
-    {"hookSpecificOutput": {"hookEventName": "...", "additionalContext": "..."}}
+5. **hooks.json 顶层带 `"version": 1`** —— 这是 Trae/ZCode 特有字段，
+   Claude/CodeBuddy 的 settings.json 格式里没有。
 
-不返回 `decision` 字段 —— 保持"增强而非阻塞"语义。
+## stdin 字段映射表
 
-## 字段映射
-
-| 本适配器读取 | 平台字段 | 说明 |
+| 本适配器读取 | Trae/ZCode 原始字段 | 说明 |
 |---|---|---|
-| 事件名   | `hook_event_name`（兼容 `event` 等，经 normalize_event 归一） | SessionStart / UserPromptSubmit |
-| 用户输入 | `prompt`（兼容 `user_prompt` / `message` / `content` / `text`） | UserPromptSubmit 才有 |
+| 事件名   | `hook_event_name` | SessionStart / UserPromptSubmit |
+| 用户输入 | `prompt`          | UserPromptSubmit 才有 |
+| 会话 id  | `session_id`      | 本适配器不使用 |
+| 工作目录 | `cwd`             | 本适配器不使用 |
+
+## stdout 格式说明
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "【kb 开工钩子】..."
+  }
+}
+```
 
 ## 环境变量
 
-- `AGENT_KB_PATH`   —— 覆盖默认 `~/.agents/kb`，优先级高于 `sys.argv[1]`
-- `AGENT_KB_DEBUG`  —— 置 `1` 时向 stderr 打印 `[agent-kb debug] ...`
-- `AGENT_KB_TRIGGER` —— 分号分隔的额外触发词正则片段
+- `AGENT_KB_PATH`  —— 覆盖默认 `~/.agents/kb`，优先级高于 `sys.argv[1]`
+- `AGENT_KB_DEBUG` —— 置 `1` 时向 stderr 打印 `[agent-kb debug] ...`
 
 ## 退出码
 
@@ -78,11 +96,11 @@ def main() -> int:
     debug_log(event or str(raw_event), prompt, kb_path)
 
     if event == EVENT_SESSION_START:
-        emit(event, session_start_reminder(str(kb_path)))
+        emit(EVENT_SESSION_START, session_start_reminder(str(kb_path)))
     elif event == EVENT_USER_PROMPT:
         if not should_trigger_user_prompt(prompt):
             return 0
-        emit(event, user_prompt_reminder())
+        emit(EVENT_USER_PROMPT, user_prompt_reminder())
     return 0
 
 
