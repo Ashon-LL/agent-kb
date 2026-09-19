@@ -24,3 +24,10 @@ venv/
 *.tmp
 *.log
 *.bak
+
+# 视频素材（本地编辑用，不入库）
+docs/screenshots/
+docs/video-subtitles.srt
+docs/narration.md
+docs/video-script.md
+docs/*.mp4
