@@ -74,51 +74,101 @@
 
 ## 平台支持
 
-| 平台 | Hook 适配器 | 状态 |
-|---|---|---|
-| Trae | trae_zcode_adapter.py | ✅ |
-| ZCode | trae_zcode_adapter.py | ✅ |
-| Codex CLI | codex_adapter.py | ✅ |
-| Claude Desktop | claude_adapter.py | ✅ 派单 #1 |
-| Qoder | qoder_adapter.py | ✅ 派单 #1 |
-| Hermes | hermes_adapter.py | ✅ 派单 #2 |
-| PI | pi_adapter.py | ✅ 派单 #2 |
-| OpenCode | opencode_adapter.py | ✅ 派单 #2 |
-| OpenClaw | openclaw_adapter.py | ✅ 派单 #2 |
-| WorkBuddy | workbuddy_adapter.py | ✅ 派单 #2 |
-| Kimi Code | kimi_adapter.py | ✅ 派单 #2 |
+| 平台 | Hook 适配器 | 事件名 | stdin 事件字段 | stdout 格式 | 核实状态 |
+|---|---|---|---|---|---|
+| Trae | trae_zcode_adapter.py | SessionStart / UserPromptSubmit | `hook_event_name` | `hookSpecificOutput.additionalContext` | ✅ |
+| ZCode | trae_zcode_adapter.py | SessionStart / UserPromptSubmit | `hook_event_name` | `hookSpecificOutput.additionalContext` | ✅ |
+| Codex CLI | codex_adapter.py | SessionStart / UserPromptSubmit | **`event`** | **`systemMessage`** | ✅ |
+| Claude Code / Desktop | claude_adapter.py | SessionStart / UserPromptSubmit | `hook_event_name` | `hookSpecificOutput.additionalContext` | ✅ |
+| Qoder | qoder_adapter.py | SessionStart / UserPromptSubmit | `hook_event_name` | `hookSpecificOutput.additionalContext` | ✅ |
+| WorkBuddy / CodeBuddy | workbuddy_adapter.py | SessionStart / UserPromptSubmit | `hook_event_name` | `hookSpecificOutput.additionalContext` | ✅ |
+| OpenClaw | openclaw_adapter.py | **`session_start` / `before_prompt_build`** | `hook_event_name` | `hookSpecificOutput.additionalContext`（插件桥） | ✅ |
+| OpenCode | opencode_adapter.py | **`session.created` / `tui.prompt.append`** | **嵌套 `event.type` + `event.properties`** | `hookSpecificOutput.additionalContext`（插件桥） | ✅ |
+| Kimi Code | kimi_adapter.py | SessionStart / UserPromptSubmit | `hook_event_name` | **纯文本**（直接追加进上下文） | ✅ |
+| Hermes | hermes_adapter.py | SessionStart / UserPromptSubmit | `hook_event_name` | `hookSpecificOutput.additionalContext` | ⚠️ 未核实（占位） |
+| PI (Perplexity) | pi_adapter.py | SessionStart / UserPromptSubmit | `hook_event_name` | `hookSpecificOutput.additionalContext` | ⚠️ 未核实（占位） |
 
-> **emit 格式来源**：每个适配器文件头都注明该平台 hook 输出格式的官方文档链接。
-> 已核实：Claude Desktop、Qoder、Kimi Code、WorkBuddy/CodeBuddy、OpenClaw（TS 插件桥接）、OpenCode（TS 插件桥接）。
-> 未核实（骨架待补）：Hermes、PI —— 文件头标 `# TODO: emit format not verified`。
+> **每个适配器的文件头**都写清了：平台名、hook 官方文档链接、
+> stdin 字段映射表、stdout 格式说明。改平台差异只需动对应文件一处。
+>
+> **配置载体差异**（安装器已按平台处理）：
+> - Trae / ZCode / Codex / Hermes / PI → 独立 `hooks.json`
+> - Claude / Qoder / WorkBuddy → 合并进已有 **`settings.json`** 的 `hooks` 子树（保留其他键）
+> - Kimi → **TOML** `~/.kimi-code/config.toml` 的 `[[hooks]]` 数组（手工注册）
+> - OpenCode / OpenClaw → **JS/TS 插件桥**，Python 脚本作为子进程被 shell 调用（手工注册）
 >
 > **桥接说明**：OpenCode、OpenClaw 原生扩展点是 JS/TS 插件，本项目的 Python 适配器作为
 > 子进程桥供插件 shell 调用；其余平台为原生 stdin/stdout hook。
+
+## 环境变量
+
+所有 10 个适配器统一支持（由 `hooks/adapter_base.py` 集中实现）：
+
+| 变量 | 取值 | 语义 |
+|---|---|---|
+| `AGENT_KB_PATH` | 目录路径 | 覆盖默认 `~/.agents/kb`。**优先级最高**，高于 `sys.argv[1]` |
+| `AGENT_KB_DEBUG` | `1` 开启 | 向 **stderr** 输出 `[agent-kb debug] 事件=xxx prompt_len=xx kb_path=...` |
+
+kb 路径解析优先级（高 → 低）：`AGENT_KB_PATH` → `sys.argv[1]` → `~/.agents/kb`（运行时求值）。
+
+debug 输出走 stderr —— 各平台只读 stdout / 退出码，因此调试信息不会污染注入内容。
+
+```bash
+# 例：把库换到别处，并打开调试
+export AGENT_KB_PATH="$HOME/my-kb"
+export AGENT_KB_DEBUG=1
+```
+
+另有 `AGENT_KB_TRIGGER`（分号分隔的正则片段），用于扩充沉淀触发词，与内置触发词取并集。
 
 ---
 
 ## 安装
 
-### Windows 一键安装（推荐）
+两个安装脚本功能对称，覆盖同样的 10 个平台（11 个平台名，trae/zcode 共用适配器）。
+
+### Windows（PowerShell）
 
 ```powershell
-# 克隆仓库
 git clone https://github.com/<your-org>/agent-kb.git
 cd agent-kb
 
-# 安装到 TraeWork（默认）
-.\scripts\install.ps1 -Platform trae
-
-# 安装到 ZCode
-.\scripts\install.ps1 -Platform zcode
-
-# 安装到 Codex CLI
-.\scripts\install.ps1 -Platform codex
+.\scripts\install.ps1 -List                 # 先看支持哪些平台、装到哪
+.\scripts\install.ps1 -Platform trae        # 安装（默认 trae）
+.\scripts\install.ps1 -Platform claude -Force   # 覆盖/合并已存在配置
 ```
 
-可选参数：
-- `-KbPath ~/.my-kb` 自定义库路径（默认 `~/.agents/kb`）
-- `-Force` 覆盖已存在文件
+参数：`-Platform`（平台名）/ `-KbPath`（库目录，默认 `~/.agents/kb`）/ `-Force` / `-List`。
+
+### macOS / Linux（bash）
+
+```bash
+git clone https://github.com/<your-org>/agent-kb.git
+cd agent-kb
+
+./scripts/install.sh -l                # 平台清单
+./scripts/install.sh -p trae           # 安装（默认 trae）
+./scripts/install.sh -p claude -f      # 覆盖/合并已存在配置
+```
+
+参数：`-p`（平台名）/ `-k`（库目录）/ `-f`（force）/ `-l`（列表）/ `-h`（帮助）。
+脚本 `set -euo pipefail`，任一步失败即中止。
+
+### 支持平台
+
+`trae` `zcode` `codex` `claude` `qoder` `workbuddy` `hermes` `pi`
+`kimi` `opencode` `openclaw`
+
+安装器会：把适配器 + `kb_core.py` + `adapter_base.py` 拷进该平台的 hooks 目录，
+生成或合并 hook 配置，并在 `~/.agents/kb` 不存在时铺一份空库模板。
+`claude` / `qoder` / `workbuddy` 为 **merge 型**：只替换 `settings.json` 的 `hooks` 子树，
+其余键原样保留，并留 `.bak` 备份。
+
+### 测试
+
+```bash
+python3 -m unittest discover tests      # 58 项：适配器契约 + 安装器 + kb_core
+```
 
 ### 手动安装
 
