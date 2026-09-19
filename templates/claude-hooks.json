@@ -1,0 +1,27 @@
+{
+  "_comment": "Claude Desktop / Claude Code：把本文件的 hooks 段合并进 ~/.claude/settings.json（项目级用 .claude/settings.json）。SessionStart / UserPromptSubmit 均不支持 matcher。",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHON_EXECUTABLE HOOKS_DIR/claude_adapter.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHON_EXECUTABLE HOOKS_DIR/claude_adapter.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

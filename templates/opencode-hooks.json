@@ -1,0 +1,29 @@
+{
+  "_comment": "OpenCode：原生扩展点是 JS/TS 插件（~/.config/opencode/plugins/ 或 .opencode/plugins/），无 stdin/stdout JSON hook。本文件描述「JS 插件 shell 调用 opencode_adapter.py」的桥接约定，HOOKS_DIR 换成实际 hooks/ 目录。官方文档 https://opencode.ai/docs/plugins/",
+  "hooks": {
+    "SessionStart": [
+      {
+        "bridge": "opencode-plugin-shell-call",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHON_EXECUTABLE HOOKS_DIR/opencode_adapter.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "bridge": "opencode-plugin-shell-call",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHON_EXECUTABLE HOOKS_DIR/opencode_adapter.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "_comment": "OpenClaw：原生扩展点是 JS/TS 插件（definePluginEntry + api.on(\"session_start\"/\"before_prompt_build\")），见 https://github.com/openclaw/openclaw/blob/main/docs/plugins/hooks/reference.md。本文件描述「JS 插件 shell 调用 openclaw_adapter.py 并把 additionalContext 注入 prompt」的桥接约定，HOOKS_DIR 换成实际 hooks/ 目录。",
+  "hooks": {
+    "SessionStart": [
+      {
+        "bridge": "openclaw-plugin-shell-call",
+        "nativeHook": "session_start",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHON_EXECUTABLE HOOKS_DIR/openclaw_adapter.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "bridge": "openclaw-plugin-shell-call",
+        "nativeHook": "before_prompt_build",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHON_EXECUTABLE HOOKS_DIR/openclaw_adapter.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

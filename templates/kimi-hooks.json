@@ -1,0 +1,21 @@
+{
+  "_comment": "Kimi Code CLI：配置是 TOML（~/.kimi-code/config.toml 的 [[hooks]] 数组），不是 JSON；本文件仅为结构化占位，请按下述 toml 转写。官方文档 https://github.com/MoonshotAI/kimi-code/blob/main/docs/en/customization/hooks.md",
+  "_toml_template": "[[hooks]]\nevent = \"SessionStart\"\nmatcher = \"startup|resume\"\ncommand = \"PYTHON_EXECUTABLE HOOKS_DIR/kimi_adapter.py\"\ntimeout = 10\n\n[[hooks]]\nevent = \"UserPromptSubmit\"\ncommand = \"PYTHON_EXECUTABLE HOOKS_DIR/kimi_adapter.py\"\ntimeout = 10\n",
+  "hooks": {
+    "SessionStart": [
+      {
+        "event": "SessionStart",
+        "matcher": "startup|resume",
+        "command": "PYTHON_EXECUTABLE HOOKS_DIR/kimi_adapter.py",
+        "timeout": 10
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "event": "UserPromptSubmit",
+        "command": "PYTHON_EXECUTABLE HOOKS_DIR/kimi_adapter.py",
+        "timeout": 10
+      }
+    ]
+  }
+}
