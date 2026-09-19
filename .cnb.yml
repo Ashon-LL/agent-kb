@@ -12,15 +12,23 @@
 #   python .analysis/dispatch_npc.py <任务书.md> feat
 
 # 通用测试流水线：任何分支的 push / PR 都跑
+#
+# ⛔ docker.image 必须显式指定带 Python 的镜像：
+# 缺省镜像 cnbcool/default-build-env 里没有 python3，
+# 脚本写 `python3` 会直接 `python3: command not found`（退出码 127）。
 "**":
   push:
-    - stages:
+    - docker:
+        image: python:3.11-slim
+      stages:
         - name: unit tests
           script: python3 -m unittest discover tests/ -v
         - name: smoke test
           script: python3 scripts/smoke_test.py
   pull_request:
-    - stages:
+    - docker:
+        image: python:3.11-slim
+      stages:
         - name: unit tests
           script: python3 -m unittest discover tests/ -v
         - name: smoke test
