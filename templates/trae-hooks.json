@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "& 'PYTHON_EXECUTABLE' 'HOOKS_DIR\\trae_zcode_adapter.py'",
+            "command": "& 'PYTHON_EXECUTABLE' 'HOOKS_DIR/trae_zcode_adapter.py'",
             "timeout": 10
           }
         ]
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "& 'PYTHON_EXECUTABLE' 'HOOKS_DIR\\trae_zcode_adapter.py'",
+            "command": "& 'PYTHON_EXECUTABLE' 'HOOKS_DIR/trae_zcode_adapter.py'",
             "timeout": 10
           }
         ]
