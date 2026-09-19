@@ -1,0 +1,27 @@
+{
+  "_comment": "Qoder (IDE / JetBrains / CLI)：把 hooks 段合并进 ~/.qoder/settings.json。SessionStart 与 UserPromptSubmit 均无 matcher。",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHON_EXECUTABLE HOOKS_DIR/qoder_adapter.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHON_EXECUTABLE HOOKS_DIR/qoder_adapter.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
