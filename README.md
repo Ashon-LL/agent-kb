@@ -214,10 +214,56 @@ agent-kb/
 │   ├── workbuddy-hooks.json
 │   └── kimi-hooks.json          # Kimi 为 TOML 占位，见文件内 _toml_template
 ├── scripts/
-│   └── install.ps1              # 一键安装
+│   ├── install.ps1              # 一键安装
+│   └── smoke_test.py            # 冒烟测试：真跑适配器校验 hook 输出契约
+├── tests/
+│   ├── test_kb_core.py          # 核心逻辑单测（触发词 / INDEX 统计 / 路径求值）
+│   └── test_trae_zcode_adapter.py  # 适配器端到端 stdin/stdout 契约测试
 └── docs/
     └── architecture.md          # 架构详文（WIP）
 ```
+
+---
+
+## 测试
+
+零第三方依赖，Python 自带 `unittest` 即可跑：
+
+```bash
+# 全部单测（28 项）
+python -m unittest discover tests/
+# 或
+python -m pytest tests/
+
+# 冒烟测试：起 subprocess 真喂 stdin 给适配器，校验 stdout 契约
+python scripts/smoke_test.py
+# [PASS] 3/3
+```
+
+`smoke_test.py` 覆盖三个场景：SessionStart 注入开工钩子（并核对 INDEX.md 条目数）、
+UserPromptSubmit 带触发词注入沉淀钩子、UserPromptSubmit 不带触发词静默放行。
+
+CI 已在 `.cnb.yml` 注册 push / PR 门禁，两条流水线不通过即红灯。
+
+---
+
+## 环境变量
+
+所有适配器统一生效（解析逻辑收在 `hooks/adapter_base.py`）：
+
+| 变量 | 取值 | 语义 |
+|---|---|---|
+| `AGENT_KB_PATH` | 目录路径 | 覆盖默认库路径。**优先级最高**，高于 `sys.argv[1]` |
+| `AGENT_KB_DEBUG` | `1` 开启 | 向 **stderr** 输出 `[agent-kb debug] ...` 诊断行（不污染注入内容） |
+| `AGENT_KB_TRIGGER` | 分号分隔的正则片段 | 追加自定义触发词，与内置触发词取并集。例：`归档;复盘` |
+
+`AGENT_KB_TRIGGER` 示例：
+
+```bash
+export AGENT_KB_TRIGGER="归档;复盘;[Ss]ave.thi"
+```
+
+非法正则片段会被忽略并回退到内置触发词 —— 环境变量写坏不会把 hook 拖挂。
 
 ---
 
