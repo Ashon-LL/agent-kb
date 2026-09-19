@@ -108,7 +108,10 @@ $Platforms = @{
 
 if ($List) {
     Write-Host "agent-kb 支持的平台：" -ForegroundColor Cyan
-    foreach ($k in ($Platforms.Keys | Sort-Object)) {
+    # 与 install.sh 保持同样的展示顺序（不要 Sort-Object，否则两边列表不一致）
+    $Order = @("trae", "zcode", "codex", "claude", "hermes", "pi",
+               "opencode", "openclaw", "workbuddy", "kimi", "qoder")
+    foreach ($k in $Order) {
         $p = $Platforms[$k]
         $suffix = if ($p.Manual) { "（需手工注册 hook）" } else { "" }
         Write-Host ("  {0,-10} -> {1} {2}" -f $k, $p.HooksDir, $suffix)
