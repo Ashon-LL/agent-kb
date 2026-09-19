@@ -1,0 +1,27 @@
+{
+  "_comment": "WorkBuddy / CodeBuddy：把 hooks 段合并进 ~/.codebuddy/settings.json（项目级用 <project>/.codebuddy/settings.json）。SessionStart 与 UserPromptSubmit 均无 matcher。官方文档 https://www.codebuddy.ai/docs/cli/hooks",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHON_EXECUTABLE HOOKS_DIR/workbuddy_adapter.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHON_EXECUTABLE HOOKS_DIR/workbuddy_adapter.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
