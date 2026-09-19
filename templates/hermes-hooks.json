@@ -1,0 +1,27 @@
+{
+  "_comment": "Hermes：hook 配置位置与输出格式未核实（TODO）。命令里的 HOOKS_DIR 换成实际 hooks/ 目录路径。",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHON_EXECUTABLE HOOKS_DIR/hermes_adapter.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHON_EXECUTABLE HOOKS_DIR/hermes_adapter.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
