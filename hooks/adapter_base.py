@@ -147,6 +147,12 @@ def normalize_event(raw_event: object) -> str:
         "beforepromptbuild",
         "user_prompt",
         "on_user_prompt",
+        "tui.prompt.append",
+        "tui_prompt_append",
+        "message.received",
+        "message_received",
+        "prompt.submit",
+        "prompt_submit",
     }:
         return EVENT_USER_PROMPT
 
