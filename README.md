@@ -8,6 +8,18 @@
 [![Hooks](https://img.shields.io/badge/hook-non--blocking%20exit%200-critical)](#)
 [![Format](https://img.shields.io/badge/storage-markdown-blueviolet)](#)
 
+[![Trae](https://img.shields.io/badge/Trae-hook-blueviolet?style=flat-square)](#)
+[![ZCode](https://img.shields.io/badge/ZCode-hook-blueviolet?style=flat-square)](#)
+[![Codex](https://img.shields.io/badge/Codex-hook-blueviolet?style=flat-square)](#)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-hook-orange?style=flat-square)](#)
+[![Kimi Code](https://img.shields.io/badge/Kimi%20Code-hook-4169E1?style=flat-square)](#)
+[![WorkBuddy / CodeBuddy](https://img.shields.io/badge/WorkBuddy%2FCodeBuddy-hook-yellowgreen?style=flat-square)](#)
+[![Qoder](https://img.shields.io/badge/Qoder-hook-ff6a00?style=flat-square)](#)
+[![OpenClaw](https://img.shields.io/badge/OpenClaw-hook-cyan?style=flat-square)](#)
+[![OpenCode](https://img.shields.io/badge/OpenCode-hook-8A2BE2?style=flat-square)](#)
+[![Hermes](https://img.shields.io/badge/Hermes-hook-lightcoral?style=flat-square)](#)
+[![PI](https://img.shields.io/badge/PI-hook-ff69b4?style=flat-square)](#)
+
 > 让你的 AI Agent **不再重复踩坑**。跨项目、跨平台、零阻塞的经验沉淀与检索系统。
 
 ## 你是不是也……
