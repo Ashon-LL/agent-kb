@@ -1,5 +1,13 @@
 # 🧠 agent-kb — Agent 全局经验知识库
 
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/downloads/)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](#)
+[![License](https://img.shields.io/badge/license-MIT-yellow)](#)
+[![Tests](https://img.shields.io/badge/tests-19%20passing-brightgreen)](#)
+[![Adapters](https://img.shields.io/badge/adapters-10%20platforms-orange)](#)
+[![Hooks](https://img.shields.io/badge/hook-non--blocking%20exit%200-critical)](#)
+[![Format](https://img.shields.io/badge/storage-markdown-blueviolet)](#)
+
 > 让你的 AI Agent **不再重复踩坑**。跨项目、跨平台、零阻塞的经验沉淀与检索系统。
 
 ## 你是不是也……
