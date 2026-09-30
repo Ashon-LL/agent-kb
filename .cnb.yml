@@ -70,7 +70,7 @@ feat:
             userPrompt: $userPrompt
 
 # ── 云原生开发环境（workspace） ───────────────────────────────
-# 环境定义在 .ide/Dockerfile：以官方默认镜像为基线，补 python3 / node / codebuddy。
+# 环境定义在 .ide/Dockerfile：以官方默认镜像为基线，只补它缺的 python3。
 # build 失败时回退到 image（官方默认镜像），至少保证环境起得来。
 $:
   vscode:
