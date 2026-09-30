@@ -40,7 +40,7 @@ REQUIRED_FIELDS = ("name", "description", "type", "source", "date", "verified", 
 TOPIC_VOCAB = (
     "api-gateway", "agent-orchestration", "browser", "ci", "cnb", "container",
     "database", "delivery", "git", "llm", "mcp", "methodology", "office",
-    "powershell", "python", "security", "tauri", "windows", "zcode",
+    "powershell", "preference", "python", "security", "tauri", "windows", "zcode",
 )
 
 _LINK_RE = re.compile(r"\[\[([^\]]+)\]\]")

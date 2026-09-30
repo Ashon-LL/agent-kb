@@ -42,7 +42,8 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
 
 ## 写入规程
 
-1. **判类**：工具链 → `tools/`，方法流程 → `workflow/`，教训反模式 → `pitfalls/`
+1. **判类**：工具链 → `tools/`，方法流程 → `workflow/`，教训反模式 → `pitfalls/`；
+   用户的**常驻偏好/纠正** → `workflow/` 且 `topic: preference`（不新增 type / 一级目录）
 2. **查重**：grep 相似主题，命中已有条目则**更新它**而非新建
 3. **新建文件**：`<目录>/<kebab-slug>.md`，按 `schema/entry.md` 格式写 frontmatter
 4. **更新 INDEX.md**：在对应分类下加一行 `- [标题](相对路径) — 一句话钩子`

@@ -4,18 +4,16 @@
 > 目录：`tools/` 工具链 · `workflow/` 流程协作 · `pitfalls/` 失败教训
 
 ## pitfalls/ 教训与反模式
+
 - [并行测试必须先隔离「会写仓库工作树的用例」](pitfalls/parallel-test-run-must-isolate-repo-mutators.md) — 会写工作树的用例独占跑；-n 别进 addopts
 - [动态工作流的子代理身份与门禁三坑](pitfalls/dynamic-workflow-agent-identity-and-gates.md) — 循环内建 agent 撞重名；门禁先清被拦对象
 - [Tauri 自定义命令的 ACL 三处一致](pitfalls/tauri-app-command-acl-three-places.md) — 命令名须同现三处 ACL，缺一静默失效
 - [校验器 `continue` 掉缺项 = 门禁全绿地漏检](pitfalls/silent-continue-masks-lost-check-coverage.md) — 缺项 continue ⇒ 校验被跳过、门禁仍全绿
 - [New API rc.26 渠道 CRUD 端点形状](pitfalls/newapi-rc26-channel-crud-shapes.md) — body 包 mode、删走路径参、option 非字典
 - [New API rc.26 令牌 CRUD 三坑](pitfalls/newapi-rc26-token-crud-shapes.md) — key 在响应里、列表是掩码、DELETE 恒失败
-
 - [Tauri Linux CI 需 webkit2gtk-4.1，无 Ubuntu 镜像](pitfalls/tauri-linux-ci-needs-webkit-41-and-target-override.md) — 无 Ubuntu 镜像；本机只编 Windows 目标
-
 - [GitHub PR 表单是 details 折叠开关](pitfalls/github-pr-form-is-a-details-disclosure.md) — 大按钮非导航；用原生 setter+requestSubmit
 - [孤儿常量与导入期告警不是阻塞项](pitfalls/orphan-constants-and-import-warnings-are-not-blockers.md) — 判阻塞先 grep 使用点；只有终点可观测物算证据
-
 - [读-改-写全量 PUT 事故家族](pitfalls/redacted-get-full-put-wipes-secrets.md) — GET 脱敏 + 全量 PUT 会静默清空
 - [环境变更陈述必须命令复测](pitfalls/env-claims-must-be-reverified.md) — 环境陈述一律命令复测；“通过”字样不可信
 - [一次性脚本改文件四铁律](pitfalls/oneoff-script-file-edit-rules.md) — 备份不被重跑覆盖、重发留段头、改后校验存在性
@@ -64,22 +62,25 @@
 - [PS Start-Process 参数会丢内层引号且静默失败](pitfalls/powershell-start-process-argumentlist-strips-quotes.md) — 会剥内层引号且不抛异常；参数先落盘再传
 - [扫描器把自己的输出扫回来](pitfalls/scanner-flags-its-own-archived-output.md) — 门禁恒 FAIL 先怀疑自指；修完须做反证防假绿
 - [阿里系SRC资产WAF拦截路径探测](pitfalls/alibaba-src-assets-waf-block-probing.md) — 路径枚举会触发 WAF block_deny 页并留痕
-
 - [验证脚本的 UA 会伪造配置失败](pitfalls/verification-script-ua-can-fake-a-config-failure.md) — CF 1010 拦的是 urllib 指纹非无 UA
 - [PowerShell bool-eq string 隐式转换坑](pitfalls/powershell-bool-eq-string-casts-string-to-bool.md) — bool 与 string 比较会隐式转换；比较前显式转类型
-pitfalls/zcode-provider-config-no-reasoning-enabled-schema.md  — ZCode provider_config.json 无 reasoning.enabled 字段；禁用 reasoning 必须用 reasoningLevel.map="""
-
 - [SRC 无效漏洞判定基准](pitfalls/src-invalid-bug-baseline.md) — 门店电话/POI 坐标属“其他数据”，默认驳回
 - [接码/号码平台的号多为存量已消耗号](pitfalls/resource-pool-acquired-numbers-are-spent.md) — “未使用过”只看本平台；用 CreateTime 跨度判存量
 - [额度耗尽 vs 账号级封禁：两类不可用，修法完全不同](pitfalls/quota-exhausted-vs-banned-distinguish.md) — 【作用域=New API】429 额度尽 vs 403 封禁
 - [配额取哪个字段决定结论](pitfalls/quota-field-whose-value-decides.md) — 多个剩余量字段只有消费方用的算数
-
 - [纯标准库手写 P-256 ECDSA/DPoP 的四个坑](pitfalls/p256-ecdsa-handrolled-pitfalls.md) — a=−3 非 0、ES256 是裸 r‖s 非 DER；须与库比对
 - [DSH 桌面端自定义网关的六处反直觉](pitfalls/dsh-llm-pi-ai-reasoning-config-traps.md) — 补丁替换整行 config、必写 off、路由名禁连字符
+- [会 roll 的 refresh token 只能有一个刷新者](pitfalls/rotating-refresh-token-needs-single-writer.md) — 多组件各刷会让 RT 作废→401/账号被禁
+- [应用自生成的凭据文件权限默认是宽的](pitfalls/generated-credential-files-default-permissive.md) — 程序写的凭据多 644、明文 token 同机可读
+- [ZCode 配置无 reasoning.enabled，禁用须用 reasoningLevel.map](pitfalls/zcode-provider-config-no-reasoning-enabled-schema.md) — 写 enabled:false 被静默忽略
+- [同一概念有多套实现，选错会静默丢语义](pitfalls/same-concept-multiple-implementations-pick-semantics.md) — 禁用多实现语义差别大、选错不报错；先枚举读注释
+- [Tauri 非 tauri:// 来源的 invoke 被 ACL 拦而非对象缺失](pitfalls/tauri-remote-url-has-no-ipc.md) — 坏的是 invoke 被 ACL 拒，非对象缺失
+- [Windows 标题栏颜色由系统主题说了算](pitfalls/windows-titlebar-theme-dictated-by-system.md) — 由系统设置支配，IMMERSIVE_DARK_MODE 被忽略
+- [被周期覆盖的状态文件不能手改](pitfalls/periodically-overwritten-state-file-cannot-be-hand-edited.md) — 周期全量重写的文件手改双重无效
 
 ## workflow/ 流程与协作
-- [哨兵（后台监查进程）](workflow/sentinel-background-watch.md) — 起后台进程轮询并自己判终态 exit；响≠好消息
 
+- [哨兵（后台监查进程）](workflow/sentinel-background-watch.md) — 起后台进程轮询并自己判终态 exit；响≠好消息
 - [最小改动与不越界三铁律](workflow/minimal-change-and-no-scope-creep.md) — 按字面范围改、闭环即止、不做表面修补
 - [线上是运营态、全量扫描双扫对齐](workflow/online-is-authoritative-dual-scan.md) — 漂移以线上为权威先问再修；只扫本地不算全量
 - [上游异常先查现状再动手](workflow/research-upstream-before-fixing.md) — 免费源脆弱；是否已切换以 DB/API 实测为准
@@ -96,10 +97,10 @@ pitfalls/zcode-provider-config-no-reasoning-enabled-schema.md  — ZCode provide
 - [缺陷定位方法论](workflow/defect-localization-methodology.md) — 根因分层排除+对照实验；对照组须含基线身份
 - [OpenClaw 真实上游实弹验证](workflow/openclaw-real-upstream-fire.md) — 直连→最小回合→工具回合；CF 要浏览器 UA
 - [交付格式规范优先级](workflow/spec-priority-official-first.md) — 官方规范>模板默认>通用知识库；未规定的保持默认
-
 - [任务书要写「性质」而非「我猜的手段」](workflow/taskbook-write-the-property-not-your-guessed-mechanism.md) — 写死手段会逼执行方两难；写性质+已满足则回报
 - [SRC 挖洞前先查驳回标准](workflow/src-prehunt-check-rejection-standard.md) — 先读无效范围/分级/降级规则；拿不准就放弃
 - [账号池汇报用用户可认的称呼](workflow/account-pool-friendly-naming.md) — 用手机尾号/系列+序号称呼，禁内部 ID 与裸序号
+
 ## tools/ 环境与平台
 
 - [GitHub 大陆双向通路（下载+推送）](tools/github-china-network-workarounds.md) — 下载用 jsdelivr/curl 续传；推送须探测+hosts 一体
@@ -116,19 +117,13 @@ pitfalls/zcode-provider-config-no-reasoning-enabled-schema.md  — ZCode provide
 - [CNB 密钥库与 imports 引用](tools/cnb-secret-repo-imports.md) — 密钥库拒一切令牌；.cnb.yml 顶层键须是分支名
 - [OpenClaw typed hook 目录](tools/openclaw-hook-catalog.md) — 拦工具调用叫 before_tool_call
 - [present_files 传 URL 即开侧栏浏览器](tools/workbuddy-present-files-url-opens-sidebar-browser.md) — URL→侧栏浏览器、本地 .html→预览面板
-- [会 roll 的 refresh token 只能有一个刷新者](pitfalls/rotating-refresh-token-needs-single-writer.md) — 多组件各刷会让 RT 作废→401/账号被禁
-- [应用自生成的凭据文件权限默认是宽的](pitfalls/generated-credential-files-default-permissive.md) — 程序写的凭据多 644、明文 token 同机可读
-- [ZCode 配置无 reasoning.enabled，禁用须用 reasoningLevel.map](pitfalls/zcode-provider-config-no-reasoning-enabled-schema.md) — 写 enabled:false 被静默忽略
-- [同一概念有多套实现，选错会静默丢语义](pitfalls/same-concept-multiple-implementations-pick-semantics.md) — 禁用多实现语义差别大、选错不报错；先枚举读注释
-- [Tauri 非 tauri:// 来源的 invoke 被 ACL 拦而非对象缺失](pitfalls/tauri-remote-url-has-no-ipc.md) — 坏的是 invoke 被 ACL 拒，非对象缺失
-- [Windows 标题栏颜色由系统主题说了算](pitfalls/windows-titlebar-theme-dictated-by-system.md) — 由系统设置支配，IMMERSIVE_DARK_MODE 被忽略
-- [被周期覆盖的状态文件不能手改](pitfalls/periodically-overwritten-state-file-cannot-be-hand-edited.md) — 周期全量重写的文件手改双重无效
-
 - [无 sourcemap 时复原前端 bundle 全量与 API 面](tools/frontend-bundle-recovery-without-sourcemap.md) — 入口只有 runtime 别判失败；对齐 chunk 清单
 - [出版级中文配图：HTML/CSS 卡片 + 无头浏览器元素截图](tools/html-playwright-figure-pipeline.md) — 设计型中文图别用 matplotlib/AI 生图
 - [html-to-docx 在 Windows 的 venv 布局坑](tools/html-to-docx-windows-venv-layout.md) — 插件按 bin/python 判，uv 建 Scripts/ ⇒ 反复重建
+- [electron-builder NSIS 静默安装兜底](tools/electron-builder-nsis-silent-install-fallback.md) — /D 必崩、/S 会崩；须 7z 解包 + pylnk3 建快捷方式
 
 ## 条目格式
+
 
 ```markdown
 ---
@@ -144,4 +139,3 @@ verified: YYYY-MM-DD
 **Why**：（可选）不这样做会怎样。
 **How to apply**：（可选）什么场景、如何应用。
 ```
-- [electron-builder NSIS 静默安装兜底](tools/electron-builder-nsis-silent-install-fallback.md) — /D 必崩、/S 会崩；须 7z 解包 + pylnk3 建快捷方式
