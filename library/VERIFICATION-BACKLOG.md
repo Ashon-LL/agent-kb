@@ -78,3 +78,33 @@
 
 > 注：上表 `tools/github-china-network-workarounds.md`、`workflow/openclaw-real-upstream-fire.md`、
 > `workflow/taskbook-...md` 三条命中的可能是真实版本号，但影响面小，暂列低位。
+
+---
+
+## 作用域复审（P1-2）
+
+判据（沿用）：**只有当 `description` 里出现具体的数值上限 / 错误码 / 返回结构 / 字段名，
+却没有点名它属于哪个网关 / 模型 / 平台时，才需要标 `【作用域=…】`**；通用规律**不标**。
+
+### 已点名作用域（正例，无需动作）
+
+`llm-context-window-is-input-plus-output`（AstrBot tdp + qwen3.8-27b）、
+`quota-exhausted-vs-banned-distinguish`（New API）、
+`kb-entry-source-scope-is-the-boundary`、`defect-localization-methodology`。
+
+### 引用了具体产品+版本、但结论为通用规律（按判据**不标**，已评估）
+
+| 条目 | source 中的产品/版本 | 判定 |
+|---|---|---|
+| `pitfalls/config-field-name-is-not-spec-read-consuming-code.md` | AstrBot v4.27.4 | 通用规律（相似字段各管一事），不标 |
+| `pitfalls/persisting-files-also-requires-exempting-cleanup.md` | AstrBot v4.27.4 | 通用规律（持久化须连清理一起放开），不标 |
+| `pitfalls/third-party-db-columns-typed-by-reading-code.md` | AstrBot v4.27.4 | 通用规律（列类型由读它的代码决定），不标 |
+| `pitfalls/verify-with-real-pipeline-and-readonly-probes.md` | AstrBot v4.27.4 | 通用方法（用应用自己的类验证），不标 |
+| `pitfalls/p256-ecdsa-handrolled-pitfalls.md` | 纯标准库 / 规范 | 规范事实（a=-3、ES256 裸 r‖s），不标 |
+| `pitfalls/generated-credential-files-default-permissive.md` | 通用 | 通用规律（umask 644），不标 |
+| `pitfalls/bind-mount-owner-must-match-container-uid.md` | 通用 | 通用规律（属主由宿主决定），不标 |
+| `pitfalls/dont-handroll-spec-encoders-use-libraries-plus-fallback.md` | segno 1.3 | 通用规律（强规范别自造），不标 |
+
+> 结论：现状**不需要**大规模补标（本库多数是通用规律，硬贴标签正是任务书警告的误用）。
+> 缺口在**机制**：`hooks/kb_validate.py` 已加 `[scope]` 规则——description 引用强版本/模型签名
+> 却未点名作用域即报错；写入流程（`skill/SKILL.md` 第 6 步）会跑校验器。模板要求见 `schema/entry.md`。

@@ -39,6 +39,25 @@ REQUIRED_FIELDS = ("name", "description", "type", "source", "date", "verified")
 _LINK_RE = re.compile(r"\[\[([^\]]+)\]\]")
 _PATH_IN_LINE_RE = re.compile(r"\(([^)]+)\)")
 
+# --- P1-2 作用域标记机制 -------------------------------------------------
+# 约定：结论若只对某网关/模型/平台成立，description 必须写 【作用域=<网关/模型/平台>】。
+# 保守强制：仅当 description 出现**强签名**（产品版本 rc.N / 带前缀的模型名）时才要求标记，
+# 以免像「source 含任意版本号」那样误伤通用规律（本库多数条目本就是通用规律）。
+_SCOPE_MARK_RE = re.compile(r"作用域")
+_SCOPE_TAG_RE = re.compile(r"【作用域=([^】]*)】")
+_STRONG_SIG_RE = re.compile(
+    r"\brc[.\-]?\d+\b"
+    r"|\b(?:qwen\d[\w.\-]*|gpt-\d[\w.\-]*|claude-[\w.\-]+|gemini-[\w.\-]+"
+    r"|deepseek-[\w.\-]+|stepfun-[\w.\-]+|doubao-[\w.\-]+|glm-\d[\w.\-]*)",
+    re.I,
+)
+_SCOPE_NAME_RE = re.compile(
+    r"New API|AstrBot|ZCode|Qoder|DSH|StepFun|qwen|gpt|claude|Tauri|PowerShell"
+    r"|Windows|Ubuntu|webkit|electron|uvx|mcp|CNB|GitHub|docker|sqlite|gtk|NSIS"
+    r"|pptx|PowerPoint|openclaw|workbuddy|kimi",
+    re.I,
+)
+
 
 def parse_frontmatter(text):
     """返回 (frontmatter dict, error)。仅解析顶层 key（不缩进）。"""
@@ -138,6 +157,19 @@ def validate(kb_path=None):
             target = m.group(1).strip()
             if target not in slugs and target not in names:
                 err(f"[link] {p}: [[{target}]] 指向不存在的条目")
+
+    # 3b) 作用域标记（P1-2）：单来源/版本绑定结论须在 description 点名边界
+    for p, text in entries.items():
+        fm = fm_by_path.get(p) or {}
+        desc = fm.get("description", "")
+        if "【作用域" in desc:
+            m = _SCOPE_TAG_RE.search(desc)
+            if not m or not m.group(1).strip():
+                err(f"[scope] {p}: description 的 【作用域=…】 标记不完整，须为【作用域=网关/模型/平台】")
+        elif _STRONG_SIG_RE.search(desc) and not _SCOPE_MARK_RE.search(desc) \
+                and not _SCOPE_NAME_RE.search(desc):
+            err(f"[scope] {p}: description 引用了具体版本/模型但未点名作用域"
+                f"（P1-2：应加 【作用域=…】 或点名网关/模型/平台）")
 
     # 4) 索引行数 == 磁盘条目数
     idx_count = count_index_entries(kb)
