@@ -29,3 +29,5 @@ topic: api-gateway
 5. 号码池与"短信关键词"**无关**——关键词只是短信正文匹配词（决定是否计费返信），换它不会换到更好的号。
 
 **相邻**：账号级封禁的判据见 [[quota-exhausted-vs-banned-distinguish]]；同平台两个不可用类型的区分见 [[quota-exhausted-vs-banned-distinguish]]。
+
+关联 [[account-pool-friendly-naming]]。

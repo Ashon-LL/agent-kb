@@ -23,3 +23,5 @@ topic: methodology
 - 中文 Windows 的 schtasks 输出是 GBK，`Last Run Time` 等字段名 grep 不到；判定成败优先看脚本自己的日志文件，别解析系统输出。
 
 **边界**：SSH 别名/凭据变更也会静默打断计划任务（任务内脚本用 `-i pem` 直连时，加固后密码登录关闭、或换 key 路径即失败）——迁移到 SSH config 别名是更稳的形态。
+
+关联 [[clear-resume-anchors-before-benchmark]]。

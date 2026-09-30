@@ -50,3 +50,5 @@ topic: git, security
    单看"目标凭据返 200"会把**公开库**误当成"凭据有权限"，进而误判凭据的作用范围。
 10. **改动前先枚举"这条链上谁排在前面"**：`git config --get-regexp "^credential"` 拿到完整顺序。URL 级 helper 是**插入链中**，若全局 helper 仍排更前，加了也没用——**必须先把该库的 helper 清空**（`helper ""`），否则会出现"配置改了但行为没变"。
 11. **推送后独立核实远端，别只信本地输出**（2026-09-21）：`git push` 本地打印成功不等于远端收到。用 `git ls-remote <remote> <branch>` 取远端 sha 与本地 `git rev-parse HEAD` 比对。（本例对应用户曾质疑我"之前报的推送成功"，确实存在只信本地输出的问题。）
+
+关联 [[credential-helper-empty-value-blocks-git-fetch]]。

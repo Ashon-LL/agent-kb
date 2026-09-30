@@ -69,3 +69,5 @@ se.write_openclaw_config(settings_dict, wf_id)   # → <state-dir>/openclaw.json
   用「同环境同配置下 A 稳 B 不稳」把变量锁死，别在单点上猜根因。
 - 结论分档：现象（exit code / stdout）/ 对照 / 根因 —— 根因没定位就写 `[未知]`，
   不得把「本机不收敛」写成「该功能不支持」。
+
+关联 [[cnb-cli-needs-cmd-suffix-when-spawned-from-python]]。

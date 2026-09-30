@@ -20,3 +20,5 @@ topic: browser
 **Why**：前端 sourcemap 本身在 SRC 场景属低危（不收），但用 map/chunk 清单做**侦察**是合法被动的，价值在 API 面重建而非提交 map 泄漏。
 
 **How to apply**：遇到"入口 JS 太小/只有 runtime"别判失败——提取 chunk ID 清单 → 首页 HTML 找 CDN 基址和版本 → 批量下载 → 正则提 API 路径 → 对每个路径取调用点上下文还原请求形状。抓已发出请求的兜底用 `performance.getEntriesByType("resource")`（页面内 hook fetch 会被导航清掉）。
+
+关联 [[cli-over-browser-automation]]。

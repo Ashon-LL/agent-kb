@@ -100,3 +100,5 @@ topic: tauri
 - **改 Rust 必须真编译一次**：容器里 `which cargo` 为空就根本发现不了 `E0599`。
   「只用了既有 API」不等于「API 存在于你想调的那个类型上」。
 - 做窗口级功能前**先确认 IPC 是否真的被 ACL 放行**（看 `permissions` 里的 `allow-<cmd>`）。
+
+关联 [[tauri-app-command-acl-three-places]]。

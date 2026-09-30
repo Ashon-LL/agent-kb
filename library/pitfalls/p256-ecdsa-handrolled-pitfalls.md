@@ -34,3 +34,5 @@ topic: python
 **How to apply**：手写椭圆曲线前先把 `a`、`b`、`G`、`n` 四个常量写死并从 RFC 核对；用上面三条判据验证而不是抄测试向量；签名格式先确认目标是 DER 还是裸拼接（JOSE/DPoP = 裸，传统 X.509/CMS = DER）；`cryptography` 只用来做交叉验证的基准，不从它身上取曲线参数。DPoP 头的 `htm`/`htu`/`iat`/`jti` 四个声明一个都不能少，`jwk` 直接内联公钥（`kty/crv/x/y`，不含 `d`）。
 
 关联：`pitfalls/dont-handroll-spec-encoders-use-libraries-plus-fallback.md`（同一族：手写规范编码器要留交叉验证基准）。
+
+关联 [[dont-handroll-spec-encoders-use-libraries-plus-fallback]]。

@@ -39,3 +39,5 @@ topic: browser
 
 - `newapi-base-url-never-carry-v1.md` —— 同为"配上去看着对但就是用不了"类
 - `verify-with-real-pipeline-and-readonly-probes.md` —— 探针与真实链路的差距
+
+关联 [[cnb-issue-attachment-download]]。

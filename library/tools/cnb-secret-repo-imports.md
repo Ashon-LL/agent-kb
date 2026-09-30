@@ -177,3 +177,5 @@ feat:
 且应用只会报一个和凭据无关的错（本项目表现为 `No route-compatible
 authentication source`，而 build 是绿的 —— 典型假 success）。
 
+
+关联 [[git-remote-ownership-check]]。

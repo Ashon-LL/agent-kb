@@ -21,3 +21,5 @@ topic: windows
 5. 手动安装的代价：无卸载注册表项、应用内自动升级可能重装回默认目录。校验包完整性用 `gh api repos/<o>/<r>/releases/tags/<v> --jq '.assets[] | ...'` 取官方 `size`+`digest`。
 
 **How to apply**：electron-builder 系安装器静默装自定义目录失败时，直接走 7z 解包 + pylnk3 建快捷方式，别跟 NSIS 参数较劲。
+
+关联 [[windows-scripting-terminal-gotchas]]。

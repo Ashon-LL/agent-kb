@@ -78,3 +78,5 @@ args += ["--timeout", str(effective)]    # DEFAULT = 600
 
 相关：[[config-field-name-is-not-spec-read-consuming-code]]（同源：名字/字面不是规格）、
 [[no-sycophantic-agreement-openers]]、[[agent-loop-follow-progress-not-liveness]]。
+
+关联 [[cnb-npc-dispatch-essentials]]。

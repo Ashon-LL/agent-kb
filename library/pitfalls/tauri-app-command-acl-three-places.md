@@ -5,7 +5,7 @@ type: pitfall
 source: MH-Agent-Open D-44/D-46（拖动桥 + restart_backend）
 date: 2026-09-22
 verified: 2026-09-22
-topic: api-gateway, tauri
+topic: tauri
 ---
 
 **经验**：Tauri 2 里每个 `#[tauri::command]` 想被前端 `invoke('cmd_name')` 调通，

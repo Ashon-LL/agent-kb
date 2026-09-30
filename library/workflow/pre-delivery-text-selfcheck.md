@@ -19,3 +19,7 @@ topic: delivery
 **Why**：脚本自检的价值在"能定位到第几段、改哪句"；只给一个"AI 率 %"既不可复现也无法行动。
 
 **How to apply**：写完任何长文档（论文/报告/标书）交付前跑一遍；报告里明确写"本报告不提供 AI 率百分比"及理由，把每条痕迹落到"段号 + 片段 + 建议动作"。清单里的**待办项要逐条处理或明确标注为刻意保留**。
+
+关联 [[numeric-claims-need-baseline-and-subject]]。
+
+关联 [[deliver-user-tuned-artifact]]。

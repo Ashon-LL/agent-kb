@@ -33,3 +33,5 @@ topic: llm
 8. ⛔ **别把别的项目的预算教训直接套过来**：`maxTokens` 顶到窗口大小会不会 400，取决于**该上游**是否校验 `input + max_tokens ≤ window`。[[llm-context-window-is-input-plus-output]] 只定谳于 AstrBot 的 tdp 网关 + qwen3.8-27b，**DSH 各网关未验证**——实测过再动。同理思考型模型的 `max_tokens` 与 reasoning 共预算（见 [[reasoning-model-max-tokens-shares-budget]]）也要本地实测。用户已设的值被改动后，先确认是不是有意为之（2026-09-30 我把用户有意设的 65536→1000000 反推成"踩坑"去劝阻，方向反了）。
 
 **相邻**：字段名不是规格见 [[config-field-name-is-not-spec-read-consuming-code]]；ZCode 侧的 reasoning schema 事实见 [[zcode-provider-config-no-reasoning-enabled-schema]]。
+
+关联 [[llm-gateway-triage-priorities]]。

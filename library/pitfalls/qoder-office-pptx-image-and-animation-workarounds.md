@@ -25,3 +25,5 @@ topic: mcp, office
 **Why**：一次 12 页演讲稿 PPT 打磨中，put_page 图片管线突然全挂，按报错盲改参数浪费多轮；动画注入与 MCP 草稿的先后顺序若搞反，白做一轮注入；GIF rels 路径少写 `../` 导致放映页"无法显示该图片"，导出 PNG 才暴露。
 
 **How to apply**：用 Qoder Presentations Office MCP 生成含真实图片/页内动画的 pptx 时。诊断顺序：read_context 确认 revision 未变（失败操作不落版本）→ 最小页面二分 → 确认是图片管线则直接切 put_image，不要反复换 operationId 重试同结构。渲染自查用 PowerPoint COM `Slide.Export(png,1280,720)`，兼容性验收用 `SaveCopyAs(tmp,24)` 后重数 timing 节点。
+
+关联 [[html-playwright-figure-pipeline]]。

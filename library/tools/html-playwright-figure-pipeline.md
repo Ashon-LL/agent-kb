@@ -31,3 +31,5 @@ topic: office, browser
 反例：用 `page.screenshot(full_page=True)` 会把多个 fig 一起截进来，还得自己算裁剪框。
 
 相关：[[html-to-docx-windows-venv-layout]]、[[workbuddy-present-files-url-opens-sidebar-browser]]
+
+关联 [[qoder-office-pptx-image-and-animation-workarounds]]。

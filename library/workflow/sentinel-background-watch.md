@@ -44,3 +44,5 @@ topic: agent-orchestration
 - 收到通知后：**先读内容**，再决定验收/续等/处置。
 
 **现成脚本**（mh-agent-open）：`.analysis/watch_npc_sn.py <sn> <branch> [max_minutes]`。
+
+关联 [[openclaw-hook-catalog]]。

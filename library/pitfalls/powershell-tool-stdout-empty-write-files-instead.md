@@ -117,3 +117,5 @@ $p.ExitCode        # 实测准（子进程 exit 3 → 报 3）
 - `log-text-is-not-spec-read-emitting-code.md` —— 同属「别把观察到的表象当结论」。
 - `file-change-not-code-running.md` —— 同属「如何确认一件事真的发生了」。
 - `cnb-cli-needs-cmd-suffix-when-spawned-from-python.md` —— 同属「Windows 上的调用姿势坑」。
+
+关联 [[powershell-start-process-argumentlist-strips-quotes]]。

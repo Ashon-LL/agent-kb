@@ -17,3 +17,5 @@ topic: methodology
 **Why**：用户要求经常使用 agent-jev 和 KB。此前曾把 skills 误称插件，又把本机 patch 中出现的插件说成完整清单；根因是没区分概念及清单范围。
 
 **How to apply**：开始任务先判断是否符合 KB Recall 和 Jev 类型化判断条件；介绍本机插件前核实实际安装/bundle 清单，分开报告全局可见、当前 preset 启用、停用、未知。
+
+关联 [[spec-priority-official-first]]。

@@ -17,3 +17,5 @@ topic: cnb, browser
 - **结论**：附件绑定那次构建上下文，手动停止构建 + 容器回收后对象大概率已清，按现有链接取不回。**可靠取回方式 = 让 NPC 直接 push 代码**（如 `auto/openclaw-sse-usage-compat`），不靠 issue 附件绕路。
 
 **How to apply**：要 NPC 的中间产物，优先在派单任务书里要求「直接推分支/建 PR」；附件只作兜底，且下载前先 `head -c 200` 验 body 是不是 HTML。
+
+关联 [[verification-script-ua-can-fake-a-config-failure]]。

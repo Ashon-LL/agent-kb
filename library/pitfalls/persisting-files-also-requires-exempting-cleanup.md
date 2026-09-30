@@ -21,3 +21,5 @@ topic: python, methodology
 5. 改完必须**实打验证**：发一条带图消息 → 等清理钩子跑完 → 回查文件仍在；只改代码不验证等于没改。
 
 **相邻**：验证要走应用自己的管线见 [[verify-with-real-pipeline-and-readonly-probes]]；"改了文件 ≠ 新代码在跑"见 [[file-change-not-code-running]]。
+
+关联 [[periodically-overwritten-state-file-cannot-be-hand-edited]]。

@@ -46,3 +46,5 @@ topic: zcode, database
 11. 留一份 `<标题>\t<id>\t<工作区>` 的清单文件，否则删完只剩 UUID 无法反查。备份本身会**抵消掉清理收益**（本次备份 1396 MB），确认无误后要删掉——用户说"不需要备份"就别留。
 
 关联 [[config-field-name-is-not-spec-read-consuming-code]]、[[log-text-is-not-spec-read-emitting-code]]、[[parallel-test-run-must-isolate-repo-mutators]]、[[zcode-platform-verified-facts]]。
+
+关联 [[producer-consumer-status-mismatch-silently-noops]]。

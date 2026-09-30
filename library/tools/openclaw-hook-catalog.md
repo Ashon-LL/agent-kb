@@ -5,7 +5,7 @@ type: tool
 source: agent-jev 派单（20260924，NPC 依官方 reference 纠正任务书里的错名）+ openclaw/openclaw docs/plugins/hooks/reference.md
 date: 2026-09-24
 verified: 2026-09-24
-topic: ci
+topic: agent-orchestration
 ---
 
 **经验**：OpenClaw **没有** `tool_call` 这个 hook；要拦截工具调用挂 **`before_tool_call`**
@@ -24,3 +24,5 @@ topic: ci
   空列表/通配符/厂商别名是非法值。
 - 注册走 `package.json` 的 `openclaw.extensions` → `index.ts`（不是 `main`/`exports`）；
   TS 回调不读 stdin ⇒ Python 侧只能当子进程桥被 `spawnSync` 调起。
+
+关联 [[sentinel-background-watch]]。

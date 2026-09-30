@@ -110,3 +110,5 @@ if _is_evidence_doc(rel) and desc not in _SECRET_ONLY_PATTERNS:
 - 修法**三层同时做**：删过度模式 + 目录级豁免（密钥类不免）+ 输出占位化。
 - 修完**必做两道反证**（防假绿 / 豁免边界）⇒ **别把门禁修哑了**。
 - 审计发现的问题**要派单**，别让它烂在文档里。
+
+关联 [[dynamic-workflow-agent-identity-and-gates]]。

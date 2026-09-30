@@ -38,3 +38,5 @@ topic: powershell
 
 **适用范围**：与项目无关的 PowerShell 通用坑。⛔ 若被调方是**本仓产品代码**，
 它走 Python 列表直传 `execve`，**不受此坑影响**（别误诊）。
+
+关联 [[powershell-tool-stdout-empty-write-files-instead]]。

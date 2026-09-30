@@ -55,3 +55,5 @@ Windows 进程创建标志文档明确：**`CREATE_NO_WINDOW` 与 `DETACHED_PROC
 （我第一次自己拼就被守卫拦下——守卫是对的，绕开它才是错）。
 
 同族：[[windows-scripting-terminal-gotchas]]、[[shared-config-multi-owner-merge-write]]。
+
+关联 [[windows-titlebar-theme-dictated-by-system]]。

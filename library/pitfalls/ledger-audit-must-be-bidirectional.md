@@ -35,3 +35,5 @@ topic: database, security, methodology
 
 - [[credential-rotation-must-cover-all-entries]]（轮换要覆盖全部条目，同族的"别只看一处"）
 - [[automation-artifacts-lie-existence-and-freshness]]（"存在性"与"新鲜度"是两层独立检查，本条的"存在"与"在用"同理）
+
+关联 [[backlog-records-rot-verify-before-dispatch]]。

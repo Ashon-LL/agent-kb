@@ -76,3 +76,5 @@ git rev-parse --abbrev-ref origin/HEAD      # origin/feat
 `git remote set-head origin feat` 修完后 `origin/HEAD` sha `0aa45e7` == 远端 HEAD sha，
 两条命令输出首次一致。⇒ **同一件事要做两次**：①.protocol 里写死正确命令；②把本机污染值清掉。
 只做①，下个会话用顺手的 `symbolic-ref` 一查还是假答案。
+
+关联 [[cnb-secret-repo-imports]]。

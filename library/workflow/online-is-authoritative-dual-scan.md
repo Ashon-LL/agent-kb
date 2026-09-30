@@ -13,3 +13,5 @@ topic: methodology
 "全量扫描"= 本地仓库扫描 + 线上只读探测，两边对齐才算完成；只扫一边不算。汇报时逐项区分：一致项 / 线上真实运营差异（保留不动）/ 工具伪差异（探测入口/解析错误）。
 
 **How to apply**：生产 DB 用 SQLite backup API 拉只读副本分析；线上探测走只读通道；生产写入后回读版本、哈希、integrity、容器健康与公网状态。
+
+关联 [[research-upstream-before-fixing]]。

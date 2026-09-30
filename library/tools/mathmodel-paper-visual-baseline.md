@@ -5,7 +5,7 @@ type: tool
 source: cumcm_zcode（CUMCM 2026 A 题，用户逐条验收通过）
 date: 2026-09-15
 verified: 2026-09-15
-topic: llm, office
+topic: office
 ---
 
 **经验**：下次数模论文可直接套用的视觉基线（用户参照近两年展示论文提出，已验收）：
@@ -18,3 +18,5 @@ topic: llm, office
 6. **模型缺点**：只留真正的局限，每条附量化影响；剔除非缺点（"数据规模较大"这类自曝式）与已在正文讲透的重复项；精简只允许"移动位置、改语气"，删掉的事实必须能在正文别处举出。
 
 **How to apply**：写数模论文时把 1–3 条落到 `code/make_figures.py` 的 rcParams 与图型选择，4–6 条落到摘要与 §"模型汇总"；出图后逐张目视（见 [[figure-placement-and-legend-occlusion]]）。
+
+关联 [[ai-disclosure-consistency]]。

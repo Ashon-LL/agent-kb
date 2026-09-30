@@ -81,3 +81,5 @@ def run(args):
 
 相关：[[windows-scripting-terminal-gotchas]]、
 [[log-text-is-not-spec-read-emitting-code]]（同源：别把表象当结论）。
+
+关联 [[openclaw-real-upstream-fire]]。

@@ -135,3 +135,5 @@ topic: windows, container
     ⇒ 看到该提示就**以为已修**是错的；要按上面的取证三步复核字节。
 
 **How to apply**：Windows 上写任何 bash/powershell/python 交织的命令，先想 `$` 归谁、`/` 归哪个 FS、进程几层。相关：[[mcp-stdio-install-smoke-test]]、[[env-claims-must-be-reverified]]。
+
+关联 [[electron-builder-nsis-silent-install-fallback]]。

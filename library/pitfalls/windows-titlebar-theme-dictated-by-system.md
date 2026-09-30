@@ -69,3 +69,5 @@ HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize
   单看一边会误判成「代码没执行」。
 - ⛔ **临时改系统设置做对照实验时，备份必须写「改前」的值**
   （本次曾把「改后的值」误存为备份，还原时写错一次 —— 所幸旁证记录了原值）。
+
+关联 [[detached-process-causes-console-window-storm]]。

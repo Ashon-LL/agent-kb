@@ -70,3 +70,5 @@ matches its cache by, so names must be unique.
 
 相关：[[automation-artifacts-lie-existence-and-freshness]]、[[defect-localization-methodology]]、
 [[subagent-orchestration-lessons]]、[[zcode-platform-verified-facts]]
+
+关联 [[scanner-flags-its-own-archived-output]]。

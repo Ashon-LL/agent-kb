@@ -5,7 +5,7 @@ type: workflow
 source: cumcm_zcode（CUMCM 2026 AI 工具使用规定落地）+ default（mathmodel 技能栈）
 date: 2026-09-15
 verified: 2026-09-15
-topic: windows, office, delivery, methodology
+topic: office, delivery, methodology
 ---
 
 **经验**（适用于一切要求"AI 使用声明/披露"的交付：竞赛、课程、专利/软著、论文投稿）：
@@ -19,3 +19,5 @@ topic: windows, office, delivery, methodology
 **Why**：第 5 条红线（故意隐瞒 / 虚假声明 / 未经人工审查的 AI 内容作为核心成果）**直接取消评奖资格**；而"多写一点更安全"的直觉同样会触发"论文与支撑材料不符"。
 
 **How to apply**：改动任何一侧前先把两侧用途列成对照表；交付前用脚本 grep 双方用途词是否齐平。AI 详情 PDF 的文件名、四项内容（工具/环节/提示方式/采纳与核验）按规范逐条核对。
+
+关联 [[mathmodel-paper-visual-baseline]]。

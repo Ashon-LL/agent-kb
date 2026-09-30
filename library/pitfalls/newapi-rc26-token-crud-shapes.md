@@ -84,3 +84,5 @@ assert v["deepseek"] == "deepseek-v4-flash, deepseek-v4-pro"   # ✅ 查 value
 - 改 option：`UserUsableGroups` 查 value 不查 key；非映射类 option 的 value 不是 JSON。
 - **写操作后读 `success` 字段，不要只看 HTTP 码**（rc.26 大量「HTTP 200 + success=false + 一个字没改」）。
 - 复用名前先确认软删记录：`name` 可能被 2026-08-11 那批用户手动软删的令牌占用，重建属越界。
+
+关联 [[rotating-refresh-token-needs-single-writer]]。

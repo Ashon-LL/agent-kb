@@ -87,3 +87,5 @@ topic: powershell, container
 引号 heredoc 也吃反斜杠）、[[powershell-tool-stdout-empty-write-files-instead]]
 （PS 5.1 的 `Out-File -Encoding utf8` 实为 UTF-16LE）、[[container-heredoc-needs-stdin-flag]]、
 [[env-claims-must-be-reverified]]。
+
+关联 [[powershell-bool-eq-string-casts-string-to-bool]]。

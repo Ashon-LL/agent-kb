@@ -38,3 +38,5 @@ topic: python, methodology
 
 同族：[[override-config-drops-implicit-fallbacks]]（声明式配置不等于真的装上）、
 [[shared-config-multi-owner-merge-write]]。
+
+关联 [[p256-ecdsa-handrolled-pitfalls]]。

@@ -37,3 +37,5 @@ topic: methodology
 7. 汇报时严格区分**"改了配置"**和**"实测上了线"**——前者是动作，后者才是结果。
 
 **相邻教训**：字面语义同样不是规格，见 [[log-text-is-not-spec-read-emitting-code]]（日志文案）；改了旋钮却不生效的取值类见 [[reasoning-model-max-tokens-shares-budget]]（`max_tokens` 被思考吃满后 `content` 键直接消失）。
+
+关联 [[clone-row-leaves-template-residue]]。

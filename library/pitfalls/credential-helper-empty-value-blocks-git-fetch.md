@@ -26,3 +26,5 @@ topic: git, security
 3. `gh auth setup-git` 不是幂等的——它先清再追加，多次调用会产生重复 key。每次运行后检查有没有空值条目。
 4. 多远程场景：cnb.cool、gitee.com、github.com 各有专用 helper，URL 级 key（`credential.https://<host>.helper`）优先于 generic `credential.helper`。清理时**按 host 分治**，别用通配 unset。
 5. 完整清理单条 key 的安全姿势：`git config --global --unset-all credential.https://<host>.helper`——只清这一项，其他不动。
+
+关联 [[credential-rotation-must-cover-all-entries]]。

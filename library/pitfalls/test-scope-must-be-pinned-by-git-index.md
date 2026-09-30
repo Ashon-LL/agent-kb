@@ -133,3 +133,5 @@ monkeypatch.setattr(se, "ROOT_DIR", fake_backend)   # install_root 下什么都�
 3. **任何断言都要能通过变异验证**：故意改坏实现，断言必须变红。改不红就是假网眼。
    尤其警惕 `or` / `any()` / `in (多个候选)` 这类**放宽型写法**——它们天然掩盖变异。
 
+
+关联 [[silent-continue-masks-lost-check-coverage]]。

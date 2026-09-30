@@ -31,3 +31,5 @@ stat -c %y state.json   # 隔 4 秒采样 3 次
 6. **顺带区分两类"改文件无效"**（容易混）：① 本文这类——**文件被覆盖 / 内存才是权威**；② [[file-change-not-code-running]] 那类——**改了文件但新代码没跑起来**（需重启进程）。判据不同，别拿一条解释另一条。
 
 **相邻**：同概念的多个实现语义不同见 [[same-concept-multiple-implementations-pick-semantics]]；改 DB 列要按代码期望的类型写见 [[third-party-db-columns-typed-by-reading-code]]。
+
+关联 [[persisting-files-also-requires-exempting-cleanup]]。

@@ -18,3 +18,5 @@ topic: mcp
 **Why**：MCP 服务器秒退在客户端侧只表现为 timeout/未连接，不实测握手就会把"包坏了"误诊成"网络坏了"再误诊成"要挂代理"。
 
 **How to apply**：任何新装/升级 stdio MCP（ZCode/Claude/Cursor 均同）；排查"面板显示未连接"。相关：[[env-claims-must-be-reverified]]、[[github-china-network-workarounds]]、[[zcode-platform-verified-facts]]、[[windows-scripting-terminal-gotchas]]。
+
+关联 [[mcp-prompt-template-servers-add-no-capability]]。

@@ -22,3 +22,5 @@ if ($t.MergeConfig -eq "toml") { ... }
 `
 
 **How to apply**：PowerShell 脚本里用 -eq 区分字符串值和布尔值时，先显式转类型再比。相关：[[cnb-npc-dispatch-essentials]]。
+
+关联 [[powershell-herestring-grammar-and-runtime-divergence]]。

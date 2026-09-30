@@ -64,3 +64,5 @@ def _find_adapter(config, source_key):
 5. 判断「门禁可信」时要看它覆盖了什么，而不是它输出了什么。`OK` 和「我跳过了它」在输出上是同一个字符串。
 
 **相邻教训**：静默失败的另外两族见 [[broad-oserror-swallow-hides-permission-misconfig]]（`except OSError: return None` 把「不存在」和「没权限」合并）、[[automation-artifacts-lie-existence-and-freshness]]（自动化产物存在性/新鲜度不可信）；错误码静默型见 [[newapi-rc26-channel-crud-shapes]]（`success=false` 但 HTTP 200）。
+
+关联 [[test-scope-must-be-pinned-by-index-not-walk]]。

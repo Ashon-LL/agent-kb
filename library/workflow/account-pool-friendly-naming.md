@@ -21,3 +21,5 @@ topic: api-gateway, delivery
 2. 汇报/答复一律用称呼；内部 ID 只在命令、脚本、DB 查询里使用。
 3. 系列命名遵循用户既有约定（尾号+手机尾4位、接码#N），**不要自己发明序号或缩写**；新增账号的序号先与用户确认。
 4. 台账双标（称呼 + 内部 ID 前缀）便于对账与排障。
+
+关联 [[resource-pool-acquired-numbers-are-spent]]。

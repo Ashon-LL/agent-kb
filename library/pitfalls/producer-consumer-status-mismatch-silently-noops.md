@@ -26,3 +26,5 @@ topic: database, methodology
 5. 同类形态：草稿/发布、待审/生效、pending/active、staged/applied——任何两态字段都要问"谁负责翻状态"。
 
 **相邻**：验证要走真实管线见 [[verify-with-real-pipeline-and-readonly-probes]]；"中间态/噪音都不能当结论"见 [[orphan-constants-and-import-warnings-are-not-blockers]]。
+
+关联 [[zcode-session-delete-is-soft-delete-two-dbs]]。

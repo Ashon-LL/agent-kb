@@ -5,7 +5,7 @@ type: pitfall
 source: APIShow/WorkBuddy 池（2026-09-27，一天内 12 号中 4 号不可用）
 date: 2026-09-27
 verified: 2026-09-27
-topic: api-gateway, llm, methodology
+topic: api-gateway, methodology
 ---
 
 **经验**：一个号"不能用"有两类根因，**症状、判据、可行的处置完全不同**，混为一谈会白试修复动作。
