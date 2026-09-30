@@ -70,12 +70,31 @@ feat:
             userPrompt: $userPrompt
 
 # ── 云原生开发环境（workspace） ───────────────────────────────
-# 显式声明 CPU 核数：CNB 云开发环境缺省是 8 核，这里降到 4 核。
-# 依据：本仓库的负载是读 110 个纯文本条目 + 跑标准库校验脚本，
-#       无编译、无并发；核时按核数计费，降到 4 核消耗减半。
+# 环境定义在 .ide/Dockerfile：以官方默认镜像为基线，补 python3 / node / codebuddy。
+# build 失败时回退到 image（官方默认镜像），至少保证环境起得来。
 $:
   vscode:
     - runner:
+        # CNB 云开发环境缺省 8 核，这里显式降到 4 核。
+        # 依据：本仓库的负载是读 110 个纯文本条目 + 跑标准库校验脚本，
+        #       无编译、无并发；核时按核数计费，降到 4 核消耗减半。
         cpus: 4
+      docker:
+        build: .ide/Dockerfile
+        image: cnbcool/default-dev-env:latest
       services:
         - vscode
+        - docker
+      # 环境启动后自检：把关键事实打进日志，配错了当场可见。
+      # 每步都用 || echo 兜底，不阻断环境启动。
+      stages:
+        - name: env-check
+          script: |
+            echo "── 环境自检 ──"
+            python3 -V || echo "⚠ 缺 python3：任务书 C1 的验收会失效"
+            echo "仓库根: $(pwd)"
+            AGENT_KB_PATH="$(pwd)/library" python3 -c "
+            import sys; sys.path.insert(0, 'hooks')
+            from kb_core import count_index_entries
+            print('kb 条目数（应为 110）:', count_index_entries())
+            " || echo "⚠ kb 自检未跑通（不阻断启动）"
