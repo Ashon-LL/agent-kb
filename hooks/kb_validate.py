@@ -85,12 +85,27 @@ def parse_frontmatter(text):
     return fm, None
 
 
+def disk_key(rel_path):
+    """把磁盘相对路径归一成以 `/` 分隔的字符串。
+
+    关键：Windows 上 `Path.relative_to()` 产出 `pitfalls\\x.md`，而 INDEX.md 里写的是
+    `pitfalls/x.md`；若直接 `str()` 二者永远不等（全库误报）。`PurePath.as_posix()`
+    把两种平台都归一到 `/`。可对 PurePosixPath / PureWindowsPath 直接测试，不依赖 Windows 环境。
+    """
+    return rel_path.as_posix()
+
+
+def index_path_key(raw):
+    """索引里的路径归一（防手抖写成反斜杠）。"""
+    return str(raw).replace("\\", "/")
+
+
 def collect_entries(kb):
-    """返回 {相对路径: text}。"""
+    """返回 {相对路径(/ 分隔): text}。"""
     entries = {}
     for d in CONTENT_DIRS:
         for f in sorted((kb / d).glob("*.md")):
-            entries[str(f.relative_to(kb))] = f.read_text(encoding="utf-8")
+            entries[disk_key(f.relative_to(kb))] = f.read_text(encoding="utf-8")
     return entries
 
 
@@ -198,8 +213,8 @@ def validate(kb_path=None):
     if idx_paths is None:
         err(f"[index] 无法读取 {INDEX_FILENAME}")
     else:
-        idx_set = set(idx_paths)
-        disk_set = set(entries)
+        idx_set = {index_path_key(p) for p in idx_paths}
+        disk_set = set(entries)  # collect_entries 已用 disk_key 归一为 / 形式
         for p in sorted(disk_set - idx_set):
             err(f"[index] 磁盘有条目但索引缺行：{p}")
         for p in sorted(idx_set - disk_set):
