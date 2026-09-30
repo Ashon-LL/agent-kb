@@ -4,6 +4,7 @@ description: PS Start-Process -ArgumentList 会剥掉参数内层双引号并静
 type: pitfall
 source: mh-agent-open（2026-09-19 实弹，家族第 2 例）
 date: 2026-09-19
+verified: 2026-09-19
 ---
 
 **症状**：`Start-Process -FilePath node.exe -ArgumentList @('-e', $js)` 里，

@@ -4,6 +4,7 @@ description: LLM 网关缓存命中率/计费异常排障优先级：429 切渠�
 type: tool
 source: mh-agent-open + apishow（2026-09 实测链）
 date: 2026-09-14
+verified: 2026-09-14
 ---
 
 **经验**（排查按此优先级）：

@@ -4,6 +4,7 @@ description: 多子代理编排实战：契约先行+文件不相交才并行、
 type: workflow
 source: mh-agent-open（2026-08~09 多轮实战）
 date: 2026-09-14
+verified: 2026-09-14
 ---
 
 **经验**：

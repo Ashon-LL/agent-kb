@@ -4,6 +4,7 @@ description: 生产不部署 .map 时，从入口 JS 的 chunk 清单+公开 CDN
 type: tool
 source: SRC 挖洞项目千问线实测（2026-09-23）
 date: 2026-09-23
+verified: 2026-09-23
 ---
 
 **场景**：逆向/侦察某 Web 应用，"抓 JS bundle"失败（入口只有几百字节 webpack runtime），或 sourcemap 404。

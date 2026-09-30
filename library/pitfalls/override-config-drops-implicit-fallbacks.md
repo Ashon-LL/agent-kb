@@ -4,6 +4,7 @@ description: 用「覆盖式配置」驱动外部 CLI/工具（--config / --isol
 type: pitfall
 source: 外部工具覆盖式配置实测（2026-09-20）
 date: 2026-09-20
+verified: 2026-09-20
 
 ---
 

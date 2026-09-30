@@ -4,6 +4,7 @@ description: Tauri 前端加 Linux CI 编译门禁的两个隐性前提：官方
 type: pitfall
 source: MH-Agent-Open PR #105（Rust 编译门禁落地）
 date: 2026-09-22
+verified: 2026-09-22
 ---
 
 **经验**：给 Tauri 2 前端加「Linux 上 `cargo check`」这类 CI 门禁时，有两层前提

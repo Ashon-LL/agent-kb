@@ -119,7 +119,7 @@ def user_prompt_reminder() -> str:
     return (
         "【kb 沉淀钩子】用户本条消息疑似要求沉淀经验。执行："
         "1) 读 ~/.agents/kb/INDEX.md 查重——同族条目优先扩充现有文件而非新建；"
-        "2) 按 kb 技能规程落盘（frontmatter: name/description/type/source/date；正文: 经验/Why/How to apply）；"
+        "2) 按 kb 技能规程落盘（frontmatter: name/description/type/source/date/verified；正文: 经验/Why/How to apply）；"
         "3) 更新 INDEX.md 并核对索引行数=实际文件数；"
         "4) 回报条目路径与索引行。若用户并非要求沉淀，忽略本提醒正常干活。"
     )

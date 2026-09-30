@@ -4,6 +4,7 @@ description: 测试的「扫描范围/环境前提/宽松断言」三者任一�
 type: pitfall
 source: MH-Agent-Open（2026-09-18：ps1 BOM 测试被 .venv311/node_modules 打红；openclaw 解析测试被本机实装件打红且宽松断言让变异漏网）
 date: 2026-09-18
+verified: 2026-09-18
 ---
 
 **经验**：凡是「仓库里每份 X 都必须满足约定 Y」的测试（BOM/EOL/编码/文件头/命名），

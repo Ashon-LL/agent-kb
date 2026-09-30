@@ -4,6 +4,7 @@ description: Windows 脚本/终端/跨语言互操作高频坑合集：MSYS 路�
 type: pitfall
 source: mh-agent-open + apishow + default
 date: 2026-09-15
+verified: 2026-09-15
 ---
 
 **经验**（共同特征：命令"成功"但啥也没发生，或报错被误判成工具不可用）：
@@ -75,9 +76,11 @@ date: 2026-09-15
 
     **实测四联证据（缺一不可，按此顺序取证）**：
     ```
-    ① 工作区字节：  python -c "import pathlib;b=pathlib.Path(f).read_bytes();print(b.count(b''))"
+    ① 工作区字节：  python -c "import pathlib;b=pathlib.Path(f).read_bytes();print(b.count(b'
+'))"
                     → 618（脏）
-    ② 索引字节：    git show :f | python -c "import sys;print(sys.stdin.buffer.read().count(b''))"
+    ② 索引字节：    git show :f | python -c "import sys;print(sys.stdin.buffer.read().count(b'
+'))"
                     → 0（干净）
     ③ 内容差异：    git diff --ignore-cr-at-eol --stat f
                     → 空（**除行尾外完全相同**）
@@ -116,7 +119,8 @@ date: 2026-09-15
     # 4) 清 stat-cache + 复核
     git update-index --refresh
     python -c "import pathlib,sys
-    print([pathlib.Path(f).read_bytes().count(b'') for f in sys.argv[1:]])" <files>
+    print([pathlib.Path(f).read_bytes().count(b'
+') for f in sys.argv[1:]])" <files>
     # 5) 跑纪律测试（8 条，1 秒）
     python -m pytest tests/test_repo_hygiene.py -q
     ```

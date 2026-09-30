@@ -4,6 +4,7 @@ description: 数模论文的图与摘要视觉基线——高级图型清单、m
 type: tool
 source: cumcm_zcode（CUMCM 2026 A 题，用户逐条验收通过）
 date: 2026-09-15
+verified: 2026-09-15
 ---
 
 **经验**：下次数模论文可直接套用的视觉基线（用户参照近两年展示论文提出，已验收）：

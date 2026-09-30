@@ -4,6 +4,7 @@ description: DSH（deepseek harness 桌面端）自定义网关走 llm-pi-ai 行
 type: pitfall
 source: ZCode 启用模型迁入 DSH（C:\Software\deepseek harness 0.2.0-rc.2，2026-09-30，8 路由 19 模型）
 date: 2026-09-30
+verified: 2026-09-30
 ---
 
 **经验**：给 DSH 配自定义网关时，六处行为跟直觉相反，且大部分零报错。写入位置是 `~/.dsh/profiles/desktop/cordis.patch.yml` 里新增一行 `- id: llm-pi-ai` / `name: "@deepseek-ai/dsh-llm-pi-ai"` / `config.providers.<路由>: ...`（`~/.dsh` 下没有 settings.yaml，profile patch 就是唯一落点；`cordis.yml` 是 `[]` 且注释写明"改 patch 不改它"）。行按 `id` 寻址、后写覆盖前写，**补丁替换整行 config 而不是合并**，覆盖时要重述全部字段。

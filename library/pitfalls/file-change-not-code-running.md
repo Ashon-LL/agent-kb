@@ -4,6 +4,7 @@ description: 后端代码文件更新≠在跑：重启后必须核对进程 Cre
 type: pitfall
 source: mh-agent-open（2026-09-07 假重启事故）
 date: 2026-09-14
+verified: 2026-09-07
 ---
 
 **经验**：改后端核心模块后必须重启进程，且验证"新代码真在跑"：

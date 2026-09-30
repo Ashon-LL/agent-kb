@@ -4,6 +4,7 @@ description: 判断一个 MCP 对模型有没有用，看 handler 到底返回�
 type: tool
 source: 2026-09-30 用户问「这个 MCP 对你有用吗」（@modelcontextprotocol/server-sequential-thinking），读源码后判定可删
 date: 2026-09-30
+verified: 2026-09-30
 ---
 
 **经验**：评估一个 MCP 值不值得留，读它的 handler 源码，**看它返回什么**，而不是读它 `registerTool` 的 `description` 宣称能干什么。判「提示词/记账型」的四条特征：

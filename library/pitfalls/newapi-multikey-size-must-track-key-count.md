@@ -4,6 +4,7 @@ description: New API 多密钥渠道的 channel_info.multi_key_size 必须与 ke
 type: pitfall
 source: APIShow 商汤三账户钥纳入 ch29/ch167 多钥池
 date: 2026-09-17
+verified: 2026-09-17
 ---
 
 ## 经验

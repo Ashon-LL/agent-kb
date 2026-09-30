@@ -4,6 +4,7 @@ description: 交付前的本机文本自检法（不联网不送检）：与题�
 type: workflow
 source: cumcm_zcode（tools/selfcheck_text.py + reports/SELFCHECK_TEXT.md，CUMCM 2026 论文）
 date: 2026-09-15
+verified: 2026-09-15
 ---
 
 **背景**：用户要求只做本机自检、不上传第三方查重/AI 检测（检测器在中文上不稳定，且送检有泄露与不可控风险）。可行的替代是一组**可复现的统计量 + 可定位到段落的清单**：

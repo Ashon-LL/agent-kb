@@ -4,6 +4,7 @@ description: Word/docx 交付管线实测坑：Word 重存丢字号、附录同�
 type: pitfall
 source: cumcm_zcode（CUMCM 2026 A 题交付全程）
 date: 2026-09-14
+verified: 2026-09-14
 ---
 
 **经验**（管线生成 docx 交付的通用坑，任何 Word/docx 项目适用）：

@@ -25,6 +25,7 @@ description: 一句话摘要（检索靠它）
 type: tool | workflow | pitfall
 source: 来源项目或事件
 date: YYYY-MM-DD
+verified: YYYY-MM-DD
 ---
 
 **经验**：直接说怎么做。

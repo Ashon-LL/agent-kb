@@ -4,6 +4,7 @@ description: New API 渠道 base_url 只写 host，/v1 由网关自动拼；带 
 type: pitfall
 source: APIShow unoRouter 8 路漏斗接入（ch168-175）
 date: 2026-09-17
+verified: 2026-09-17
 ---
 
 ## 经验

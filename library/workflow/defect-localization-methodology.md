@@ -4,6 +4,7 @@ description: 缺陷定位方法论——根因分层排除、对照实验留证�
 type: workflow
 source: cumcm_zcode（跨平台对比实测提炼，2026-09-15）；APIShow CNB 凭据排查（2026-09-21 补第 2 条基线缺陷）
 date: 2026-09-21
+verified: 2026-09-15
 ---
 
 **经验**（比"试到好为止"可靠得多的排查法）：

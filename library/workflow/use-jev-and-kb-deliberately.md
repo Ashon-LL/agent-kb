@@ -4,6 +4,7 @@ description: Jev 用于分类初筛评分核查，KB 用于非平凡任务前检
 type: workflow
 source: 用户明确偏好（2026-10-01）
 date: 2026-10-01
+verified: 2026-10-01
 ---
 
 **经验**：

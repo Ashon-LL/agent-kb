@@ -4,6 +4,7 @@ description: ZCode 动态工作流三个实测坑——循环内建同名子代�
 type: pitfall
 source: MH-Agent-Open 20260925~26 实弹（dwfrun-73349ee4 / 3h01m / 112.1M tokens 中止后主代理接手）
 date: 2026-09-26
+verified: 2026-09-26
 ---
 
 ## ⛔ 坑 1：`agent(name)` 建在 for 循环里 ⇒ 第二轮必炸 DuplicateActorName

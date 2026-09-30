@@ -4,6 +4,7 @@ description: PowerShell here-string 定界符的真实语法（开/闭两侧不�
 type: pitfall
 source: ps-heredoc-todie + PowerShell-Reliability-Framework
 date: 2026-09-21
+verified: 2026-09-21
 ---
 
 **经验**：here-string / heredoc 出错几乎都**不报错**或报错文案指向错地方，人会在错误的方向上排查很久。以下全部在 pwsh 7.6.5（Core）与 Windows PowerShell 5.1.26100.8115（Desktop）**双运行时实测**，解析期结论两者完全一致。

@@ -4,6 +4,7 @@ description: Windows 11 未自绘的窗口标题栏外观由系统设置 SystemU
 type: pitfall
 source: Windows 11 标题栏主题实测（2026-09-21）
 date: 2026-09-21
+verified: 2026-09-21
 
 ---
 

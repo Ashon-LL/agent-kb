@@ -4,6 +4,7 @@ description: 文档写了"每日自动备份"不等于它在跑：既要查任�
 type: pitfall
 source: APIShow（2026-09-15 备份清理时发现本地 DB 拉取停摆 3 周）
 date: 2026-09-15
+verified: 2026-09-15
 ---
 
 **经验**：验收任何"自动运行的东西"（Windows 计划任务 / systemd timer / cron）必须做**两层独立检查**，缺一层就会假绿：

@@ -4,6 +4,7 @@ description: OpenClaw 真实上游实弹验证（Windows 本机）——exec 可
 type: workflow
 source: MH-Agent-Open D-17
 date: 2026-09-18
+verified: 2026-09-18
 ---
 
 **背景**：D-17 长期缺口 = 「默认 harness 已是 openclaw，但**从未在真实上游跑通完整回合**」。

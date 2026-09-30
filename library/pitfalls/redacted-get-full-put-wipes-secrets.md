@@ -4,6 +4,7 @@ description: "读-改-写"配置经全量 PUT 回传的四类静默事故——G
 type: pitfall
 source: apishow（2026-08-22 AstrBot 事件 + 08-26 ModelRatio / 09-02 GroupRatio 两次全站清空）
 date: 2026-09-15
+verified: 2026-08-22
 ---
 
 **经验**：对带管理 API 的系统做"读-改-写"（GET 全量取回 → 改几个字段 → PUT 全量回写）是**静默破坏的高发形态**，本族已实测四类：

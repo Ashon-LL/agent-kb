@@ -4,6 +4,7 @@ description: 修复纪律：按字面最小范围改动、修完闭环即止不�
 type: workflow
 source: apishow + mh-agent-open（用户 2026-08-23 / 09-04 / 09-03 / 09-15 多次固化）
 date: 2026-09-15
+verified: 2026-08-23
 ---
 
 **经验**（用户三条铁律，同族合并）：

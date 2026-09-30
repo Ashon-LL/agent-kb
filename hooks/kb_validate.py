@@ -34,7 +34,7 @@ from kb_core import (  # noqa: E402  （同目录 import）
 CONTENT_DIRS = ("pitfalls", "tools", "workflow")
 TYPE_TO_DIR = {"pitfall": "pitfalls", "tool": "tools", "workflow": "workflow"}
 DIR_TO_TYPE = {v: k for k, v in TYPE_TO_DIR.items()}
-REQUIRED_FIELDS = ("name", "description", "type", "source", "date")
+REQUIRED_FIELDS = ("name", "description", "type", "source", "date", "verified")
 
 _LINK_RE = re.compile(r"\[\[([^\]]+)\]\]")
 _PATH_IN_LINE_RE = re.compile(r"\(([^)]+)\)")

@@ -4,6 +4,7 @@ description: CNB 平台与 NPC 派单要点：payload body 三层套嵌（env.us
 type: tool
 source: ailika + mh-agent-open（2026-09-13~16 实战）+ agent-kb 派单（2026-09-20 OAuth scope 坑）；完整手册见 Downloads/Project/DeepSeek/CNB-上手指南-给其他项目.md
 date: 2026-09-20
+verified: 2026-09-13
 ---
 
 **经验**（cnb.cool = GitHub + CI + AI 员工 NPC；全程可脚本化，docs.cnb.cool 有 llms.txt 可批量读）：

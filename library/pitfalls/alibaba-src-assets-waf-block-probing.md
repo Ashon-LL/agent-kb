@@ -4,6 +4,7 @@ description: 阿里系SRC资产（盒马/千问等）有WAF，路径枚举式探
 type: pitfall
 source: SRC挖洞项目（2026-09-21 盒马 portal.hemaos.com 探测实战）
 date: 2026-09-21
+verified: 2026-09-21
 ---
 
 **经验**：对阿里系 SRC 范围资产（盒马 hemaos.com、千问 qianwen.com、阿里云等）做暴露面探测时——

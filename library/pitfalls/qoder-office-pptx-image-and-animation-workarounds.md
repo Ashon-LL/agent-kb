@@ -4,6 +4,7 @@ description: Qoder Office MCP put_page 的 imageFiles 管线可能整体故障�
 type: pitfall
 source: Qoder Presentations Office MCP 演讲稿打磨实弹（落盘日无明确记录，取入库日）
 date: 2026-09-30
+verified: 2026-09-30
 ---
 
 **经验**：

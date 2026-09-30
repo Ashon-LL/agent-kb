@@ -3,6 +3,7 @@ name: silent-continue-masks-lost-check-coverage
 description: 校验器用 config.get() 取不到键就 continue，改名后该校验被静默跳过而非报错——门禁仍全绿，漏检无声；跨名字引用的校验必须容忍命名后缀或显式登记，并有一条测试专门断言"改名的代价是仍能定位"
 source: APIShow CodeArts 五渠道合并（2026-09-28，config adapter 键 codearts → codearts__ch177，compare_adapter_maps 静默跳过）
 date: 2026-09-28
+verified: 2026-09-28
 type: pitfall
 
 ---

@@ -4,6 +4,7 @@ description: ZCode provider_config.json 没有 reasoning.enabled 字段，schema
 type: pitfall
 source: APIShow 接入 tokenrhythm 网关 neohorse-1-9b（2026-09-21）——网关报 400 unknown request field: reasoning.effort
 date: 2026-09-21
+verified: 2026-09-21
 tags: [zcode, provider_config, reasoning_effort, schema]
 ---
 

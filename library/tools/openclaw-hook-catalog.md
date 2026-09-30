@@ -4,6 +4,7 @@ description: OpenClaw 拦工具调用的 hook 叫 before_tool_call 不是 tool_c
 type: tool
 source: agent-jev 派单（20260924，NPC 依官方 reference 纠正任务书里的错名）+ openclaw/openclaw docs/plugins/hooks/reference.md
 date: 2026-09-24
+verified: 2026-09-24
 ---
 
 **经验**：OpenClaw **没有** `tool_call` 这个 hook；要拦截工具调用挂 **`before_tool_call`**

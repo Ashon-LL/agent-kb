@@ -4,6 +4,7 @@ description: 一次性脚本改重要文件四铁律：备份不被重跑覆盖�
 type: pitfall
 source: apishow（2026-09-08 credentials.toml 双端损坏事故）
 date: 2026-09-14
+verified: 2026-09-08
 ---
 
 **经验**：一次性脚本改配置/凭据/DB 相关文件时——

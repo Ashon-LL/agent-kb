@@ -4,6 +4,7 @@ description: 「可选凭据/可选资源加载器把 OSError 一并吞掉」会
 type: pitfall
 source: APIShow CodeArts STS 凭据改造（2026-09-28）：凭据已部署、内容有效，服务却持续回退长期钥且零日志
 date: 2026-09-28
+verified: 2026-09-28
 ---
 
 **经验**：任何「加载可选资源，失败就当作没有」的代码，都必须在**异常类型层面**区分「真的没有」和「有但读不到」。`except OSError: return None` 会把 `FileNotFoundError`（正常，未配置）与 `PermissionError` / `IsADirectoryError`（配置错误）合并成同一个返回值；而 `os.path.exists()` 本身就吞掉所有异常并返回 False，等于在最前面又吞了一次。在 auto/回退模式里，这类失败会被回退路径**静默吸收**，最终表现为「配置已部署、内容正确，但完全不生效，且零错误日志」——这是最难查的一类故障。

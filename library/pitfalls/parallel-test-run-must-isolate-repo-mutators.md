@@ -4,6 +4,7 @@ description: 给测试套件加并行前先隔离「会写仓库工作树的用�
 type: pitfall
 source: MH-Agent-Open（2026-09-28 全量测试 13m58s → 7m 的落地复盘）
 date: 2026-09-28
+verified: 2026-09-28
 ---
 
 **经验**：给已有测试套件加并行（`pytest-xdist -n auto`）**不是加个 `-n` 就完事**。

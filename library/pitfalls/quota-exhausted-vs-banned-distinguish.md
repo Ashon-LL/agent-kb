@@ -4,6 +4,7 @@ description: 【业务码作用域=New API 平台（error.data.code），14018/1
 type: pitfall
 source: APIShow/WorkBuddy 池（2026-09-27，一天内 12 号中 4 号不可用）
 date: 2026-09-27
+verified: 2026-09-27
 ---
 
 **经验**：一个号"不能用"有两类根因，**症状、判据、可行的处置完全不同**，混为一谈会白试修复动作。

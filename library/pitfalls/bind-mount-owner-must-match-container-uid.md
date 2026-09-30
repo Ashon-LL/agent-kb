@@ -4,6 +4,7 @@ description: bind mount 的文件属主由宿主机决定，容器内 chown 无�
 type: pitfall
 source: APIShow 部署 workbuddy2api（2026-09-19）：config.json 设 600 + 容器 uid 10001 → 崩溃循环；管理端 data/ 同款
 date: 2026-09-19
+verified: 2026-09-19
 ---
 
 **经验**：`bind mount` 挂进去的文件/目录，**属主与权限完全由宿主机那一侧决定**——镜像里写的 `chown` 对它不起作用（镜像内的 chown 只作用于构建时 COPY 进去的文件）。所以「宿主机上按安全习惯 `chmod 600` + 容器以非 root uid 运行」这个组合，会直接让容器读不到自己的配置文件。

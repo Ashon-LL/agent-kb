@@ -4,6 +4,7 @@ description: New API rc.26 渠道 CRUD 端点形状与静默成功坑——POST 
 type: pitfall
 source: APIShow/New API rc.26（2026-09-28 修订补渠道 CRUD 端点形状）
 date: 2026-09-17
+verified: 2026-09-28
 
 ---
 

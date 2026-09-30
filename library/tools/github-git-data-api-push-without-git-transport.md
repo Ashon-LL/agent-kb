@@ -4,6 +4,7 @@ description: git 传输死/被限时用 GitHub Git Data API 零 git 二进制建
 type: tool
 source: ps-heredoc-todie（mokuyoaxis/PowerShell-Reliability-Framework PR #1，2026-09-21 实测）
 date: 2026-09-21
+verified: 2026-09-21
 ---
 
 **经验**：`git fetch/push` 被网络掐死（`Recv failure: Connection was reset`，`--depth 1`、

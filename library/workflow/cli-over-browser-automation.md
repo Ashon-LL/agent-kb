@@ -4,6 +4,7 @@ description: 平台任务优先用 CLI/OpenAPI 而非浏览器自动化，先读
 type: workflow
 source: ailika（2026-09-13 用户指示）
 date: 2026-09-14
+verified: 2026-09-13
 ---
 
 **经验**：要操作某平台前先确认它有无 CLI 或 OpenAPI（如 `gh` 对 GitHub、`cnb` 对 CNB），读一遍平台文档（很多文档站提供 llms.txt 可批量抓）后用命令读写。浏览器自动化只留给确实没有 API 的环节：扫码登录、一次性建 token、仅 UI 的核验。

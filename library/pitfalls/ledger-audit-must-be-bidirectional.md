@@ -4,6 +4,7 @@ description: 有「真值集中存放处」+「运行时实例」两套系统时
 type: pitfall
 source: APIShow 凭据库与线上状态双向核对（2026-09-17）
 date: 2026-09-17
+verified: 2026-09-17
 ---
 
 # 台账核对必须双向，单向核出会漏

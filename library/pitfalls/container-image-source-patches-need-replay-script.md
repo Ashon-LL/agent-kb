@@ -4,6 +4,7 @@ description: 打进容器镜像内的源码补丁扛 docker restart、不扛 rm/
 type: pitfall
 source: APIShow/AstrBot v4.27.4（2026-09-18 三个源码补丁：token 计数 / 压缩闸门 / 历史图片剥离）
 date: 2026-09-18
+verified: 2026-09-18
 ---
 
 **经验**：容器里"改源码"有四种持久性，选错一种等于没改——

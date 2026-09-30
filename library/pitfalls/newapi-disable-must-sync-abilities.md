@@ -4,6 +4,7 @@ description: New API 的 abilities 表是唯一路由事实源，docker restart 
 type: pitfall
 source: APIShow/New API（2026-09-17 扩充条目：改 channels.group 同样要手工重建 abilities）
 date: 2026-09-17
+verified: 2026-09-17
 
 ---
 

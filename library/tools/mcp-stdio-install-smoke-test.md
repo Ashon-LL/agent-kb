@@ -4,6 +4,7 @@ description: stdio MCP 安装前必须实测 initialize+tools/list 握手；uvx/
 type: tool
 source: ZCode 联网搜索双源接入（Tavily + 博查），2026-09-15
 date: 2026-09-15
+verified: 2026-09-15
 ---
 
 **经验**：

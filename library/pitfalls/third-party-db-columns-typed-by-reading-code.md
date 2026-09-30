@@ -4,6 +4,7 @@ description: 手工改第三方应用的 DB 前必须 grep 读该列的代码—
 type: pitfall
 source: APIShow/AstrBot v4.27.4（2026-09-18 updated_at 写成 int 崩 fromisoformat）；APIShow/New API rc.26（2026-09-19 channel_info 写成 TEXT 而其余 30 行是 BLOB，致渠道列表与选路全挂）
 date: 2026-09-19
+verified: 2026-09-18
 ---
 
 **经验**：SQLite 是弱类型，你写进去的任何类型它都收——**收得下不等于读得动**。第三方应用的列类型由其代码的读法决定，不由你的 SQL 常识决定。

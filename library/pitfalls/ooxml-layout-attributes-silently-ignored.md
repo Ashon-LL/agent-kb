@@ -4,6 +4,7 @@ description: Word/OOXML 四类"设了属性却不生效"的静默失效——字
 type: pitfall
 source: cumcm_zcode（CUMCM 2026 A 题 Word 交付全程实测）
 date: 2026-09-15
+verified: 2026-09-15
 ---
 
 **共同特征**：属性写进 XML 了、脚本自检全绿、Word 里却不对——**XML 计数与文本 diff 都查不出**，只能靠量测或目视。四条各附修法：

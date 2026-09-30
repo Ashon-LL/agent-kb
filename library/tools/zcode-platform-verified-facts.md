@@ -4,6 +4,7 @@ description: ZCode 平台实测事实合集——扩展资源落点语义（skil
 type: tool
 source: ailika + default（2026-08~09 本机 Windows 实证）；2026-09-15 合并 hooks 与资源落点两条
 date: 2026-09-15
+verified: 2026-09-15
 ---
 
 改 ZCode 配置/自动化前先认落点与实测行为，避免"改了不生效""hook 没触发"。以下均本机实证，非文档转述。

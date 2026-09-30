@@ -4,6 +4,7 @@ description: Tauri v2 窗口指向 http(s) URL（含 localhost）时 invoke() �
 type: pitfall
 source: Tauri v2 远程 URL 实测（2026-09-21）
 date: 2026-09-21
+verified: 2026-09-21
 
 ---
 

@@ -4,6 +4,7 @@ description: PowerShell bool -eq string 时先把 string 转 bool（非空=True�
 type: pitfall
 source: agent-kb hooks 多平台部署（2026-09-20）
 date: 2026-09-20
+verified: 2026-09-20
 ---
 
 **教训**：PowerShell 里 -eq 两侧类型不同会触发隐式转换，方向是把右边转成左边。所以 $true -eq "toml" 会先把 "toml" 转成布尔（非空串 → $true），再比较 $true -eq True → **True**！这让 if/else 分支全部走错，把 JSON 当 TOML 追加了进去。

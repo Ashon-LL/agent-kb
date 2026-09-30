@@ -4,6 +4,7 @@ description: New API rc.26 令牌 CRUD 三坑——POST /api/token/ 成功但 da
 type: pitfall
 source: APIShow/New API rc.26（2026-09-28 令牌 CRUD 三坑）
 date: 2026-09-28
+verified: 2026-09-28
 
 ---
 

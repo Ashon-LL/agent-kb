@@ -4,6 +4,7 @@ description: Windows 上 DETACHED_PROCESS 会让子进程族的每个 console �
 type: pitfall
 source: gateway 重启黑窗风暴实弹 2026-09-26（用户报「重启 gateway 弹出很多黑屏」）
 date: 2026-09-26
+verified: 2026-09-26
 ---
 
 Windows 上为了「父进程退出后子进程仍存活」而加 `DETACHED_PROCESS`，

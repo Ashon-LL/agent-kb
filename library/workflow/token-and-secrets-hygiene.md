@@ -4,6 +4,7 @@ description: 凭据卫生：token 不内联命令行、公开内容零站点/密
 type: workflow
 source: ailika + mh-agent-open（用户多次强调）
 date: 2026-09-14
+verified: 2026-09-14
 ---
 
 **经验**：

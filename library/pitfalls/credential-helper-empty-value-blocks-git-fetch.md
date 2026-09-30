@@ -4,6 +4,7 @@ description: git config 空值 credential.helper 让 fetch 阻塞等待（不是
 type: pitfall
 source: agent-guard 2026-09-20 实锤（三轮迭代才收敛：空值阻塞 → 全删 → 另一个 agent 修复好条目）
 date: 2026-09-20
+verified: 2026-09-20
 ---
 
 **经验**：清理 git credential 配置时，⛔ 不能 `unset-all credential.https://<host>.*` 一把梭，⛔ 不能设空字符串 `credential.helper=""`。必须先 `--show-origin --get-all` 列清每个条目的来源和值，**只删空值或明确坏的**。

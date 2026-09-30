@@ -4,6 +4,7 @@ description: 判断某物是否阻塞前必须先 grep 它的实际使用点；�
 type: pitfall
 source: MH-Agent-Open（CNB 密钥库验证单）
 date: 2026-09-18
+verified: 2026-09-18
 ---
 
 **经验**：一条报错/一个常量"看起来是问题"，和它"是不是真的阻塞"，是两件事。

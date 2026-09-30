@@ -4,6 +4,7 @@ description: kb 条目的 source 字段是这条经验的作用域边界，不�
 type: pitfall
 source: 迁移 DSH 桌面端配置时把 AstrBot 的 max_tokens 教训套到 StepFun（2026-09-30，用户当场纠正）
 date: 2026-09-30
+verified: 2026-09-30
 ---
 
 **经验**：kb 条目的 `source:` 字段同时是**出处署名**和**作用域声明**，两件事别混。检索时靠 description 命中，但**命中之后要回读 `source:` 确认这条经验属于哪个项目/组件/版本**——命中即适用是错的，跨项目套用必须实测。写条目时如果只写"某类系统普遍如此"，就等于把作用域写没了。

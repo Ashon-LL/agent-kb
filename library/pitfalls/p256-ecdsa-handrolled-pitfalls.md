@@ -4,6 +4,7 @@ description: 纯标准库手写 P-256 ECDSA/DPoP JWS 的四个坑——曲线是
 type: pitfall
 source: APIShow CodeArts STS 凭据体系改造（2026-09-28，为对齐 gitee deepseek-harness-codearts 的 DPoP 签名手写 P-256，零第三方依赖）
 date: 2026-09-28
+verified: 2026-09-28
 ---
 
 **经验**：需要在无第三方依赖的环境（生产服务器只装标准库）里手写 ECDSA 签名时，有四个坑会让代码「看起来对、验签必错」：
