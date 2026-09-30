@@ -5,6 +5,7 @@ type: workflow
 source: ailika + mh-agent-open（用户多次强调）
 date: 2026-09-14
 verified: 2026-09-14
+topic: security
 ---
 
 **经验**：

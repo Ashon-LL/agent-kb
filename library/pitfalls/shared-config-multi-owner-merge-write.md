@@ -5,6 +5,7 @@ type: pitfall
 source: openclaw gateway config 多主人覆盖实弹 2026-09-26
 date: 2026-09-26
 verified: 2026-09-26
+topic: api-gateway, security, methodology
 ---
 
 驱动外部工具时，**同一份 config 文件往往有多个写入者**，各自只认自己那几个键。

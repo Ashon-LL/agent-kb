@@ -5,6 +5,7 @@ type: workflow
 source: mh-agent-open / 用户 2026-09-23 敲定叫法
 date: 2026-09-23
 verified: 2026-09-23
+topic: agent-orchestration
 ---
 
 **经验**：长任务（NPC 单 / CI / 长跑测试 / 部署同步）**不要阻塞等待**，也不要靠人反复问"好了吗"。

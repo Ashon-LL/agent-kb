@@ -5,6 +5,7 @@ type: workflow
 source: SRC 挖洞项目（2026-09-21 用户裁定 BUG-004 理想门店电话不算，要求"以后找洞前先查"）
 date: 2026-09-21
 verified: 2026-09-21
+topic: methodology
 ---
 
 **经验**：每接一个新目标（新 SRC / 新任务页），先花几分钟读三样东西再开始探测：

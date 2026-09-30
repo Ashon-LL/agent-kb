@@ -5,6 +5,7 @@ type: pitfall
 source: cumcm_zcode（CUMCM 2026 A 题交付全程）
 date: 2026-09-14
 verified: 2026-09-14
+topic: office, delivery
 ---
 
 **经验**（管线生成 docx 交付的通用坑，任何 Word/docx 项目适用）：

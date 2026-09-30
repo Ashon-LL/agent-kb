@@ -5,6 +5,7 @@ type: pitfall
 source: 外部工具覆盖式配置实测（2026-09-20）
 date: 2026-09-20
 verified: 2026-09-20
+topic: methodology
 
 ---
 

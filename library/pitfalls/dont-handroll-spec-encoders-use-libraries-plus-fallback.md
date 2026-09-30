@@ -5,6 +5,7 @@ type: pitfall
 source: 二维码编码器与 segno 逐格对账实弹（项目含「检查点二维码」；落盘日无明确记录，取入库日）
 date: 2026-09-30
 verified: 2026-09-30
+topic: python, methodology
 ---
 
 「不引入依赖」的直觉在**有强规范的对象**上是错的。我为了给二维码做无依赖兜底，

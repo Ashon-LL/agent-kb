@@ -5,6 +5,7 @@ type: workflow
 source: MH-Agent-Open D-17
 date: 2026-09-18
 verified: 2026-09-18
+topic: windows
 ---
 
 **背景**：D-17 长期缺口 = 「默认 harness 已是 openclaw，但**从未在真实上游跑通完整回合**」。

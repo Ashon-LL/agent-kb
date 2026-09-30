@@ -5,6 +5,7 @@ type: pitfall
 source: mh-agent-open（2026-09-19 实弹，家族第 2 例）
 date: 2026-09-19
 verified: 2026-09-19
+topic: powershell
 ---
 
 **症状**：`Start-Process -FilePath node.exe -ArgumentList @('-e', $js)` 里，

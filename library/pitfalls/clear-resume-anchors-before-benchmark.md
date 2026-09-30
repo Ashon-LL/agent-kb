@@ -5,6 +5,7 @@ type: pitfall
 source: mh-agent-open（2026-09-15 炼制实弹：24 秒"整轮"假数据）
 date: 2026-09-15
 verified: 2026-09-15
+topic: methodology
 ---
 
 **经验**：对带"已完成即跳过"锚点的系统做耗时基准前，先清掉锚点（或换全新工作集），确保主流程真的跑了。

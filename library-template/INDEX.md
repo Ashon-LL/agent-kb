@@ -26,6 +26,7 @@ type: tool | workflow | pitfall
 source: 来源项目或事件
 date: YYYY-MM-DD
 verified: YYYY-MM-DD
+topic: 领域（受控词表，逗号分隔可多值）
 ---
 
 **经验**：直接说怎么做。

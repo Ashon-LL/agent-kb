@@ -5,6 +5,7 @@ type: workflow
 source: cumcm_zcode（跨平台对比实测提炼，2026-09-15）；APIShow CNB 凭据排查（2026-09-21 补第 2 条基线缺陷）
 date: 2026-09-21
 verified: 2026-09-15
+topic: security, methodology
 ---
 
 **经验**（比"试到好为止"可靠得多的排查法）：

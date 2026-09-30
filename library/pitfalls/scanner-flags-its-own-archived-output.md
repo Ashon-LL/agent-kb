@@ -5,6 +5,7 @@ type: pitfall
 source: MH-Agent-Open（release_check.py 2 项恒 FAIL，0911 审计已记录病根却未修，20260919 根治）
 date: 2026-09-19
 verified: 2026-09-19
+topic: ci, methodology
 ---
 
 **病症**：仓库的安全门禁（敏感信息扫描）**长期恒 FAIL，且怎么清都清不掉**。

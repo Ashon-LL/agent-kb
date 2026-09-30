@@ -5,6 +5,7 @@ type: pitfall
 source: MH-Agent-Open（CNB NPC 工单 cnb-eke-1k2paekff 挂起事故）
 date: 2026-09-18
 verified: 2026-09-18
+topic: methodology
 ---
 
 **经验**：脚本里 `cmd &` 起了常驻进程后再裸 `wait`，**必然死锁**。

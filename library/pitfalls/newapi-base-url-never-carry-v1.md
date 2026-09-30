@@ -5,6 +5,7 @@ type: pitfall
 source: APIShow unoRouter 8 路漏斗接入（ch168-175）
 date: 2026-09-17
 verified: 2026-09-17
+topic: api-gateway
 ---
 
 ## 经验

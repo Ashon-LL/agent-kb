@@ -5,6 +5,7 @@ type: workflow
 source: APIShow WorkBuddy 号池 2026-09-27/0928 两次用户纠正
 date: 2026-09-28
 verified: 2026-09-27
+topic: api-gateway, delivery
 ---
 
 # 账号池汇报：用「用户可认的称呼」而非内部 ID

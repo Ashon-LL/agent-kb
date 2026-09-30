@@ -5,6 +5,7 @@ type: tool
 source: 2026-09-23 WorkBuddy 参赛帖 md/html → docx
 date: 2026-09-23
 verified: 2026-09-23
+topic: windows, git, python, office
 ---
 
 **事实（本机实测）**：`<plugin_root>/scripts/wb/local/setup-html-to-docx.sh` 第 86 / 94 行（及后续冒烟测试）一律用 `$VENV_DIR/bin/python`；**uv 在 Windows 上建出的 venv 是 `Scripts/`，根本没有 `bin/`** ⇒

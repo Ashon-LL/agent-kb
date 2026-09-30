@@ -5,6 +5,7 @@ type: tool
 source: ebot（arduino-cli 实测）+ mh-agent-open（推送兜底指南）；2026-09-14 两条晋升、2026-09-15 合并
 date: 2026-09-15
 verified: 2026-09-14
+topic: container, git
 ---
 
 **经验**：本机到 GitHub 的连通性问题是**双向、秒级波动**的，两条通路分开治理。

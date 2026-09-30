@@ -5,6 +5,7 @@ type: pitfall
 source: MH-Agent-Open（CNB 密钥库验证单）
 date: 2026-09-18
 verified: 2026-09-18
+topic: ci, methodology
 ---
 
 **经验**：一条报错/一个常量"看起来是问题"，和它"是不是真的阻塞"，是两件事。

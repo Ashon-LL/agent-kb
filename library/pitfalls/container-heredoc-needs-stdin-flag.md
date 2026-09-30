@@ -5,6 +5,7 @@ type: pitfall
 source: 日常沉淀 2026-09-18（here-doc 喂 docker exec/ssh 静默丢 stdin）
 date: 2026-09-18
 verified: 2026-09-18
+topic: container, security
 ---
 
 在管道命令里用 here-doc 喂容器内进程时，**`docker exec` 默认不转发标准输入**：

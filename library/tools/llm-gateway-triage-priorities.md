@@ -5,6 +5,7 @@ type: tool
 source: mh-agent-open + apishow（2026-09 实测链）
 date: 2026-09-14
 verified: 2026-09-14
+topic: api-gateway, llm
 ---
 
 **经验**（排查按此优先级）：

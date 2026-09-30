@@ -5,6 +5,7 @@ type: pitfall
 source: MH-Agent-Open（2026-09-19 全库通读 + 仓库现场复核）
 date: 2026-09-19
 verified: 2026-09-19
+topic: security, methodology
 ---
 
 **经验**：项目自己的记忆库 / 债务台账 / TODO 里的「未做」「待办」「尚未派单」，**不等于现在还没做**。

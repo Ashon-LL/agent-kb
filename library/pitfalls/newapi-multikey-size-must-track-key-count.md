@@ -5,6 +5,7 @@ type: pitfall
 source: APIShow 商汤三账户钥纳入 ch29/ch167 多钥池
 date: 2026-09-17
 verified: 2026-09-17
+topic: api-gateway, security
 ---
 
 ## 经验

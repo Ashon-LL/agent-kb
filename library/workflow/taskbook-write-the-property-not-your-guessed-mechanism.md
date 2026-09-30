@@ -5,6 +5,7 @@ type: workflow
 source: MH-Agent-Open（20260918 超时硬化单：我写的 B1 手段在本仓已等效实现，NPC 正确回报并拒绝硬改）
 date: 2026-09-18
 verified: 2026-09-18
+topic: cnb
 ---
 
 **经验**：派单任务书里，**区分「目标/性质」与「手段/写法」**。

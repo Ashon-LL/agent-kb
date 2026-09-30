@@ -5,6 +5,7 @@ type: pitfall
 source: APIShow 凭据库与线上状态双向核对（2026-09-17）
 date: 2026-09-17
 verified: 2026-09-17
+topic: database, security, methodology
 ---
 
 # 台账核对必须双向，单向核出会漏

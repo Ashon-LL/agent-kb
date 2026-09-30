@@ -5,6 +5,7 @@ type: pitfall
 source: ps-heredoc-todie（mokuyoaxis/PowerShell-Reliability-Framework PR #1，2026-09-21 实测）
 date: 2026-09-21
 verified: 2026-09-21
+topic: git
 ---
 
 **经验**：GitHub compare 页那个大号 `btn-primary` 的「Create pull request」按钮**不是导航**。它的属性是 `type=button` + `class="js-details-target"` + `aria-expanded=false`——是一个 `<details>` 折叠开关。所以任何「点它然后等 URL 变化 / 等 `/pulls/N`」的自动化**永远等不到**，表象像网络挂了或按钮无响应，实际是语义读错了。

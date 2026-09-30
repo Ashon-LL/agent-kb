@@ -5,6 +5,7 @@ type: workflow
 source: 用户明确偏好（2026-10-01）
 date: 2026-10-01
 verified: 2026-10-01
+topic: methodology
 ---
 
 **经验**：

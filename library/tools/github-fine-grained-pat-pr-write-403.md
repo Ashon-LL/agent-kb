@@ -5,6 +5,7 @@ type: tool
 source: ps-heredoc-todie（mokuyoaxis/PowerShell-Reliability-Framework PR #1，2026-09-21 实测）
 date: 2026-09-21
 verified: 2026-09-21
+topic: git, browser, security
 ---
 
 **经验**：fork PR 用 `gh pr create` 或 `POST /repos/{owner}/{repo}/pulls` 返回

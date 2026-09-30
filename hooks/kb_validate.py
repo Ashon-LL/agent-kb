@@ -34,7 +34,14 @@ from kb_core import (  # noqa: E402  （同目录 import）
 CONTENT_DIRS = ("pitfalls", "tools", "workflow")
 TYPE_TO_DIR = {"pitfall": "pitfalls", "tool": "tools", "workflow": "workflow"}
 DIR_TO_TYPE = {v: k for k, v in TYPE_TO_DIR.items()}
-REQUIRED_FIELDS = ("name", "description", "type", "source", "date", "verified")
+REQUIRED_FIELDS = ("name", "description", "type", "source", "date", "verified", "topic")
+
+# P3-1 受控领域词表（正交于 type；type 只回答「怎么用」，topic 回答「属于哪个领域」）
+TOPIC_VOCAB = (
+    "api-gateway", "agent-orchestration", "browser", "ci", "cnb", "container",
+    "database", "delivery", "git", "llm", "mcp", "methodology", "office",
+    "powershell", "python", "security", "tauri", "windows", "zcode",
+)
 
 _LINK_RE = re.compile(r"\[\[([^\]]+)\]\]")
 _PATH_IN_LINE_RE = re.compile(r"\(([^)]+)\)")
@@ -150,6 +157,15 @@ def validate(kb_path=None):
             actual_dir = p.split("/", 1)[0]
             if want_dir and actual_dir in CONTENT_DIRS and actual_dir != want_dir:
                 err(f"[type] {p}: type='{t}' 应在 {want_dir}/ 下，实际在 {actual_dir}/")
+
+    # 2b) topic 受控词表（P3-1）
+    for p, text in entries.items():
+        fm = fm_by_path.get(p) or {}
+        raw = fm.get("topic", "")
+        vals = [x.strip() for x in raw.split(",") if x.strip()]
+        bad = [x for x in vals if x not in TOPIC_VOCAB]
+        if bad:
+            err(f"[topic] {p}: 领域值不在受控词表 {bad}（合法值：{', '.join(TOPIC_VOCAB)}）")
 
     # 3) 双链死链
     for p, text in entries.items():

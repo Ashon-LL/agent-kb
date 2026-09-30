@@ -5,6 +5,7 @@ type: pitfall
 source: mh-agent-open + apishow + default
 date: 2026-09-15
 verified: 2026-09-15
+topic: windows, container
 ---
 
 **经验**（共同特征：命令"成功"但啥也没发生，或报错被误判成工具不可用）：

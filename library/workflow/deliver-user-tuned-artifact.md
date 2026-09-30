@@ -5,6 +5,7 @@ type: workflow
 source: cumcm_zcode（CUMCM 2026 论文定稿阶段用户裁定）
 date: 2026-09-15
 verified: 2026-09-15
+topic: delivery
 ---
 
 **经验**：当用户已在自己的编辑器里逐页调好某份生成产物（Word/PPT/网页）并声明"样式我已经真实去看去调了，目前是最适合的"，**该产物即最终稿，其权威高于生成主源（markdown/模板 + 管线）**。此时：

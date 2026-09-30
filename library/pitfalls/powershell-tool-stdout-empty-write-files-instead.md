@@ -5,6 +5,7 @@ type: pitfall
 source: WorkBuddy PS 工具调用（ZCode 侧 Bash 调 PowerShell，2026-09-18 实测；正文标注环境 Windows 10.0.26200 / PS 5.1.26100.8115）
 date: 2026-09-18
 verified: 2026-09-18
+topic: powershell, methodology
 ---
 
 ## WorkBuddy PS 工具：执行正常，但 stdout 回传恒为空（改用「写文件 + Bash 读」）

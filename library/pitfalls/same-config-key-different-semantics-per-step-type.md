@@ -5,6 +5,7 @@ type: pitfall
 source: MH-Agent-Open（.cnb.yml `timeout: 4h` 未兑现，用户两次质疑后反查全量构建记录推翻原结论）
 date: 2026-09-18
 verified: 2026-09-18
+topic: cnb, security, methodology
 ---
 
 **经验**：查文档不能只查「字段名」，要查**该字段对该步骤类型**的定义。

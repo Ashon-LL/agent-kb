@@ -5,6 +5,7 @@ type: pitfall
 source: MH-Agent-Open（后台监测脚本 watch_sn1.py 第一次运行就 FileNotFoundError）
 date: 2026-09-18
 verified: 2026-09-18
+topic: windows, powershell, cnb, python
 ---
 
 **经验**：`which cnb` 找到的路径**不代表 Python 能 spawn 它**。

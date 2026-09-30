@@ -5,6 +5,7 @@ type: tool
 source: cc-haha v0.6.7 Windows 安装实测（2026-09-28）
 date: 2026-09-28
 verified: 2026-09-28
+topic: windows
 ---
 
 **经验**：electron-builder 打的 per-user NSIS 安装器（如 cc-haha `Claude-Code-Haha-*-win-x64.exe`）：

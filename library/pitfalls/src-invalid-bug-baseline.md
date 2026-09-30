@@ -5,6 +5,7 @@ type: pitfall
 source: ASRC 公告 id=191、补天 FAQ/BILISRC/360 漏洞盒子、TSRC TPSA25-01、MiSRC 处罚公告（2026-09-21 整理）
 date: 2026-09-21
 verified: 2026-09-21
+topic: methodology
 ---
 
 **经验**（判定顺序：先看数据分级，再看利用性，最后看重复）：

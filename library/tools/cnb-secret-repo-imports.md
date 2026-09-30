@@ -5,6 +5,7 @@ type: tool
 source: MH-Agent-Open 项目（apigogo/mh-agent-open）
 date: 2026-09-18
 verified: 2026-09-18
+topic: cnb, security
 ---
 
 **经验**：CNB 密钥库引用环境变量的完整可用姿势 + 三个会让人白跑一轮的坑。

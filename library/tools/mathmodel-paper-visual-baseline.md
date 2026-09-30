@@ -5,6 +5,7 @@ type: tool
 source: cumcm_zcode（CUMCM 2026 A 题，用户逐条验收通过）
 date: 2026-09-15
 verified: 2026-09-15
+topic: llm, office
 ---
 
 **经验**：下次数模论文可直接套用的视觉基线（用户参照近两年展示论文提出，已验收）：

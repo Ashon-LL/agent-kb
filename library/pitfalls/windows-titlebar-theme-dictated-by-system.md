@@ -5,6 +5,7 @@ type: pitfall
 source: Windows 11 标题栏主题实测（2026-09-21）
 date: 2026-09-21
 verified: 2026-09-21
+topic: windows
 
 ---
 

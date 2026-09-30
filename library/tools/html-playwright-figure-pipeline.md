@@ -5,6 +5,7 @@ type: tool
 source: WorkBuddy 参赛帖配图（2026-09-23，一次产出 8 张）
 date: 2026-09-23
 verified: 2026-09-23
+topic: office, browser
 ---
 
 **经验**：要给文章 / 帖子 / PPT 出**设计型**中文配图（流程卡、对比表、终端风格卡、柱状图），别用 matplotlib 硬凑版式，也别用 AI 生图（中文必然乱码）。

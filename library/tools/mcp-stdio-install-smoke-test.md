@@ -5,6 +5,7 @@ type: tool
 source: ZCode 联网搜索双源接入（Tavily + 博查），2026-09-15
 date: 2026-09-15
 verified: 2026-09-15
+topic: mcp
 ---
 
 **经验**：

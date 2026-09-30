@@ -5,6 +5,7 @@ type: tool
 source: mh-agent-open 第八单（2026-09-17）实测；附件随构建停止回收取不回
 date: 2026-09-17
 verified: 2026-09-17
+topic: cnb, browser
 ---
 
 **经验**（NPC 上传 `cnb issues upload-file --file <path>`，需 `CNB_ISSUE_IID=<n>` 否则报缺 issue number；返回 `asset_link` 是**根相对** `/-/files/issues/<内部ID>/<slug>/<uuid>/<名>`，无仓库前缀）：

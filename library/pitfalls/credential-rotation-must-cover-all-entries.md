@@ -5,6 +5,7 @@ type: pitfall
 source: mh-agent-open（2026-09-15 CNB 令牌轮换实锤）；APIShow（2026-09-21 同一坑二次踩：host 级条目抢走 APIShow 的推送，而那条恰是 mh-agent-open 的合法专用 key）
 date: 2026-09-21
 verified: 2026-09-15
+topic: git, security
 ---
 
 **经验**：git 报凭据失效/仓库不存在、但仓库明明还在时，第一嫌疑是**凭据链里有个更早的 host 级条目抢先命中**（`credential.useHttpPath` 默认 false ⇒ 优先 host 级查找；path 级新条目**完全不参与** host 级查找，救不了这个场景）。

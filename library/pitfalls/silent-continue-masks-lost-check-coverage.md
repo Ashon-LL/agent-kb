@@ -4,6 +4,7 @@ description: 校验器用 config.get() 取不到键就 continue，改名后该�
 source: APIShow CodeArts 五渠道合并（2026-09-28，config adapter 键 codearts → codearts__ch177，compare_adapter_maps 静默跳过）
 date: 2026-09-28
 verified: 2026-09-28
+topic: ci
 type: pitfall
 
 ---

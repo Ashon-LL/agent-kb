@@ -5,6 +5,7 @@ type: workflow
 source: cumcm_zcode（CUMCM 2026 A 题摘要与正文数值表述）
 date: 2026-09-15
 verified: 2026-09-15
+topic: methodology
 ---
 
 **经验**：写结论、写摘要时，**每个数字都要能回答"以什么为基准、这是谁的结论"**；省字把不同基准的结果挤进一句，读者就会按最近的主语理解。

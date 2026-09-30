@@ -5,6 +5,7 @@ type: workflow
 source: cumcm_zcode（CUMCM 2026 AI 工具使用规定落地）+ default（mathmodel 技能栈）
 date: 2026-09-15
 verified: 2026-09-15
+topic: windows, office, delivery, methodology
 ---
 
 **经验**（适用于一切要求"AI 使用声明/披露"的交付：竞赛、课程、专利/软著、论文投稿）：

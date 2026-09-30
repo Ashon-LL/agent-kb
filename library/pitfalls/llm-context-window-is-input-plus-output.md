@@ -5,6 +5,7 @@ type: pitfall
 source: APIShow AstrBot v4.28.2 tdp 网关（qwen3.8-27b，2026-09-29 生产 400 报错定谳 + models.dev 官方规格交叉验证）
 date: 2026-09-29
 verified: 2026-09-29
+topic: llm
 ---
 
 **作用域（先读这条）**：本条只定谳于 **AstrBot 的 tdp 网关 + qwen3.8-27b 这一个组合**（2026-09-29 生产 400 打脸 + models.dev 官方规格交叉验证）。OpenAI 兼容上游**是否都做同样的 `input + max_tokens ≤ window` 校验，未验证**——别的网关可能 clamp 而不是拒、可能只校验 `max_completion_tokens`、也可能压根不校验。⛔ **当成"通用 OpenAI 规范"套到别的项目前必须实测一次**；正文里的数字和字段名都是 AstrBot/tdp 语境。

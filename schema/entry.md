@@ -5,6 +5,7 @@ type: tool | workflow | pitfall
 source: 来源项目或事件（如 "GitHub Actions CI 事故"）
 date: YYYY-MM-DD
 verified: YYYY-MM-DD
+topic: 领域（受控词表，逗号分隔可多值；取值见 hooks/kb_validate.py 的 TOPIC_VOCAB）
 ---
 
 **经验**：直接说怎么做。

@@ -5,6 +5,7 @@ type: tool
 source: MH-Agent-Open（20260918 用户确认）
 date: 2026-09-18
 verified: 2026-09-18
+topic: browser
 ---
 
 **事实**：`present_files` 的 `files` 数组元素既可以是**本地绝对路径**，也可以是 **http/https URL**。

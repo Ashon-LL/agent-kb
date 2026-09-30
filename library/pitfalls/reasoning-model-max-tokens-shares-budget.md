@@ -5,6 +5,7 @@ type: pitfall
 source: APIShow 每日汇报脚本 daily_zhiqing_report.py（2026-09-18 03:10 生产降级实锤，sensenova-6.8-flash-lite 三档实测）
 date: 2026-09-18
 verified: 2026-09-18
+topic: llm
 ---
 
 **经验**：调 OpenAI 兼容的思考型模型（`reasoning_effort` / `thinking` / 流式 reasoning 内容那类）时，**reasoning token 和正文 token 共用同一个 `max_tokens` 预算**，不是"思考额外送"。所以预算定得过紧时，思考会把整份预算吃满，`finish_reason=length`，返回的 `message` 里**只有 `reasoning`/`reasoning_content` 键，`content` 键整个不存在**。此时 `message["content"]` 直接抛 `KeyError`，不是 `None`。
