@@ -2,7 +2,8 @@
 name: dont-handroll-spec-encoders-use-libraries-plus-fallback
 description: 有强规范的对象（二维码/条码/压缩/加密）不要手写编码器——我手写的 QR 版本与 segno 逐格对账差异 836/1681；正确做法是成熟库 + 多级兜底链
 type: pitfall
-
+source: 二维码编码器与 segno 逐格对账实弹（项目含「检查点二维码」；落盘日无明确记录，取入库日）
+date: 2026-09-30
 ---
 
 「不引入依赖」的直觉在**有强规范的对象**上是错的。我为了给二维码做无依赖兜底，

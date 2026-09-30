@@ -2,7 +2,8 @@
 name: detached-process-causes-console-window-storm
 description: Windows 上 DETACHED_PROCESS 会让子进程族的每个 console 子进程都新建一个可见黑窗（实测一次 26 个）；且它与 CREATE_NO_WINDOW 同用时后者被忽略——二者只能选一个
 type: pitfall
-
+source: gateway 重启黑窗风暴实弹 2026-09-26（用户报「重启 gateway 弹出很多黑屏」）
+date: 2026-09-26
 ---
 
 Windows 上为了「父进程退出后子进程仍存活」而加 `DETACHED_PROCESS`，

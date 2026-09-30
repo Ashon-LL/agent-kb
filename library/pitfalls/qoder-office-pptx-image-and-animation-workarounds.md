@@ -2,7 +2,8 @@
 name: qoder-office-pptx-image-and-animation-workarounds
 description: Qoder Office MCP put_page 的 imageFiles 管线可能整体故障（OPERATION_FAILED），改用 put_page(无图)+put_image 两步；页内动画只能 zip 注 XML，MCP 会自动重同步且保存不丢
 type: pitfall
-
+source: Qoder Presentations Office MCP 演讲稿打磨实弹（落盘日无明确记录，取入库日）
+date: 2026-09-30
 ---
 
 **经验**：

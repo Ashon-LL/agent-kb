@@ -2,7 +2,8 @@
 name: shared-config-multi-owner-merge-write
 description: 第三方工具的同一份 config 常有多个主人（官方向导写凭据、doctor 写 meta、你写渠道），整文件覆盖会静默抹掉别人的键——必须读-合并-写；且插件的「信任开关」就在 config 里，缺它静默不装载
 type: pitfall
-
+source: openclaw gateway config 多主人覆盖实弹 2026-09-26
+date: 2026-09-26
 ---
 
 驱动外部工具时，**同一份 config 文件往往有多个写入者**，各自只认自己那几个键。
