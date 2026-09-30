@@ -68,3 +68,14 @@ feat:
               平台 2h 硬边界不可逾越，每完成一个可编译/可验证小步就 commit push。
             # ⛔ userPrompt 必须保持变量引用（$userPrompt），不得写死字面量
             userPrompt: $userPrompt
+
+# ── 云原生开发环境（workspace） ───────────────────────────────
+# 显式声明 CPU 核数：CNB 云开发环境缺省是 8 核，这里降到 4 核。
+# 依据：本仓库的负载是读 110 个纯文本条目 + 跑标准库校验脚本，
+#       无编译、无并发；核时按核数计费，降到 4 核消耗减半。
+$:
+  vscode:
+    - runner:
+        cpus: 4
+      services:
+        - vscode
