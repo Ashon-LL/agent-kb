@@ -7,5 +7,5 @@ argument-hint: "<关键词> 或 add <一条经验>"
 
 用户输入：$ARGUMENTS
 
-- 若以 `add ` 开头：把后面的内容作为一条经验，按 kb 技能的写入规程（判类、查重、frontmatter、更新 INDEX.md）写入库目录，完成后回报文件路径与索引行。
+- 若以 `add ` 开头：把后面的内容作为一条经验，按 kb 技能的写入规程（判类、查重、frontmatter、更新 INDEX.md）写入库目录；**落盘后必须运行库校验器 `python3 hooks/kb_validate.py` 并通过（写入当下硬门）**，再回报文件路径与索引行。
 - 否则视为检索关键词：读 INDEX.md 并 grep 库内内容，返回最相关条目全文；没有命中就明确说无相关经验。
