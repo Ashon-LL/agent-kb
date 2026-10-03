@@ -78,13 +78,16 @@ class TestSessionStart(unittest.TestCase):
         self._tmp.cleanup()
 
     def test_output_contains_session_hook_and_real_count(self):
+        # 2026-10-04 起 kb_core 不再把条数印进文案（防两份拷贝因数字漂移分叉）；
+        # 条数经 count_index_entries 验证，文案只区分就绪/未就绪。
         proc = run_adapter(
             json.dumps({"hook_event_name": "SessionStart"}), kb_path=self.kb
         )
         self.assertEqual(proc.returncode, 0)
         ctx = json.loads(proc.stdout)["hookSpecificOutput"]["additionalContext"]
         self.assertIn("开工钩子", ctx)
-        self.assertIn("2 条", ctx)
+        self.assertIn("就绪", ctx)
+        self.assertNotIn("条）", ctx)
 
 
 class TestUserPromptSubmit(unittest.TestCase):

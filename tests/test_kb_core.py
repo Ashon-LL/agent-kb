@@ -148,9 +148,13 @@ class TestIndexCounting(unittest.TestCase):
         self.assertEqual(kb_core.count_index_entries(self.kb), 0)
 
     def test_reminder_reports_real_count(self):
+        # 2026-10-04 起 kb_core 不再把条数印进文案（数字随增删漂移，曾致两份拷贝分叉）；
+        # 条数只驱动"就绪/尚无条目"措辞，精确值由 count_index_entries 单独验证。
         self._write_index(self.SAMPLE_INDEX)
+        self.assertEqual(kb_core.count_index_entries(self.kb), 3)
         text = kb_core.session_start_reminder(str(self.kb))
-        self.assertIn("3 条", text)
+        self.assertIn("就绪", text)
+        self.assertNotIn("条）", text)
         self.assertIn(str(self.kb), text)
         self.assertIn("开工钩子", text)
 
@@ -161,7 +165,9 @@ class TestIndexCounting(unittest.TestCase):
 
     def test_reminder_accepts_path_object(self):
         self._write_index("- [a](a.md) —— x\n- [b](b.md) —— y\n")
-        self.assertIn("2 条", kb_core.session_start_reminder(self.kb))
+        text = kb_core.session_start_reminder(self.kb)
+        self.assertIn("就绪", text)
+        self.assertEqual(kb_core.count_index_entries(self.kb), 2)
 
     def test_default_arg_uses_runtime_path(self):
         # 不传参不报错（真实 ~/.agents/kb 可能不存在）
