@@ -68,9 +68,11 @@ def check_session_start(kb_path):
     ctx = hook.get("additionalContext") or ""
     if "开工钩子" not in ctx:
         return False, "additionalContext 缺“开工钩子”"
-    if "2 条" not in ctx:
-        return False, "additionalContext 未反映 INDEX.md 真实条目数（期望 2 条）"
-    return True, "SessionStart 注入开工钩子，条数统计正确"
+    if "就绪" not in ctx:
+        return False, "additionalContext 缺“就绪”（FAKE_INDEX 有 2 条，应为就绪措辞）"
+    if "条）" in ctx:
+        return False, "additionalContext 不应印条数（2026-10-04 起条数不入文案，防副本分叉）"
+    return True, "SessionStart 注入开工钩子（就绪，不印条数）"
 
 
 def check_user_prompt_triggered(kb_path=None):
