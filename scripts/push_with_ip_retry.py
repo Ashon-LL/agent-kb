@@ -13,10 +13,15 @@
      （应用层被针对性干扰时，换协议版本可能绕开，v2 的 HTTP 特征更明显）
   4. 每个 IP 最多试 ROUNDS 轮，应对瞬时抖动
 
+候选 IP **实时获取**（2026-10-04 用户要求，不再写死）：运行时向多个 DoH 端点
+（1.1.1.1 / 8.8.8.8 / 223.5.5.5，走 443 不易被 DNS 污染）查询 github.com 的 A 记录
+取并集作主力候选；全部 DoH 源失败才退回内置 FALLBACK 列表。
+
 hosts 指向候选 IP 后**不再恢复**（2026-10-04 用户要求）：推送成功的 IP 就固化在
 hosts 里，下次推送/访问直接走已验证的通路；全部失败的也停在最后尝试的 IP。
 条目行精确匹配 github.com，不碰 raw.githubusercontent.com 等其他含 "github" 字样的条目。
 """
+import json
 import random
 import re
 import socket
@@ -24,6 +29,7 @@ import ssl
 import subprocess
 import sys
 import time
+import urllib.request
 
 HOSTS = r"C:\Windows\System32\drivers\etc\hosts"
 HOST = "github.com"
@@ -31,19 +37,18 @@ HOST = "github.com"
 # api.github.com 等含 github 字样的其他条目
 _GH_ENTRY = re.compile(r"^\s*\d{1,3}(?:\.\d{1,3}){3}\s+github\.com\s*(?:#.*)?$")
 
-# 候选 IP：跨 5 个网段，避免整段被干扰时无路可走
-CANDIDATES = [
-    # GitHub 主站段 140.82.112.0/20
-    "140.82.112.3", "140.82.112.4", "140.82.112.5",
-    "140.82.113.4", "140.82.113.5",
-    "140.82.114.4", "140.82.114.5",
-    "140.82.115.4", "140.82.116.4", "140.82.116.5",
-    "140.82.117.4", "140.82.118.4", "140.82.119.4",
-    "140.82.120.4", "140.82.121.4", "140.82.122.3",
-    # 其他可见网段
-    "20.205.243.166", "20.205.243.168", "20.27.177.113",
-    "20.200.245.247", "192.30.255.112", "192.30.255.113",
-    "4.237.22.38",  # 本机 hosts 里原有的加速条目，一并纳入轮换
+# DoH JSON API 端点（Cloudflare / Google / 阿里，走 443；多源并集防单点污染）
+_DOH_ENDPOINTS = (
+    "https://1.1.1.1/dns-query?name={host}&type=A",
+    "https://8.8.8.8/resolve?name={host}&type=A",
+    "https://223.5.5.5/resolve?name={host}&type=A",
+)
+
+# 兜底：仅当所有 DoH 源都拿不到结果时使用（DoH 源全被阻断的极端情形）
+FALLBACK_CANDIDATES = [
+    "140.82.112.3", "140.82.112.4", "140.82.113.4",
+    "140.82.114.4", "140.82.116.4", "140.82.121.4",
+    "20.205.243.166", "20.27.177.113", "4.237.22.38",
 ]
 
 ROUNDS = 2                    # 每个 IP 的尝试轮数（瞬时抖动很常见）
@@ -51,6 +56,24 @@ PROTOCOL_VARIANTS = (         # 先默认，再退回 HTTP 特征更旧的一版
     [],
     ["-c", "protocol.version=1"],
 )
+
+
+def _fetch_dynamic_ips():
+    """实时解析 github.com 的 A 记录：多 DoH 源并集，零第三方依赖。"""
+    ips = []
+    for tpl in _DOH_ENDPOINTS:
+        url = tpl.format(host=HOST)
+        try:
+            req = urllib.request.Request(url, headers={"accept": "application/dns-json"})
+            with urllib.request.urlopen(req, timeout=6) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            found = [a["data"] for a in data.get("Answer", []) if a.get("type") == 1]
+            if found:
+                print(f"  [doh]  {url.split('/')[2]}: {', '.join(found)}")
+                ips.extend(found)
+        except Exception as exc:
+            print(f"  [doh]  {tpl.split('/')[2]}: 失败（{exc}）")
+    return list(dict.fromkeys(ips))  # 去重保序
 
 
 def _tls_ok(ip, timeout=3.0):
@@ -77,11 +100,19 @@ def _flushdns():
 def main():
     # 每个参数是一项推送（如 "mirror main" / "mirror main --force"），空格分词
     push_cmds = [arg.split() for arg in (sys.argv[1:] or ["origin"])]
-    random.shuffle(CANDIDATES)
+    print("== 实时解析 github.com A 记录（DoH 多源）==")
+    candidates = _fetch_dynamic_ips()
+    if candidates:
+        print(f"== 动态候选 {len(candidates)} 个；DoH 全挂时才用内置兜底 ==")
+        candidates += [ip for ip in FALLBACK_CANDIDATES if ip not in candidates]
+    else:
+        print("== DoH 全部失败，退回内置兜底列表 ==")
+        candidates = list(FALLBACK_CANDIDATES)
+    random.shuffle(candidates)
     alive = []
     # 阶段一：TLS 预检，快速筛掉不可达的 IP
     print("== TLS 预检 ==")
-    for ip in CANDIDATES:
+    for ip in candidates:
         if _tls_ok(ip):
             alive.append(ip)
             print(f"  [ok]   {ip}")
