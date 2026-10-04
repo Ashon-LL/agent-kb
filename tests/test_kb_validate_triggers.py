@@ -100,10 +100,18 @@ class TestHooksCopy(CheckTriggersCase):
         self.assertTrue(any("kb_hooks.py 不在" in n for n in notes))
 
     def test_hooks_missing_in_zcode_env_fails(self):
-        # config.json 在 = ZCode 部署环境，入口脚本丢了是钩子全死，不是「未部署」
+        # config.json 在 + 同目录有 INDEX.md（库根形态）= 入口脚本丢了是钩子全死
+        (self.dir / "INDEX.md").write_text("", encoding="utf-8")
         self.hooks.unlink()
         problems, _ = self.run_check()
         self.assertTrue(any("钩子入口丢失" in p for p in problems))
+
+    def test_hooks_missing_in_mirror_shape_is_note_only(self):
+        # 技能 scripts/ 镜像形态（同目录无 INDEX.md）本来就不含钩子入口，只记 note
+        self.hooks.unlink()
+        problems, notes = self.run_check()
+        self.assertEqual(problems, [])
+        self.assertTrue(any("脚本镜像形态" in n for n in notes))
 
     def test_hooks_drifted_copy_fails(self):
         _write(self.hooks, HOOKS_DRIFT)
@@ -140,7 +148,8 @@ class TestConfigMatcher(CheckTriggersCase):
         self.assertTrue(any("单真相源合法形态" in n for n in notes))
 
     def test_missing_matcher_still_checks_hooks_enabled(self):
-        # 无 matcher 也必须查入口与开关：入口缺失仍要报，不能因 matcher 没了就全跳过
+        # 无 matcher 也必须查入口与开关：库根形态下入口缺失仍要报，不能因 matcher 没了就全跳过
+        (self.dir / "INDEX.md").write_text("", encoding="utf-8")
         self.hooks.unlink()
         _write_config(self.config, None)
         problems, _ = self.run_check()

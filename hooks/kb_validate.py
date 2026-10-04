@@ -439,9 +439,14 @@ def check_triggers(hooks_rel=None, zcode_config=None, copies=None, source=None):
         else:
             notes.append("config.json 未设 matcher——平台不过滤，触发词由 kb_core 正则全权决定（单真相源合法形态）")
         if hook_state == "missing":
-            problems.append(
-                f"[trigger] ZCode 环境但 kb_hooks.py 不在 {hooks_path}"
-                "——钩子入口丢失，开工提醒与沉淀注入全部失效，请重新部署入口脚本")
+            # 只在库根形态（同目录有 INDEX.md）要求入口存在；技能 scripts/ 镜像
+            # 形态（如 ~/.workbuddy/skills/kb/scripts/）本来就不含钩子入口
+            if (hooks_path.parent / INDEX_FILENAME).is_file():
+                problems.append(
+                    f"[trigger] ZCode 环境但 kb_hooks.py 不在 {hooks_path}"
+                    "——钩子入口丢失，开工提醒与沉淀注入全部失效，请重新部署入口脚本")
+            else:
+                notes.append(f"kb_hooks.py 不在 {hooks_path}（脚本镜像形态），跳过入口检查")
         elif hook_state == "unreadable":
             problems.append(f"[trigger] kb_hooks.py 存在但读不出（{hooks_path}），请检查权限/编码")
         elif hook_state == "nomatch":
