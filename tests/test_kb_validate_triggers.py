@@ -132,12 +132,19 @@ class TestConfigMatcher(CheckTriggersCase):
         self.assertEqual(len(problems), 1)
         self.assertIn("matcher 与 kb_core.TRIGGER_PATTERN 不一致", problems[0])
 
-    def test_missing_matcher_is_error_not_skip(self):
-        # 文件在但解析不出 matcher —— 正是 2026-10-04 修正要抓的情形，不得静默跳过
+    def test_missing_matcher_is_legal_single_source(self):
+        # 2026-10-04 用户删掉 matcher 后的合法形态：平台不过滤，触发词由 kb_core 正则全权决定
+        _write_config(self.config, None)
+        problems, notes = self.run_check()
+        self.assertEqual(problems, [])
+        self.assertTrue(any("单真相源合法形态" in n for n in notes))
+
+    def test_missing_matcher_still_checks_hooks_enabled(self):
+        # 无 matcher 也必须查入口与开关：入口缺失仍要报，不能因 matcher 没了就全跳过
+        self.hooks.unlink()
         _write_config(self.config, None)
         problems, _ = self.run_check()
-        self.assertEqual(len(problems), 1)
-        self.assertIn("没有 matcher", problems[0])
+        self.assertTrue(any("钩子入口丢失" in p for p in problems))
 
     def test_config_absent_is_note_only(self):
         self.config.unlink()

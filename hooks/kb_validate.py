@@ -408,44 +408,8 @@ def check_triggers(hooks_rel=None, zcode_config=None, copies=None, source=None):
     # ② config.json：平台要求写死字符串，必须与源一致；解析不出是真故障
     cfg_path = _ZCODE_CONFIG if zcode_config is None else Path(zcode_config)
     cfg_state, cfg = _read_trigger_from_config(zcode_config)
-    if cfg_state == "ok":
-        if _norm_trigger(cfg) != base:
-            problems.append(
-                f"[trigger] config.json:UserPromptSubmit.matcher 与 kb_core.TRIGGER_PATTERN 不一致"
-                f"（源：{'|'.join(base)}｜该处：{'|'.join(_norm_trigger(cfg))}）"
-                "——改 kb_core.py 的 TRIGGER_PATTERN 后必须同步这里")
-        if hook_state == "missing":
-            # config.json 在 = ZCode 部署环境，入口脚本丢了不是「未部署」而是钩子全死
-            problems.append(
-                f"[trigger] ZCode 环境但 kb_hooks.py 不在 {hooks_path}"
-                "——钩子入口丢失，开工提醒与沉淀注入全部失效，请重新部署入口脚本")
-        elif hook_state == "unreadable":
-            problems.append(f"[trigger] kb_hooks.py 存在但读不出（{hooks_path}），请检查权限/编码")
-        elif hook_state == "nomatch":
-            notes.append("kb_hooks.py 未存触发词副本（预期：它 import kb_core）——正确")
-        elif _norm_trigger(hook) != base:
-            problems.append(
-                f"[trigger] kb_hooks.py 里存了一份触发词副本且与 kb_core 不一致"
-                f"（源：{'|'.join(base)}｜该处：{'|'.join(_norm_trigger(hook))}）"
-                "——⛔ 副本就是漂移源，删掉它改用 kb_core.should_trigger_user_prompt()")
-        # ②b) hooks 开关：matcher 完好而 enabled 关闭时，旧版直接全绿（实测盲区）
-        en_state, en_detail = _read_hooks_enabled(zcode_config)
-        if en_state == "master-off":
-            problems.append(f"[trigger] config.json hooks 总开关已关闭：{en_detail}（{cfg_path}）")
-        elif en_state == "entry-off":
-            problems.append(f"[trigger] config.json 钩子条目已停用：{en_detail}（{cfg_path}）")
-        elif en_state == "unreadable":
-            problems.append(f"[trigger] config.json 存在但读不出（{cfg_path}）")
-    else:
-        # 非 ZCode 环境（config.json 不存在/读不出）：入口与开关无从核对，只记 note
-        if cfg_state == "missing":
-            notes.append(f"未找到 {cfg_path}（非 ZCode 环境属正常），跳过配置比对")
-        elif cfg_state == "unreadable":
-            problems.append(f"[trigger] config.json 存在但读不出（{cfg_path}）")
-        elif cfg_state == "nomatch":
-            problems.append(
-                f"[trigger] config.json 的 hooks.events.UserPromptSubmit 里没有 matcher"
-                f"（{cfg_path}）——沉淀钩子不会触发，请检查配置结构")
+    if cfg_state == "missing":
+        notes.append(f"未找到 {cfg_path}（非 ZCode 环境属正常），跳过配置比对")
         if hook_state == "missing":
             notes.append(f"kb_hooks.py 不在 {hooks_path}（该适配器未部署？），跳过比对")
         elif hook_state == "unreadable":
@@ -457,6 +421,42 @@ def check_triggers(hooks_rel=None, zcode_config=None, copies=None, source=None):
                 f"[trigger] kb_hooks.py 里存了一份触发词副本且与 kb_core 不一致"
                 f"（源：{'|'.join(base)}｜该处：{'|'.join(_norm_trigger(hook))}）"
                 "——⛔ 副本就是漂移源，删掉它改用 kb_core.should_trigger_user_prompt()")
+    elif cfg_state == "unreadable":
+        problems.append(f"[trigger] config.json 存在但读不出（{cfg_path}）")
+    else:
+        # config.json 在且结构可读 = ZCode 部署环境。ok = 有 matcher；nomatch = 无 matcher
+        # （2026-10-04 用户删掉 matcher 后的合法形态：平台不过滤、每条消息都调钩子，
+        #   触发词由 kb_core 正则全权决定——词表只剩一处真相源，双副本同步死结消失；
+        #   真源解析失败已单独报 FAIL，此处无需再判。）
+        if cfg_state == "ok":
+            if _norm_trigger(cfg) != base:
+                problems.append(
+                    f"[trigger] config.json:UserPromptSubmit.matcher 与 kb_core.TRIGGER_PATTERN 不一致"
+                    f"（源：{'|'.join(base)}｜该处：{'|'.join(_norm_trigger(cfg))}）"
+                    "——改 kb_core.py 的 TRIGGER_PATTERN 后必须同步这里")
+        else:
+            notes.append("config.json 未设 matcher——平台不过滤，触发词由 kb_core 正则全权决定（单真相源合法形态）")
+        if hook_state == "missing":
+            problems.append(
+                f"[trigger] ZCode 环境但 kb_hooks.py 不在 {hooks_path}"
+                "——钩子入口丢失，开工提醒与沉淀注入全部失效，请重新部署入口脚本")
+        elif hook_state == "unreadable":
+            problems.append(f"[trigger] kb_hooks.py 存在但读不出（{hooks_path}），请检查权限/编码")
+        elif hook_state == "nomatch":
+            notes.append("kb_hooks.py 未存触发词副本（预期：它 import kb_core）——正确")
+        elif cfg_state == "ok" and _norm_trigger(hook) != base:
+            problems.append(
+                f"[trigger] kb_hooks.py 里存了一份触发词副本且与 kb_core 不一致"
+                f"（源：{'|'.join(base)}｜该处：{'|'.join(_norm_trigger(hook))}）"
+                "——⛔ 副本就是漂移源，删掉它改用 kb_core.should_trigger_user_prompt()")
+        # ②b) hooks 开关：matcher 在不在都查——enabled 关闭时钩子全死（实测盲区）
+        en_state, en_detail = _read_hooks_enabled(zcode_config)
+        if en_state == "master-off":
+            problems.append(f"[trigger] config.json hooks 总开关已关闭：{en_detail}（{cfg_path}）")
+        elif en_state == "entry-off":
+            problems.append(f"[trigger] config.json 钩子条目已停用：{en_detail}（{cfg_path}）")
+        elif en_state == "unreadable":
+            problems.append(f"[trigger] config.json 存在但读不出（{cfg_path}）")
 
     # ③ 全机部署副本：统一为硬链接后若被 git 等重写断链，内容漂移必须报出来
     try:
