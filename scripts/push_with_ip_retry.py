@@ -37,12 +37,18 @@ HOST = "github.com"
 # api.github.com 等含 github 字样的其他条目
 _GH_ENTRY = re.compile(r"^\s*\d{1,3}(?:\.\d{1,3}){3}\s+github\.com\s*(?:#.*)?$")
 
-# DoH JSON API 端点（Cloudflare / Google / 阿里，走 443；多源并集防单点污染）
+# DoH JSON API 端点：国内源优先（阿里/腾讯 DNSPod），Cloudflare/Google 兜底；
+# 多源并集防单点污染或单点超时（2026-10-04 实测 1.1.1.1/8.8.8.8 本机超时、阿里可用）
 _DOH_ENDPOINTS = (
-    "https://1.1.1.1/dns-query?name={host}&type=A",
-    "https://8.8.8.8/resolve?name={host}&type=A",
-    "https://223.5.5.5/resolve?name={host}&type=A",
+    "https://223.5.5.5/resolve?name={host}&type=A",        # 阿里
+    "https://223.6.6.6/resolve?name={host}&type=A",        # 阿里备用
+    "https://1.12.12.12/dns-query?name={host}&type=A",     # 腾讯 DNSPod
+    "https://120.53.53.53/dns-query?name={host}&type=A",   # 腾讯 DNSPod 备用
+    "https://1.1.1.1/dns-query?name={host}&type=A",        # Cloudflare
+    "https://8.8.8.8/resolve?name={host}&type=A",          # Google
 )
+# 114DNS 等不支持 DoH JSON 的源，走 UDP 53 手写 A 记录直查
+_UDP_DNS_SERVERS = ("114.114.114.114", "223.5.5.5")
 
 # 兜底：仅当所有 DoH 源都拿不到结果时使用（DoH 源全被阻断的极端情形）
 FALLBACK_CANDIDATES = [
@@ -58,8 +64,42 @@ PROTOCOL_VARIANTS = (         # 先默认，再退回 HTTP 特征更旧的一版
 )
 
 
+def _udp_dns_query(host, server, timeout=4):
+    """手写 A 记录查询（UDP 53），覆盖不支持 DoH JSON 的源（如 114DNS）。零依赖。"""
+    tid = random.randint(0, 65535)
+    q = tid.to_bytes(2, "big") + b"\x01\x00" + b"\x00\x01\x00\x00\x00\x00\x00\x00"
+    q += b"".join(bytes([len(l)]) + l.encode() for l in host.split(".")) + b"\x00"
+    q += b"\x00\x01\x00\x01"  # type A, class IN
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(timeout)
+    try:
+        s.sendto(q, (server, 53))
+        data, _ = s.recvfrom(4096)
+    finally:
+        s.close()
+    idx = 12
+    while data[idx] != 0:          # 跳过问题区的域名
+        idx += data[idx] + 1
+    idx += 5                       # 结尾 0 + qtype(2) + qclass(2)
+    out = []
+    for _ in range(int.from_bytes(data[6:8], "big")):
+        if data[idx] & 0xC0 == 0xC0:   # 名字压缩指针
+            idx += 2
+        else:
+            while data[idx] != 0:
+                idx += data[idx] + 1
+            idx += 1
+        rtype = int.from_bytes(data[idx:idx + 2], "big")
+        rdlen = int.from_bytes(data[idx + 8:idx + 10], "big")
+        rdata = data[idx + 10:idx + 10 + rdlen]
+        idx += 10 + rdlen
+        if rtype == 1 and rdlen == 4:
+            out.append(".".join(str(b) for b in rdata))
+    return out
+
+
 def _fetch_dynamic_ips():
-    """实时解析 github.com 的 A 记录：多 DoH 源并集，零第三方依赖。"""
+    """实时解析 github.com 的 A 记录：DoH JSON 多源 + UDP 直查，并集去重，零第三方依赖。"""
     ips = []
     for tpl in _DOH_ENDPOINTS:
         url = tpl.format(host=HOST)
@@ -73,6 +113,14 @@ def _fetch_dynamic_ips():
                 ips.extend(found)
         except Exception as exc:
             print(f"  [doh]  {tpl.split('/')[2]}: 失败（{exc}）")
+    for server in _UDP_DNS_SERVERS:
+        try:
+            found = _udp_dns_query(HOST, server)
+            if found:
+                print(f"  [udp]  {server}: {', '.join(found)}")
+                ips.extend(found)
+        except Exception as exc:
+            print(f"  [udp]  {server}: 失败（{exc}）")
     return list(dict.fromkeys(ips))  # 去重保序
 
 
