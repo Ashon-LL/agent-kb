@@ -294,7 +294,9 @@ _ZCODE_CONFIG = Path.home() / ".zcode" / "cli" / "config.json"
 # 同日 Kimi Code 卸载，其副本随 ~/.kimi-code 一并移除，不再列）。
 # git checkout / reset 会重写文件从而断链，静默回到多版本漂移 —— 本检查按内容兜底。
 _KB_CORE_COPIES = (
-    Path.home() / ".codebuddy" / "hooks" / "kb_core.py",
+    # CodeBuddy 已卸载、~/.codebuddy 已删（2026-10-04），不再列；
+    # WorkBuddy 经 junction 共享 ~/.agents/skills/kb，其 scripts 副本入库清单：
+    Path.home() / ".workbuddy" / "skills" / "kb" / "scripts" / "kb_core.py",
     Path.home() / ".qoder" / "hooks" / "kb_core.py",
     Path.home() / ".trae-cn" / "hooks" / "agent-kb" / "kb_core.py",
     Path.home() / "Downloads" / "Project" / "trae" / "trae_huanjing"
