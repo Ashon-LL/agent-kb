@@ -91,11 +91,19 @@ class TestHooksCopy(CheckTriggersCase):
         self.assertEqual(problems, [])
         self.assertTrue(any("kb_hooks.py" in n for n in notes))
 
-    def test_hooks_missing_is_note_only(self):
+    def test_hooks_missing_in_non_zcode_env_is_note_only(self):
+        # 非 ZCode 环境（config.json 不存在）：入口缺失无从核对，只记 note
+        self.config.unlink()
         self.hooks.unlink()
         problems, notes = self.run_check()
         self.assertEqual(problems, [])
         self.assertTrue(any("kb_hooks.py 不在" in n for n in notes))
+
+    def test_hooks_missing_in_zcode_env_fails(self):
+        # config.json 在 = ZCode 部署环境，入口脚本丢了是钩子全死，不是「未部署」
+        self.hooks.unlink()
+        problems, _ = self.run_check()
+        self.assertTrue(any("钩子入口丢失" in p for p in problems))
 
     def test_hooks_drifted_copy_fails(self):
         _write(self.hooks, HOOKS_DRIFT)
@@ -177,20 +185,86 @@ class TestDeployCopies(CheckTriggersCase):
 
 
 class TestSourceParsing(CheckTriggersCase):
-    """真源自身解析不出触发词时：无从比对，note 跳过且不产生 problem。"""
+    """真源自身解析不出触发词 = 钩子与校验同时失效，必须报 FAIL（2026-10-04 升级）。"""
 
-    def test_unparseable_source_notes_and_skips(self):
+    def test_unparseable_source_fails(self):
         _write(self.src, SRC_NO_TRIGGER)
-        problems, notes = self.run_check()
-        self.assertEqual(problems, [])
-        self.assertEqual(len(notes), 1)
-        self.assertIn("nomatch", notes[0])
+        problems, _ = self.run_check()
+        self.assertEqual(len(problems), 1)
+        self.assertIn("钩子与校验器同时失效", problems[0])
 
-    def test_missing_source_notes_and_skips(self):
+    def test_missing_source_fails(self):
         self.src.unlink()
-        problems, notes = self.run_check()
+        problems, _ = self.run_check()
+        self.assertTrue(any("解析不出触发词（missing）" in p for p in problems))
+
+
+class TestHooksEnabled(CheckTriggersCase):
+    """②b config.json 的 hooks 开关：matcher 完好而开关关闭时不得全绿。"""
+
+    def _write_config_enabled(self, root_enabled, entry_enabled=None):
+        hook = {"type": "process", "command": "python", "args": ["kb_hooks.py"]}
+        if entry_enabled is not None:
+            hook["enabled"] = entry_enabled
+        cfg = {
+            "hooks": {
+                "enabled": root_enabled,
+                "events": {"UserPromptSubmit": [{"matcher": MATCHER_OK, "hooks": [hook]}]},
+            }
+        }
+        self.config.write_text(json.dumps(cfg, ensure_ascii=False), encoding="utf-8")
+
+    def test_enabled_true_passes(self):
+        self._write_config_enabled(True)
+        problems, _ = self.run_check()
         self.assertEqual(problems, [])
-        self.assertIn("missing", notes[0])
+
+    def test_master_switch_off_fails(self):
+        self._write_config_enabled(False)
+        problems, _ = self.run_check()
+        self.assertTrue(any("hooks 总开关已关闭" in p for p in problems))
+
+    def test_entry_switch_off_fails(self):
+        self._write_config_enabled(True, entry_enabled=False)
+        problems, _ = self.run_check()
+        self.assertTrue(any("enabled=false 的 hook 条目" in p for p in problems))
+
+
+class TestIndexShapes(unittest.TestCase):
+    """validate() 5b：围栏未闭合与路径含空格——regex 全绿但实际检索不到/打不开的形状。"""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.kb = Path(self._tmp.name)
+        for d in ("pitfalls", "tools", "workflow"):
+            (self.kb / d).mkdir()
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def _validate(self, index_text):
+        (self.kb / "INDEX.md").write_text(index_text, encoding="utf-8")
+        import kb_validate
+        return kb_validate.validate(self.kb)
+
+    def test_unclosed_fence_is_reported(self):
+        problems = self._validate(
+            "- [a](pitfalls/a.md) — x\n\n```markdown\n- [示例](x.md) — 围栏内不算\n"
+        )
+        self.assertTrue(any("未闭合的代码围栏" in p for p in problems))
+
+    def test_closed_fence_is_clean(self):
+        (self.kb / "pitfalls" / "a.md").write_text(
+            "---\nname: a\ndescription: d\ntype: pitfall\nsource: s\ndate: 2026-10-04\n"
+            "verified: 2026-10-04\ntopic: methodology\n---\n\n正文\n", encoding="utf-8")
+        problems = self._validate(
+            "- [a](pitfalls/a.md) — x\n\n```markdown\n- [示例](x.md) — 围栏内不算\n```\n"
+        )
+        self.assertEqual(problems, [])
+
+    def test_path_with_space_is_reported(self):
+        problems = self._validate("- [t](pitfalls/my file.md) — x\n")
+        self.assertTrue(any("路径含空格" in p for p in problems))
 
 
 if __name__ == "__main__":

@@ -31,7 +31,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from kb_core import (  # noqa: E402  （同目录 import）
     INDEX_FILENAME,
     _INDEX_ENTRY_RE,
+    _fence_mark,
     count_index_entries,
+    index_entry_lines,
     resolve_kb_path,
 )
 
@@ -125,26 +127,59 @@ def collect_entries(kb):
 
 
 def index_entry_paths(kb):
-    """按 kb_core 同款口径提取索引行路径（跳过代码块）。"""
+    """按 kb_core 同款口径提取索引行路径（围栏处理与计数共用同一实现）。
+
+    顺带检测路径含空格的坏链接形状：regex 能 MATCH、集合比对也能一致通过，
+    但 markdown 渲染必断链——这种「全绿但链接死了」的形状在这里报出来。
+    """
     index = kb / INDEX_FILENAME
     try:
         text = index.read_text(encoding="utf-8")
     except Exception:
         return None
     paths = []
-    in_fence = False
-    for line in text.splitlines():
-        stripped = line.strip()
-        if stripped.startswith("```"):
-            in_fence = not in_fence
-            continue
-        if in_fence:
-            continue
-        if _INDEX_ENTRY_RE.match(line):
-            m = _PATH_IN_LINE_RE.search(line)
-            if m:
-                paths.append(m.group(1).strip())
+    for line in index_entry_lines(text):
+        m = _PATH_IN_LINE_RE.search(line)
+        if m:
+            paths.append(m.group(1).strip())
     return paths
+
+
+def index_fence_open(kb):
+    """INDEX.md 结束时是否仍处于未闭合的代码围栏内。
+
+    未闭合围栏会把其后所有条目行静默吞掉（count 少数 → 检索不到 →
+    SessionStart 可能显示「尚无条目」），必须显式报出来。
+    """
+    index = kb / INDEX_FILENAME
+    try:
+        text = index.read_text(encoding="utf-8")
+    except Exception:
+        return False
+    fence = None
+    for line in text.splitlines():
+        mark = _fence_mark(line.strip())
+        if fence is None:
+            if mark:
+                fence = mark
+        elif mark == fence:
+            fence = None
+    return fence is not None
+
+
+def index_paths_with_spaces(kb):
+    """INDEX 条目行里「(路径 内有空格)」的坏链接形状（regex 认、渲染必断）。"""
+    index = kb / INDEX_FILENAME
+    try:
+        text = index.read_text(encoding="utf-8")
+    except Exception:
+        return []
+    bad = []
+    for line in index_entry_lines(text):
+        m = _PATH_IN_LINE_RE.search(line)
+        if m and re.search(r"\s", m.group(1)):
+            bad.append(line.strip()[:120])
+    return bad
 
 
 def validate(kb_path=None):
@@ -235,6 +270,12 @@ def validate(kb_path=None):
         for p in sorted(idx_set - disk_set):
             err(f"[index] 索引有行但磁盘无对应文件（死链/已删）：{p}")
 
+    # 5b) 围栏与链接形状：regex 全绿但实际检索不到/打不开的形状
+    if index_fence_open(kb):
+        err(f"[index] {INDEX_FILENAME} 存在未闭合的代码围栏——其后所有条目行会被静默跳过（检索不到），请补闭合围栏")
+    for bad_line in index_paths_with_spaces(kb):
+        err(f"[index] 条目行路径含空格（markdown 渲染必断链）：{bad_line}")
+
     return problems
 
 
@@ -309,6 +350,39 @@ def _read_trigger_from_config(path=None):
     return "nomatch", None
 
 
+def _read_hooks_enabled(path=None):
+    """读 ZCode 配置的 hooks 开关状态：(state, detail)。
+
+    state ∈ {missing, unreadable, master-off, entry-off, ok}：
+    - master-off：hooks.enabled=false（全部钩子死，SessionStart 也无）
+    - entry-off：UserPromptSubmit 的某个 hook 条目 enabled=false（只死沉淀注入）
+    实测缺口（2026-10-04）：matcher 完好而开关关闭时旧版直接全绿——开关是
+    config.json:21 与 :74 都真实在用的字段，不查等于漏掉一整类静默死亡。
+    """
+    cfg_path = _ZCODE_CONFIG if path is None else Path(path)
+    try:
+        import json
+        raw = cfg_path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return "missing", None
+    except Exception:
+        return "unreadable", None
+    try:
+        cfg = json.loads(raw)
+        hooks_root = cfg.get("hooks", {})
+        if hooks_root.get("enabled") is False:
+            return "master-off", "hooks.enabled=false（SessionStart 与沉淀注入全部不生效）"
+        for grp in hooks_root.get("events", {}).get("UserPromptSubmit", []):
+            if not isinstance(grp, dict):
+                continue
+            for h in grp.get("hooks", []):
+                if isinstance(h, dict) and h.get("enabled") is False:
+                    return "entry-off", "UserPromptSubmit 里存在 enabled=false 的 hook 条目（沉淀注入不生效）"
+    except Exception:
+        return "unreadable", None
+    return "ok", None
+
+
 def check_triggers(hooks_rel=None, zcode_config=None, copies=None, source=None):
     """返回 (problems, notes)：唯一真相源是 kb_core.TRIGGER_PATTERN；核对 config.json matcher 与钩子是否残留副本。
 
@@ -318,8 +392,11 @@ def check_triggers(hooks_rel=None, zcode_config=None, copies=None, source=None):
     src = Path(__file__).resolve().parent / "kb_core.py" if source is None else Path(source)
     src_state, src_val = _read_trigger_from_source(src)
     if src_state != "ok":
-        # kb_core.py 是唯一来源，它自己解析不了 ⇒ 无从比对，直接跳过
-        notes.append(f"未从 {src} 解析出触发词（{src_state}），跳过比对")
+        # 2026-10-04 升级：真源解析不出触发词曾是「跳过比对仍 PASS」的盲区——
+        # 而此时 hooks 调 get_trigger_pattern 也在同一文件上死掉，两道防线同时失效。
+        problems.append(
+            f"[trigger] 唯一真相源 {src} 解析不出触发词（{src_state}）——"
+            "钩子与校验器同时失效，请立即修复 kb_core.py 的 TRIGGER_PATTERN 定义")
         return problems, notes
 
     base = _norm_trigger(src_val)
@@ -327,34 +404,59 @@ def check_triggers(hooks_rel=None, zcode_config=None, copies=None, source=None):
     # ① kb_hooks.py：它 import kb_core，不存副本 —— "没有正则定义"是**正确状态**
     hooks_path = _HOOKS_REL if hooks_rel is None else Path(hooks_rel)
     hook_state, hook = _read_trigger_from_source(hooks_path)
-    if hook_state == "missing":
-        notes.append(f"kb_hooks.py 不在 {hooks_path}（该适配器未部署？），跳过比对")
-    elif hook_state == "unreadable":
-        problems.append(f"[trigger] kb_hooks.py 存在但读不出（{hooks_path}），请检查权限/编码")
-    elif hook_state == "nomatch":
-        notes.append("kb_hooks.py 未存触发词副本（预期：它 import kb_core）——正确")
-    elif _norm_trigger(hook) != base:
-        problems.append(
-            f"[trigger] kb_hooks.py 里存了一份触发词副本且与 kb_core 不一致"
-            f"（源：{'|'.join(base)}｜该处：{'|'.join(_norm_trigger(hook))}）"
-            "——⛔ 副本就是漂移源，删掉它改用 kb_core.should_trigger_user_prompt()")
 
     # ② config.json：平台要求写死字符串，必须与源一致；解析不出是真故障
     cfg_path = _ZCODE_CONFIG if zcode_config is None else Path(zcode_config)
     cfg_state, cfg = _read_trigger_from_config(zcode_config)
-    if cfg_state == "missing":
-        notes.append(f"未找到 {cfg_path}（非 ZCode 环境属正常），跳过配置比对")
-    elif cfg_state == "unreadable":
-        problems.append(f"[trigger] config.json 存在但读不出（{cfg_path}）")
-    elif cfg_state == "nomatch":
-        problems.append(
-            f"[trigger] config.json 的 hooks.events.UserPromptSubmit 里没有 matcher"
-            f"（{cfg_path}）——沉淀钩子不会触发，请检查配置结构")
-    elif _norm_trigger(cfg) != base:
-        problems.append(
-            f"[trigger] config.json:UserPromptSubmit.matcher 与 kb_core.TRIGGER_PATTERN 不一致"
-            f"（源：{'|'.join(base)}｜该处：{'|'.join(_norm_trigger(cfg))}）"
-            "——改 kb_core.py 的 TRIGGER_PATTERN 后必须同步这里")
+    if cfg_state == "ok":
+        if _norm_trigger(cfg) != base:
+            problems.append(
+                f"[trigger] config.json:UserPromptSubmit.matcher 与 kb_core.TRIGGER_PATTERN 不一致"
+                f"（源：{'|'.join(base)}｜该处：{'|'.join(_norm_trigger(cfg))}）"
+                "——改 kb_core.py 的 TRIGGER_PATTERN 后必须同步这里")
+        if hook_state == "missing":
+            # config.json 在 = ZCode 部署环境，入口脚本丢了不是「未部署」而是钩子全死
+            problems.append(
+                f"[trigger] ZCode 环境但 kb_hooks.py 不在 {hooks_path}"
+                "——钩子入口丢失，开工提醒与沉淀注入全部失效，请重新部署入口脚本")
+        elif hook_state == "unreadable":
+            problems.append(f"[trigger] kb_hooks.py 存在但读不出（{hooks_path}），请检查权限/编码")
+        elif hook_state == "nomatch":
+            notes.append("kb_hooks.py 未存触发词副本（预期：它 import kb_core）——正确")
+        elif _norm_trigger(hook) != base:
+            problems.append(
+                f"[trigger] kb_hooks.py 里存了一份触发词副本且与 kb_core 不一致"
+                f"（源：{'|'.join(base)}｜该处：{'|'.join(_norm_trigger(hook))}）"
+                "——⛔ 副本就是漂移源，删掉它改用 kb_core.should_trigger_user_prompt()")
+        # ②b) hooks 开关：matcher 完好而 enabled 关闭时，旧版直接全绿（实测盲区）
+        en_state, en_detail = _read_hooks_enabled(zcode_config)
+        if en_state == "master-off":
+            problems.append(f"[trigger] config.json hooks 总开关已关闭：{en_detail}（{cfg_path}）")
+        elif en_state == "entry-off":
+            problems.append(f"[trigger] config.json 钩子条目已停用：{en_detail}（{cfg_path}）")
+        elif en_state == "unreadable":
+            problems.append(f"[trigger] config.json 存在但读不出（{cfg_path}）")
+    else:
+        # 非 ZCode 环境（config.json 不存在/读不出）：入口与开关无从核对，只记 note
+        if cfg_state == "missing":
+            notes.append(f"未找到 {cfg_path}（非 ZCode 环境属正常），跳过配置比对")
+        elif cfg_state == "unreadable":
+            problems.append(f"[trigger] config.json 存在但读不出（{cfg_path}）")
+        elif cfg_state == "nomatch":
+            problems.append(
+                f"[trigger] config.json 的 hooks.events.UserPromptSubmit 里没有 matcher"
+                f"（{cfg_path}）——沉淀钩子不会触发，请检查配置结构")
+        if hook_state == "missing":
+            notes.append(f"kb_hooks.py 不在 {hooks_path}（该适配器未部署？），跳过比对")
+        elif hook_state == "unreadable":
+            problems.append(f"[trigger] kb_hooks.py 存在但读不出（{hooks_path}），请检查权限/编码")
+        elif hook_state == "nomatch":
+            notes.append("kb_hooks.py 未存触发词副本（预期：它 import kb_core）——正确")
+        elif _norm_trigger(hook) != base:
+            problems.append(
+                f"[trigger] kb_hooks.py 里存了一份触发词副本且与 kb_core 不一致"
+                f"（源：{'|'.join(base)}｜该处：{'|'.join(_norm_trigger(hook))}）"
+                "——⛔ 副本就是漂移源，删掉它改用 kb_core.should_trigger_user_prompt()")
 
     # ③ 全机部署副本：统一为硬链接后若被 git 等重写断链，内容漂移必须报出来
     try:

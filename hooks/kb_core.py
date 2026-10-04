@@ -18,6 +18,7 @@
 """
 import os
 import re
+import sys
 from pathlib import Path
 
 # 触发词环境变量：分号分隔的正则片段，与内置触发词取并集
@@ -53,6 +54,39 @@ def resolve_kb_path(kb_path=None) -> Path:
     return Path(str(kb_path)).expanduser()
 
 
+def _fence_mark(stripped):
+    """取一行代码围栏的开栏标记（连续反引号/波浪线串），非围栏行返回 None。
+
+    取**完整前导串**而非固定 3 字符：```` 包 ``` 的嵌套里，内层 ``` 不应关闭外层。
+    """
+    if stripped.startswith("`"):
+        return "`" * (len(stripped) - len(stripped.lstrip("`")))
+    if stripped.startswith("~"):
+        return "~" * (len(stripped) - len(stripped.lstrip("~")))
+    return None
+
+
+def index_entry_lines(text):
+    """产出 INDEX.md 文本中的有效条目行（跳过代码围栏内的示例行）。
+
+    这是「什么是条目行」的唯一实现：count_index_entries 与 kb_validate 的
+    索引路径提取都必须走这里，避免两处围栏状态机各自漂移。
+    旧版只认 ``` 且逐行翻转，``` ` ```` 嵌套会被内层提前闭合、~~~ 围栏完全
+    不识别（2026-10-04 实测的漏数/多数形状）。
+    """
+    fence = None  # 当前围栏标记（` 或 ~ 的重复串）；None = 不在围栏内
+    for line in text.splitlines():
+        stripped = line.strip()
+        mark = _fence_mark(stripped)
+        if fence is None:
+            if mark:
+                fence = mark
+            elif _INDEX_ENTRY_RE.match(line):
+                yield line
+        elif mark == fence:
+            fence = None
+
+
 def count_index_entries(kb_path=None) -> int:
     """统计 {kb_path}/INDEX.md 里的条目行数。
 
@@ -64,33 +98,32 @@ def count_index_entries(kb_path=None) -> int:
         text = index.read_text(encoding="utf-8")
     except Exception:
         return 0
-
-    count = 0
-    in_fence = False
-    for line in text.splitlines():
-        stripped = line.strip()
-        # 跳过 ``` 代码块，避免把模板里的示例行算成条目
-        if stripped.startswith("```"):
-            in_fence = not in_fence
-            continue
-        if in_fence:
-            continue
-        if _INDEX_ENTRY_RE.match(line):
-            count += 1
-    return count
+    return sum(1 for _ in index_entry_lines(text))
 
 
 def get_trigger_pattern() -> re.Pattern:
     """内置触发词 + AGENT_KB_TRIGGER 环境变量（分号分隔的正则片段）取并集。
 
-    环境变量里的片段直接参与正则拼接；非法片段被忽略，不影响内置触发词。
+    逐片段校验：非法片段跳过并向 stderr 告警，同批合法片段照常生效——
+    旧版整体 try/except 会在任一片段写坏时静默回退内置词表，把合法扩词一并吞掉，
+    用户以为扩了词实际等于没扩（2026-10-04 实测确认过该行为）。
     """
     fragments = []
     env = os.environ.get(TRIGGER_ENV_VAR, "")
     for frag in env.split(";"):
         frag = frag.strip()
-        if frag:
-            fragments.append(frag)
+        if not frag:
+            continue
+        try:
+            re.compile(frag)
+        except re.error as exc:
+            print(
+                f"[agent-kb] 忽略 {TRIGGER_ENV_VAR} 中的非法正则片段 {frag!r}: {exc}"
+                f"（同批其余片段仍生效）",
+                file=sys.stderr,
+            )
+            continue
+        fragments.append(frag)
 
     if not fragments:
         return TRIGGER_PATTERN
