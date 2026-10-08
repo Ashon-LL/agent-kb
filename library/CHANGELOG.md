@@ -1,5 +1,4 @@
 # 全局经验库 变更日志（kb）
-
 > 自 `INDEX.md` 迁出（2026-09-30 知识库治理 P0-1）。内容为历次沉淀与修订记录，原文照录、未做删减。
 > 索引与条目正文见 `INDEX.md` 与 `{pitfalls,tools,workflow}/`。
 
@@ -12,6 +11,7 @@
 > 2026-09-17 日常沉淀：+1（New API 多密钥 size 必须与 key 段数同步）。**34 → 35**。
 > 2026-09-17 日常沉淀：+1（台账核对必须双向），并补索引上一轮漏登记的 `newapi-multikey-size-must-track-key-count`（此前只有 header 计数、无 INDEX 行）。**实际条目 38**（此前计数偏少 2）。
 > 2026-09-17 日常沉淀：+1（New API 禁用渠道必须同步 abilities.enabled）。**实际条目 39**。
+> 2026-10-08 扩充 `newapi-multikey-size-must-track-key-count`（非新增条目）：实测**原生 API PUT 加钥免重启**——GET 的 key 是掩码须 SQL 只读回填、PUT 载荷禁带 `status`、handler 自动重建 multi_key_size/BLOB、免重启；反转原「必须 SQL+重启」结论，「PUT 不落 name」作废。
 > 2026-09-17 扩充 `newapi-disable-must-sync-abilities`（非新增条目，计数仍 39）：改 `channels.group` 同样要手工重建 abilities（照 `UpdateAbilities` 语义，Tag 取 `channels.tag`）；**INSERT 占位符/列顺序错位会静默产出不可路由行**——字面量 `1` 占错槽，第 4 个占位符落进 `enabled`，全表写成 `enabled=4/5/2/0`，行数看着对但 `WHERE enabled=1` 把整批路由全断。别把"行数对"当验收。
 > 2026-09-17 重大修订：`tools/cnb-npc-dispatch-essentials.md` 补 **api_trigger_npc 派单三字段唯一正解**（任务书塞 `env.userPrompt` 而非 `options.systemPrompt`；`userPrompt` 不可写死；`workMode` 嵌 `npc` 内）+ **派单失败后正确动作**（先查日志根因、修配置、确认无 pending 残留、只派一次）+ **"该停的停"≠"全停"** 判据。事故来源：同一任务连派 4 次（u4o/618/2qo），误判在跑单"卡住"。
 > 2026-09-17 日常沉淀：+1（配置字段名不是规格，读消费它的代码）。**实际条目 40**。
@@ -42,3 +42,16 @@
 > 2026-09-30 作用域修正：+1（**kb 条目的 source 就是作用域边界**）+ **修订 2 条**（`llm-context-window-is-input-plus-output` 与 `dsh-llm-pi-ai-reasoning-config-traps` 第 8 条）——起因是我把 AstrBot 网关的 `input + max_tokens ≤ window` 教训当通用定律套到 DSH/StepFun，去劝阻用户有意设的 1000000；正文作用域块、`description:` 前缀、INDEX 行**三处**都补了标记（只写 body 等于没写，检索只读 description）。另按用户「不要乱动」收口：stepfun2 的思考模式设置、workbuddy 的 image 输入均为有意为之，停止上报为缺陷。**索引行数与 `find` 实测重新对齐（此前 107 vs 108，缺本条）**。
 > 2026-09-30 日常沉淀：+1（**MCP 有没有用看 handler 返回什么** —— 用户问 sequential-thinking 有用吗，读源码判定"传进去的 thought 一个字不回传"= 单向通道零信息量，且描述常驻系统提示每轮烧 token，可删；同族判据：返回值与入参无关 + 只 `console.error` 给人类看 + description 全是祈使句提示词）。
 > 2026-09-30 作用域二次审计：用户指出"模型上下文和最大输出方面是专项却容易被当公用，这只是一个方面还有其他"。按**「description 里有具体数值上限/错误码/返回结构/字段名却没点名平台」**这条标准扫 110 条，**真要修的只有 2 条**：`reasoning-model-max-tokens-shares-budget`（商汤 sensenova-6.8-flash-lite 单模型实测，"content 键整个不存在"疑似该模型特有）、`quota-exhausted-vs-banned-distinguish`（`14018`/`11140` 是 New API 平台业务码，换网关即失效），两条的 description/正文/INDEX 行三处都补了作用域。**同时立下反向规则：单来源≠伪通用**——bind mount、克隆行残留、全量 PUT、P-256 那些本就是通用规律只是碰巧在某项目踩到，硬贴作用域只是噪声。元教训已写进 `kb-entry-source-scope-is-the-boundary`：**修了一条 ≠ 修了这个家族，补标记时必须 grep 同族**。
+
+## 2026-10-03
+- 新增 `pitfalls/report-what-you-did-not-what-you-meant-to-do.md`：把「打算做/以为在做」写成「已生效」的高发场景（后台进程尤其：创建成功≠进程存活），要求汇报「已生效」前另起一次独立验证。
+- 修订 `tools/cnb-workspace-agent-cli.py` 与配套文档：标注 `watch` 必须在前台可见窗口跑（实测后台会哑）。
+
+
+- `tools/cnb-workspace-agent-direct-channel.md` 附**可执行脚本** `tools/cnb-workspace-agent-cli.py`（与 `github-push-ip-retry.py` 同款形态）：reply / history / sessions / keepalive / **watch**（持续盯 + 定期心跳）。
+
+- 新增 `tools/cnb-workspace-agent-direct-channel.md`：直连云环境 AI Agent 的三步法（SSH + `POST :8688/api/v1/sessions/{id}/reply`，⛔ 必带 `x-codebuddy-request: 1`）；附带解掉「工作区无心跳 10 分钟即被回收」与四条相邻事实（工作区 start 不能指定模型 / Dockerfile 构建期无 git 凭据 / 上下文不是仓库根 / 个人环境变量注入顺序）。
+- 新增 `pitfalls/minimal-change-degenerates-into-skipping-real-bugs.md`：最小面原则从「先修哪个」退化成「能不能不修」的许可。
+- 新增 `workflow/two-agent-iteration-via-dispatch-board.md`：派活板三区 + 维护约定；「已完成」表要带维护者复算结论而非只记自报。
+
+> 2026-10-04 机制升级与合并：① 合并同族三副本（`option-write-six-step-iron-law` 并入 `redacted-get-full-put-wipes-secrets`，六步铁律成其标准流程段；知识未删减，newapi 条目补双链导航），**144 → 143**——本库首次按 SKILL.md 新增「合并既有条目」规程执行。② 补记此前漏记批次：2026-10-01 至 10-04 新增 32 条（含 fail-open-except、diff-deployed-vs-vcs、hardlink-unify 等），详见 INDEX 对应日期簇。③ 校验器补三类盲区（hooks 开关/真源损坏/入口缺失），新增 kb_search.py 检索与查重工具。

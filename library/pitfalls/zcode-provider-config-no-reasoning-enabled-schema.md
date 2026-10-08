@@ -91,3 +91,16 @@ tags: [zcode, provider_config, reasoning_effort, schema]
 3. **providerConfigRules.providerRules 的 providerId 与 config.json 里的 providerId 是两套独立体系**——personal provider（new-provider-4 这种）只存在于 providerConfigRules，不会自动出现在 config.json
 
 日期：2026-09-21
+
+## 补充（2026-10-01 CNB 官方端点实测）：values 里即使能选 disabled，网关可能直接 400
+
+有些网关对 `reasoning_effort=disabled` 返 **400**（CNB 官方 workspace 端点实测 `code 11150 "the reasoning effort value is not supported by the current model"`），
+而 `none/low/medium/high/max` 全收。此时 values 里仍可留 `disabled`（UI 语义清晰），
+但 **map 必须把 disabled 译成 none**：
+
+```json
+{"reasoningLevel": {"values": ["disabled","low","medium","high","max"],
+  "map": "reasoningLevel == \"disabled\" ? {\"reasoning_effort\": \"none\"} : {\"reasoning_effort\": reasoningLevel}"}}
+```
+
+⚠ 平铺 `reasoning_effort` 字段有效、嵌套 `reasoning.effort` 无效（同端点实测 rt=0）。给网关配档位前先各档实测一发，别假设 disabled 一定被接受。

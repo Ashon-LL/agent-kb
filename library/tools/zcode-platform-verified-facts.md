@@ -1,10 +1,10 @@
 ---
 name: zcode-platform-verified-facts
-description: ZCode 平台实测事实合集——扩展资源落点语义（skill 分 zcode/agents、记忆仅项目层、MCP 权威在 cli/config.json、AGENTS.md symlink 拒写、新资源需重启）与 hooks 行为（默认关、项目级启动加载+trust 门控、always-allow 会话级旁路）
+description: ZCode 平台实测事实合集——扩展资源落点语义（skill 分 zcode/agents、记忆仅项目层、MCP 权威在 cli/config.json、AGENTS.md symlink 拒写、skill/subagent 需重启但 provider_config.json 热生效）与 hooks 行为（默认关、项目级启动加载+trust 门控、always-allow 会话级旁路）
 type: tool
 source: ailika + default（2026-08~09 本机 Windows 实证）；2026-09-15 合并 hooks 与资源落点两条
 date: 2026-09-15
-verified: 2026-09-15
+verified: 2026-10-06
 topic: mcp, zcode
 ---
 
@@ -17,6 +17,7 @@ topic: mcp, zcode
 - **MCP 权威位置是 `~/.zcode/cli/config.json` 的 `mcp.servers`**；`~/.agents/mcp.json` 只是同作用域回退，**config.json 里一旦有 server 段，整个回退文件被忽略**——改 mcp.json 不生效。
 - **AGENTS.md 可能是符号链接**：如 `cloudflare_temp_email/AGENTS.md → CLAUDE.md`，Edit/Write 拒写"穿 symlink"，须改真实目标文件。
 - **自定义子代理/技能需重启会话**才被识别（启动时扫描缓存）。
+- **`~/.zcode/v2/provider_config.json` 改动热生效、无需重启 ZCode**（2026-10-06 用户实证，推翻旧误解）：改 `modelConfigRules.providerModelRules`（如某 provider 的 `maxOutputTokens.max`）保存后即自动应用，**不存在"重启前仍是旧值"的观察窗**——别再把"没重启"当修复未生效的借口。注意与上面 skill/subagent 相反：那两类资源才需要重启会话。
 - 全局 `~/.zcode/AGENTS.md` 每次会话注入，是唯一可靠的"跨项目规则"落点。
 
 ## 二、hooks 行为
