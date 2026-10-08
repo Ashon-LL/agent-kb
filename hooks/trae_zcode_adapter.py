@@ -75,6 +75,7 @@ from adapter_base import (  # noqa: E402
     run_adapter,
 )
 from kb_core import (  # noqa: E402
+    stop_reminder,
     session_start_reminder,
     should_trigger_user_prompt,
     user_prompt_reminder,
@@ -101,6 +102,8 @@ def main() -> int:
         if not should_trigger_user_prompt(prompt):
             return 0
         emit(EVENT_USER_PROMPT, user_prompt_reminder())
+    elif event == "Stop":
+        emit("Stop", stop_reminder())
     return 0
 
 

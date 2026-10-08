@@ -57,6 +57,9 @@ def main():
             return 0
         debug("UserPromptSubmit 注入沉淀规程")
         emit(ev, kb_core.user_prompt_reminder() if kb_core else MSG_DEGRADED)
+    elif ev == "Stop":
+        debug("Stop -> kb_core.stop_reminder()")
+        emit(ev, kb_core.stop_reminder() if kb_core else MSG_DEGRADED)
     return 0
 
 

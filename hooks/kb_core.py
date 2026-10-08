@@ -135,6 +135,19 @@ def get_trigger_pattern() -> re.Pattern:
         return TRIGGER_PATTERN
 
 
+def stop_reminder() -> str:
+    """Stop 事件注入：会话收尾的沉淀提醒（用户 2026-10-04 注册 Stop 钩子）。
+
+    开工有开工提醒、触发词有沉淀规程，唯独「收尾」没有任何提示——任务做完最容易
+    忘记把新教训回流。这里补上最后一道：不判断该不该沉淀，只提醒一遍。
+    """
+    return (
+        f"【kb 收尾钩子】本次会话若有**跨项目可复用**的教训/经验（踩坑与修法、"
+        f"最佳实践），按 kb 技能规程沉淀进 {default_kb_path()}；"
+        f"写入后必须见 kb_validate [PASS]。项目专属状态留项目 memory，不必入库。"
+    )
+
+
 def session_start_reminder(kb_path=None) -> str:
     """SessionStart 时注入的开工提醒。
 
