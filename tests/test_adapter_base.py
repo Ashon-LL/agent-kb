@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -30,22 +31,42 @@ ADAPTERS = [
 ]
 
 
+def _tmp_kb(name: str) -> Path:
+    """跨平台临时 kb 路径（不创建）。
+
+    不要硬编码 `/tmp/x`：Windows 上 Path 会渲染成 `\\tmp\\x`，断言真实路径时必失败
+    （2026-10-04 本地 20 个假失败即此）。
+    """
+    return Path(tempfile.gettempdir()) / name
+
+
+def _flat(s: str) -> str:
+    """抹平反斜杠再断言。
+
+    注入文本经 json.dumps 输出时，路径里的 `\\` 会被转义成 `\\\\`；kimi 适配器又是纯文本。
+    两边统一去掉反斜杠后比较，跨平台、跨输出格式都稳。
+    """
+    return s.replace("\\", "")
+
+
 class TestAdapterBase(unittest.TestCase):
     def test_env_path_beats_argv(self):
-        os.environ["AGENT_KB_PATH"] = "/tmp/env-kb"
+        env_kb = str(_tmp_kb("env-kb"))
+        os.environ["AGENT_KB_PATH"] = env_kb
         try:
             self.assertEqual(
-                adapter_base.resolve_kb_path(["x.py", "/tmp/argv-kb"]),
-                Path("/tmp/env-kb"),
+                adapter_base.resolve_kb_path(["x.py", str(_tmp_kb("argv-kb"))]),
+                Path(env_kb),
             )
         finally:
             del os.environ["AGENT_KB_PATH"]
 
     def test_argv_beats_default(self):
         os.environ.pop("AGENT_KB_PATH", None)
+        argv_kb = str(_tmp_kb("argv-kb"))
         self.assertEqual(
-            adapter_base.resolve_kb_path(["x.py", "/tmp/argv-kb"]),
-            Path("/tmp/argv-kb"),
+            adapter_base.resolve_kb_path(["x.py", argv_kb]),
+            Path(argv_kb),
         )
 
     def test_default_is_home_based(self):
@@ -78,7 +99,7 @@ class TestAdapterBase(unittest.TestCase):
 
 def _run(adapter: str, payload: object, env_extra: dict | None = None):
     env = dict(os.environ)
-    env["AGENT_KB_PATH"] = "/tmp/adapter-test-kb"
+    env["AGENT_KB_PATH"] = str(_tmp_kb("adapter-test-kb"))
     if env_extra:
         env.update(env_extra)
     raw = payload if isinstance(payload, str) else json.dumps(payload)
@@ -113,9 +134,9 @@ class TestAllAdapters(unittest.TestCase):
             with self.subTest(adapter=a):
                 r = _run(a, {"hook_event_name": "SessionStart"})
                 self.assertEqual(r.returncode, 0)
-                out = r.stdout.decode("utf-8")
+                out = _flat(r.stdout.decode("utf-8"))
                 self.assertIn("kb", out)
-                self.assertIn("/tmp/adapter-test-kb", out)
+                self.assertIn(_flat(str(_tmp_kb("adapter-test-kb"))), out)
 
     def test_unrelated_event_is_silent(self):
         for a in ADAPTERS:
@@ -153,16 +174,19 @@ class TestAllAdapters(unittest.TestCase):
         for a in ADAPTERS:
             with self.subTest(adapter=a):
                 env = dict(os.environ)
-                env["AGENT_KB_PATH"] = "/tmp/env-wins"
+                env_kb = _tmp_kb("env-wins")
+                argv_kb = _tmp_kb("argv-loses")
+                env["AGENT_KB_PATH"] = str(env_kb)
                 r = subprocess.run(
-                    [sys.executable, str(HOOKS_DIR / f"{a}.py"), "/tmp/argv-loses"],
+                    [sys.executable, str(HOOKS_DIR / f"{a}.py"), str(argv_kb)],
                     input=json.dumps({"hook_event_name": "SessionStart"}).encode(),
                     capture_output=True,
                     env=env,
                     timeout=20,
                 )
-                self.assertIn(b"/tmp/env-wins", r.stdout)
-                self.assertNotIn(b"/tmp/argv-loses", r.stdout)
+                out = _flat(r.stdout.decode("utf-8"))
+                self.assertIn(_flat(str(env_kb)), out)
+                self.assertNotIn(_flat(str(argv_kb)), out)
 
 
 class TestPlatformSpecifics(unittest.TestCase):

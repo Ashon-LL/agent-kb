@@ -50,6 +50,51 @@ def _has_pwsh() -> bool:
     return shutil.which("pwsh") is not None
 
 
+def _bash() -> str | None:
+    """显式解析 bash 可执行文件路径。
+
+    ⚠️ 不要裸用 "bash"：Windows 上 subprocess 会按 PATH 解析到 System32\\bash.exe
+    （WSL 的 Linux bash），它不认 `C:/...` 路径，报 `No such file or directory`(127)；
+    shutil.which 给的是 Git Bash（MINGW64），两者不兼容。显式取 which 结果即可。
+    """
+    return shutil.which("bash")
+
+
+def _posix(p: Path) -> str:
+    """给 bash 用的路径：Windows 上 str(Path) 是反斜杠，bash 会把 \\ 当转义吃掉
+    （`C:\\a\\b` → `C:ab`，报 No such file or directory）。as_posix() 的 `C:/a/b`
+    在 Git Bash 下可用。"""
+    return p.as_posix()
+
+
+def _decode(b: bytes) -> str:
+    """容错解码子进程输出。
+
+    bash 输出 UTF-8；Windows 的 pwsh 经管道输出走系统 OEM 代码页（GBK/936），
+    直接 utf-8 解码会 UnicodeDecodeError（2026-10-04 本地最后一个假失败）。
+    先试 UTF-8，失败退回本地首选编码。
+    """
+    try:
+        return b.decode("utf-8")
+    except UnicodeDecodeError:
+        import locale
+        return b.decode(locale.getpreferredencoding(False), errors="replace")
+
+
+def _listed_platforms(out: str) -> set:
+    """从 -l/-List 输出里抽出平台名（行形如 `  trae  -> <路径>`）。"""
+    found = set()
+    for line in out.splitlines():
+        for p in PLATFORMS:
+            if p in line:
+                found.add(p)
+    return found
+
+
+_BASH = _bash()
+_NEED_BASH = unittest.skipUnless(_BASH, "bash 不可用，跳过 install.sh 测试")
+
+
 class InstallerTestBase:
     # 子类填：命令行前缀 + 平台参数标志 + 库路径标志
     script_cmd: list[str] = []
@@ -126,12 +171,13 @@ class InstallerTestBase:
             self.assertNotEqual(r.returncode, 0)
 
 
+@_NEED_BASH
 class TestInstallSh(InstallerTestBase, unittest.TestCase):
-    script_cmd = ["bash", str(INSTALL_SH)]
+    script_cmd = [_BASH or "bash", _posix(INSTALL_SH)]
 
     def test_list_covers_every_platform(self):
         r = subprocess.run(
-            ["bash", str(INSTALL_SH), "-l"],
+            [_BASH, _posix(INSTALL_SH), "-l"],
             capture_output=True, timeout=60, cwd=str(REPO_ROOT),
         )
         out = r.stdout.decode("utf-8")
@@ -149,14 +195,20 @@ class TestInstallPs1(unittest.TestCase):
     SCRIPT = ["pwsh", "-NoProfile", "-File", str(INSTALL_PS1)]
 
     def test_ps1_and_sh_list_outputs_match(self):
-        sh = subprocess.run(["bash", str(INSTALL_SH), "-l"],
+        """两个安装脚本的 -l/-List 必须覆盖同一批平台。
+
+        只比平台名，不比路径字符串：Windows 上 bash 输出 MSYS 路径 `/c/Users/...`、
+        pwsh 输出 Windows 路径 `C:\\Users\\...`，逐字符比必然不等（2026-10-04）。
+        测试意图是「两个脚本支持面一致」，平台集合才是该断言的契约。
+        """
+        sh = subprocess.run([_BASH, _posix(INSTALL_SH), "-l"],
                             capture_output=True, timeout=60, cwd=str(REPO_ROOT))
         ps = subprocess.run([*self.SCRIPT, "-List"],
                             capture_output=True, timeout=120, cwd=str(REPO_ROOT))
-        self.assertEqual(
-            [l.rstrip() for l in sh.stdout.decode("utf-8").splitlines()],
-            [l.rstrip() for l in ps.stdout.decode("utf-8").splitlines()],
-        )
+        sh_platforms = _listed_platforms(_decode(sh.stdout))
+        ps_platforms = _listed_platforms(_decode(ps.stdout))
+        self.assertEqual(sh_platforms, ps_platforms)
+        self.assertEqual(sh_platforms, set(PLATFORMS))
 
     def test_ps1_installs_all_platforms(self):
         for platform in PLATFORMS:
