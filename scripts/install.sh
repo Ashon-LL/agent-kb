@@ -31,6 +31,20 @@ if [ -z "$HOME_DIR" ]; then
   exit 2
 fi
 
+# MSYS/Cygwin（Git Bash）下 $HOME 等是 /c/Users/... 的 MSYS 路径，但**写进平台配置的
+# 值会被 Windows 原生程序（Trae/ZCode/…）读取**，必须是 C:\Users\... 原生格式，
+# 否则 hook 命令根本起不来。纯 Linux/macOS 无 cygpath，原样返回。
+# 列表输出与配置生成统一走这里，保证与 install.ps1 的输出一致。
+to_native() {
+  # 空路径直接返回空（manual 型平台没有 CONFIG_FILE，cygpath 对空串会报错）
+  [ -z "$1" ] && return 0
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -w -- "$1"
+  else
+    printf '%s' "$1"
+  fi
+}
+
 PLATFORM="trae"
 KB_PATH=""
 FORCE=0
@@ -133,6 +147,9 @@ set_platform() {
       exit 1
       ;;
   esac
+  # 配置里要写的路径统一转 Windows 原生格式（与 install.ps1 一致，见 to_native 注释）
+  HOOKS_DST_NATIVE="$(to_native "$HOOKS_DST")"
+  CONFIG_FILE_NATIVE="$(to_native "$CONFIG_FILE")"
 }
 
 # ------------------------------------------------------------------ -l 列表
@@ -142,7 +159,7 @@ if [ "$LIST_ONLY" -eq 1 ]; then
     set_platform "$p"
     suffix=""
     [ "$MANUAL" -eq 1 ] && suffix="（需手工注册 hook）"
-    printf '  %-10s -> %s %s\n' "$p" "$HOOKS_DST" "$suffix"
+    printf '  %-10s -> %s %s\n' "$p" "$HOOKS_DST_NATIVE" "$suffix"
   done
   exit 0
 fi
@@ -163,6 +180,8 @@ if [ -z "$PYTHON" ]; then
   echo "[WARN] 找不到 python，请手动编辑生成配置里的 PYTHON_EXECUTABLE" >&2
   PYTHON="python3"
 fi
+# 写进配置的解释器路径同样要原生格式
+PYTHON_NATIVE="$(to_native "$PYTHON")"
 
 # ------------------------------------------------------------------ 1. Skill
 SKILL_DST="$HOME_DIR/.agents/skills/kb"
@@ -194,34 +213,46 @@ if [ "$MANUAL" -eq 1 ]; then
   case "$PLATFORM" in
     kimi)
       printf '       写法：TOML，追加到 ~/.kimi-code/config.toml 的 [[hooks]] 数组\n'
-      printf '       command = "%s %s/kimi_adapter.py"\n' "$PYTHON" "$HOOKS_DST"
+      printf '       command = "%s %s/kimi_adapter.py"\n' "$PYTHON_NATIVE" "$HOOKS_DST_NATIVE"
       ;;
     opencode)
       printf '       写法：JS 插件 shell 调起桥接脚本\n'
-      printf '       shell: "%s" "%s/opencode_adapter.py"\n' "$PYTHON" "$HOOKS_DST"
+      printf '       shell: "%s" "%s/opencode_adapter.py"\n' "$PYTHON_NATIVE" "$HOOKS_DST_NATIVE"
       ;;
     openclaw)
       printf '       写法：TS 插件（definePluginEntry）注册 session_start / before_prompt_build\n'
-      printf '       shell: "%s" "%s/openclaw_adapter.py"\n' "$PYTHON" "$HOOKS_DST"
+      printf '       shell: "%s" "%s/openclaw_adapter.py"\n' "$PYTHON_NATIVE" "$HOOKS_DST_NATIVE"
       ;;
   esac
 else
   TEMPLATE_PATH="$TEMPLATES_DIR/$TEMPLATE"
   if [ -f "$TEMPLATE_PATH" ]; then
-    # 占位符替换
-    body="$(sed -e "s|PYTHON_EXECUTABLE|$PYTHON|g" -e "s|HOOKS_DIR|$HOOKS_DST|g" "$TEMPLATE_PATH")"
-
-    # 剥离模板里的 "_comment"（给人看的文档字段，不该进平台真实配置）
+    # ⚠️ 顺序关键：先用 sed 在模板**文本**上替换占位符会产出非法 JSON
+    # （路径含 `C:\Program Files\...`，`\P` 是无效转义——2026-10-04 实测）。
+    # 正确顺序：解析模板 JSON → 在对象里替换字符串值 → 序列化（转义交给序列化器）。
+    # 这里用 python3 完成（install.sh 本就用 python3 处理配置）；无 python3 时退回 sed。
     if command -v python3 >/dev/null 2>&1; then
-      stripped="$(printf '%s' "$body" | python3 -c '
+      body="$(python3 -c '
 import json, sys
-try:
-    d = json.load(sys.stdin)
-except Exception:
-    sys.exit(1)
+tpl_path, py, hooks, cfg_key = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+with open(tpl_path, encoding="utf-8") as fh:
+    d = json.load(fh)
 d.pop("_comment", None)
-print(json.dumps(d, ensure_ascii=False, indent=2))
-' 2>/dev/null)" && [ -n "$stripped" ] && body="$stripped"
+
+def repl(node):
+    if isinstance(node, str):
+        return node.replace("PYTHON_EXECUTABLE", py).replace("HOOKS_DIR", hooks)
+    if isinstance(node, list):
+        return [repl(x) for x in node]
+    if isinstance(node, dict):
+        return {k: repl(v) for k, v in node.items()}
+    return node
+
+print(json.dumps(repl(d), ensure_ascii=False, indent=2))
+' "$TEMPLATE_PATH" "$PYTHON_NATIVE" "$HOOKS_DST_NATIVE" hooks 2>/dev/null)"
+      [ -z "$body" ] && body="$(sed -e "s|PYTHON_EXECUTABLE|$PYTHON_NATIVE|g" -e "s|HOOKS_DIR|$HOOKS_DST_NATIVE|g" "$TEMPLATE_PATH")"
+    else
+      body="$(sed -e "s|PYTHON_EXECUTABLE|$PYTHON_NATIVE|g" -e "s|HOOKS_DIR|$HOOKS_DST_NATIVE|g" "$TEMPLATE_PATH")"
     fi
 
     mkdir -p "$(dirname -- "$CONFIG_FILE")"
@@ -243,18 +274,18 @@ cur["hooks"] = tpl.get("hooks", {})
 with open(path, "w", encoding="utf-8") as fh:
     json.dump(cur, fh, ensure_ascii=False, indent=2)
 ' "$CONFIG_FILE" 2>/dev/null; then
-          printf '[OK] hooks 已合并进 -> %s\n' "$CONFIG_FILE"
-          printf '     （保留了原有 settings.json 其他配置，备份 %s.bak）\n' "$CONFIG_FILE"
+          printf '[OK] hooks 已合并进 -> %s\n' "$CONFIG_FILE_NATIVE"
+          printf '     （保留了原有 settings.json 其他配置，备份 %s.bak）\n' "$CONFIG_FILE_NATIVE"
         else
           printf '[WARN] 合并失败，改为整文件写入（原文件已备份 .bak）\n'
           printf '%s\n' "$body" > "$CONFIG_FILE"
         fi
       else
         printf '%s\n' "$body" > "$CONFIG_FILE"
-        printf '[OK] 配置已生成 -> %s\n' "$CONFIG_FILE"
+        printf '[OK] 配置已生成 -> %s\n' "$CONFIG_FILE_NATIVE"
       fi
     else
-      printf '[SKIP] %s 已存在，加 -f 覆盖/合并\n' "$CONFIG_FILE"
+      printf '[SKIP] %s 已存在，加 -f 覆盖/合并\n' "$CONFIG_FILE_NATIVE"
       printf '       模板路径：%s\n' "$TEMPLATE_PATH"
     fi
   fi
@@ -275,10 +306,10 @@ fi
 
 # ------------------------------------------------------------------ 完成
 printf '\n=== 安装完成 ===\n'
-printf '目标路径：%s\n' "$HOOKS_DST"
+printf '目标路径：%s\n' "$HOOKS_DST_NATIVE"
 printf '下一步  ：重启 Agent 会话让新 hook/skill 生效\n'
 if [ "$MANUAL" -eq 0 ] && [ -n "$CONFIG_FILE" ]; then
-  printf '          配置文件：%s\n' "$CONFIG_FILE"
+  printf '          配置文件：%s\n' "$CONFIG_FILE_NATIVE"
 fi
 printf '          覆盖默认库路径：export AGENT_KB_PATH=<dir>\n'
 printf '          排查问题      ：export AGENT_KB_DEBUG=1 看 stderr\n'

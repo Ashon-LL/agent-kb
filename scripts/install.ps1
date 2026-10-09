@@ -196,21 +196,27 @@ if ($cfg.Manual) {
 else {
     $TemplatePath = Join-Path $RepoRoot "templates/$($cfg.Template)"
     if (Test-Path $TemplatePath) {
+        # ⚠️ 路径替换的转义陷阱（2026-10-04 实测踩到）：
+        #   - 直接 `$body.Replace("HOOKS_DIR", $HooksDst)` 会把 `C:\Users\...` 原样塞进
+        #     JSON 文本 ⇒ `\U`/`\P` 非法转义 ⇒ ConvertFrom-Json 失败 / 产出非法 JSON。
+        #   - 递归改 PS 对象属性又太脆（数组/PSCustomObject 混层易改坏）。
+        # 采用：先把值做 JSON 转义（\ → \\）再文本替换，然后解析→序列化归一化。
         $body = Get-Content $TemplatePath -Raw
-        $body = $body.Replace("PYTHON_EXECUTABLE", $Python)
-        $body = $body.Replace("HOOKS_DIR", $HooksDst)
-
-        # 模板里的 "_comment" 是给人看的文档字段，不能写进平台真实配置
+        $pyEsc = $Python.Replace("\", "\\")
+        $hooksEsc = $HooksDst.Replace("\", "\\")
+        $body = $body.Replace("PYTHON_EXECUTABLE", $pyEsc).Replace("HOOKS_DIR", $hooksEsc)
         try {
             $parsed = $body | ConvertFrom-Json
-            if ($parsed.PSObject.Properties.Name -contains "_comment") {
-                $parsed.PSObject.Properties.Remove("_comment")
-                $body = $parsed | ConvertTo-Json -Depth 20
-            }
         }
         catch {
-            Write-Host "[WARN] 模板 JSON 解析失败，按原文写入" -ForegroundColor Yellow
+            Write-Host "[ERROR] 模板 JSON 无法解析：$TemplatePath" -ForegroundColor Red
+            Write-Host "        $($_.Exception.Message)" -ForegroundColor Red
+            exit 2
         }
+        if ($parsed.PSObject.Properties.Name -contains "_comment") {
+            $parsed.PSObject.Properties.Remove("_comment")
+        }
+        $templateObj = $parsed
 
         $ConfigFile = $cfg.ConfigFile
         $ConfigDir = Split-Path -Parent $ConfigFile
@@ -220,26 +226,31 @@ else {
 
         $exists = Test-Path $ConfigFile
         if (-not $exists -or $Force) {
+            # ⚠️ 必须用 ConvertTo-Json 序列化后写入，不能 Set-Content $body 原文：
+            # 模板替换出的路径含 `C:\Program Files\...`，直接写会产出**非法 JSON**
+            # （\P 是无效转义，2026-10-04 实测 install.ps1 生成 trae 配置即坏）。
+            # 下面统一走对象 → ConvertTo-Json，转义由序列化器保证。
+            $templateObj = $body | ConvertFrom-Json
             if ($cfg.Merge -and $exists -and $Force) {
                 # merge 型：解析已有 settings.json，只替换 hooks 子树，保留其他键
                 try {
                     $existing = Get-Content $ConfigFile -Raw | ConvertFrom-Json
-                    $template = $body | ConvertFrom-Json
+                    Copy-Item $ConfigFile "$ConfigFile.bak" -Force
                     $existing | Add-Member -NotePropertyName "hooks" `
-                                          -NotePropertyValue $template.hooks -Force
+                                          -NotePropertyValue $templateObj.hooks -Force
                     $merged = $existing | ConvertTo-Json -Depth 20
                     Set-Content -Path $ConfigFile -Value $merged -Encoding UTF8
                     Write-Host "[OK] hooks 已合并进 -> $ConfigFile" -ForegroundColor Green
-                    Write-Host "     （保留了原有 settings.json 其他配置）" -ForegroundColor DarkGray
+                    Write-Host "     （保留了原有 settings.json 其他配置，备份 .bak）" -ForegroundColor DarkGray
                 }
                 catch {
                     Write-Host "[WARN] 合并失败，改为整文件写入（原文件已备份 .bak）" -ForegroundColor Yellow
                     Copy-Item $ConfigFile "$ConfigFile.bak" -Force
-                    Set-Content -Path $ConfigFile -Value $body -Encoding UTF8
+                    $templateObj | ConvertTo-Json -Depth 20 | Set-Content -Path $ConfigFile -Encoding UTF8
                 }
             }
             else {
-                Set-Content -Path $ConfigFile -Value $body -Encoding UTF8
+                $templateObj | ConvertTo-Json -Depth 20 | Set-Content -Path $ConfigFile -Encoding UTF8
                 Write-Host "[OK] 配置已生成 -> $ConfigFile" -ForegroundColor Green
             }
         }

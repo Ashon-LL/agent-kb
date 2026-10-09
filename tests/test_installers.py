@@ -70,15 +70,16 @@ def _posix(p: Path) -> str:
 def _decode(b: bytes) -> str:
     """容错解码子进程输出。
 
-    bash 输出 UTF-8；Windows 的 pwsh 经管道输出走系统 OEM 代码页（GBK/936），
-    直接 utf-8 解码会 UnicodeDecodeError（2026-10-04 本地最后一个假失败）。
-    先试 UTF-8，失败退回本地首选编码。
+    bash 输出 UTF-8；Windows 的 pwsh 经管道输出走系统 OEM 代码页（GBK/936）。
+    ⚠️ 不能靠 locale.getpreferredencoding()——Python 3.15 起默认 UTF-8 模式，它返回
+    'utf-8'，对 GBK 字节无效（2026-10-04 实测）。按候选编码链依次尝试。
     """
-    try:
-        return b.decode("utf-8")
-    except UnicodeDecodeError:
-        import locale
-        return b.decode(locale.getpreferredencoding(False), errors="replace")
+    for enc in ("utf-8", "gbk", "cp936", "latin-1"):
+        try:
+            return b.decode(enc)
+        except UnicodeDecodeError:
+            continue
+    return b.decode("utf-8", errors="replace")
 
 
 def _listed_platforms(out: str) -> set:
@@ -195,20 +196,22 @@ class TestInstallPs1(unittest.TestCase):
     SCRIPT = ["pwsh", "-NoProfile", "-File", str(INSTALL_PS1)]
 
     def test_ps1_and_sh_list_outputs_match(self):
-        """两个安装脚本的 -l/-List 必须覆盖同一批平台。
+        """两个安装脚本的 -l/-List 必须**逐行一致**（含路径格式）。
 
-        只比平台名，不比路径字符串：Windows 上 bash 输出 MSYS 路径 `/c/Users/...`、
-        pwsh 输出 Windows 路径 `C:\\Users\\...`，逐字符比必然不等（2026-10-04）。
-        测试意图是「两个脚本支持面一致」，平台集合才是该断言的契约。
+        2026-10-04 统一后两边都输出 Windows 原生路径（install.sh 走 cygpath -w），
+        故可直接逐行比对；若哪天又分叉（MSYS /c/... vs C:\\...），此断言会抓住。
+        中文表头在 Windows 上 pwsh 输出走 GBK，用 _decode 容错解码。
         """
         sh = subprocess.run([_BASH, _posix(INSTALL_SH), "-l"],
                             capture_output=True, timeout=60, cwd=str(REPO_ROOT))
         ps = subprocess.run([*self.SCRIPT, "-List"],
                             capture_output=True, timeout=120, cwd=str(REPO_ROOT))
-        sh_platforms = _listed_platforms(_decode(sh.stdout))
-        ps_platforms = _listed_platforms(_decode(ps.stdout))
-        self.assertEqual(sh_platforms, ps_platforms)
-        self.assertEqual(sh_platforms, set(PLATFORMS))
+        sh_lines = [l.rstrip() for l in _decode(sh.stdout).splitlines()]
+        ps_lines = [l.rstrip() for l in _decode(ps.stdout).splitlines()]
+        # 表头行可能因编码不同而有差异，比对平台行（含路径）必须一致
+        sh_body = [l for l in sh_lines if "->" in l]
+        ps_body = [l for l in ps_lines if "->" in l]
+        self.assertEqual(sh_body, ps_body)
 
     def test_ps1_installs_all_platforms(self):
         for platform in PLATFORMS:
