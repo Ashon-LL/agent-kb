@@ -158,7 +158,12 @@ def session_start_reminder(kb_path=None) -> str:
     # 就绪与否由 count 决定，但**不把数字印进注入文本**：那个数字随增删漂移，
     # 且 2026-10-02 之前两份拷贝正是因它不一致才分叉。需要条数随时查
     # count_index_entries()，kb_validate.py 就在用。
-    shown = "~/.agents/kb/" if resolved == default_kb_path() else f"{resolved}/"
+    # 显示真实路径：resolved 已是 resolve_kb_path() 的结果，直接印它。
+    # 旧版写 `resolved == default_kb_path()` 判断——但 default_kb_path() 自己就读
+    # AGENT_KB_PATH，两边恒等 ⇒ env 覆盖时文案仍印字面 "~/.agents/kb/"，
+    # 用户以为在真库操作、实际读写的却是 env 指向的库（2026-10-04 分析已标记，
+    # 本次 CI 红点正是它：env 覆盖后真实路径必须可见）。
+    shown = f"{resolved}/"
     if count:
         head = f"全局经验库 {shown} 就绪。"
     else:
