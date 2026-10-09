@@ -1,10 +1,10 @@
 ---
 name: newapi-rc26-token-crud-shapes
-description: New API rc.26 令牌 CRUD 三坑——POST /api/token/ 成功但 data 为 null 拿不到 key、列表接口返回掩码 key、DELETE /api/token/{id} 读错参数恒假失败；真值只在 tokens.key
+description: New API rc.26 令牌 CRUD 形状——POST /api/token/ 成功但 data 为 null 拿不到 key、列表接口返回掩码 key、DELETE /api/token/{id} 可用且软删立即生效（旧「恒假失败」结论已证伪）；真值只在 tokens.key
 type: pitfall
-source: APIShow/New API rc.26（2026-09-28 令牌 CRUD 三坑）
+source: APIShow/New API rc.26（2026-09-28 令牌 CRUD 三坑；2026-10-09 修正 DELETE 结论）
 date: 2026-09-28
-verified: 2026-09-28
+verified: 2026-10-09
 topic: api-gateway
 
 ---
@@ -49,19 +49,34 @@ FROM tokens WHERE id = ?;
 
 **幂等脚本的正确写法**：先 `GET` 列表按 `name` 查是否已存在 → 已存在就复用并从 DB 取真值 → 不存在才 `POST`；`POST` 后再 `GET` 列表反查 id、再从 DB 取 key。断言只断形态（长度、前缀字符集），**不要写 `assert key.startswith("sk-")`** —— 库里就是没有前缀，这一步会让你整脚本 abort 在已成功的写操作之后。
 
-## DELETE /api/token/{id} —— 读错参数，恒假失败
+## DELETE /api/token/{id} —— **可用**（2026-10-09 源码+实测双重证伪旧结论）
+
+⚠️ **本条曾记为「读错参数、恒假失败」，是错的，已推翻。** 旧结论的成因：对一个**已软删**的 token 重试，`First()` 因 soft-delete 作用域查不到 → 误判为「端点坏了」。
+
+rc.26 源码（`controller/token.go:354`）读的**就是路径参数**：
+
+```go
+func DeleteToken(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))   // ← 路径参数，没有读错
+	userId := c.GetInt("id")
+	err := model.DeleteTokenById(id, userId)
+```
+
+`model.DeleteTokenById` 用 `Token{Id: id, UserId: userId}` 做 `First()` 再 `token.Delete()` ⇒ **是带 user 作用域的软删**（GORM `deleted_at`）。
+
+**实测（2026-10-09，token id=80）**：
 
 ```
-DELETE /api/token/65  ->  {"success": false, "message": "record not found"}
+DELETE /api/token/80        -> 200 {"message":"", "success":true}      # 首次：真的删掉了
+DB: deleted_at 被写上，随后用该 key 请求 -> 401 Invalid token          # 立即失效，无需重启
+DELETE /api/token/80        -> 200 {"message":"record not found","success":false}   # 对已删的重试
+DELETE /api/token/999999    -> 200 {"message":"record not found","success":false}   # 不存在的 id
 ```
 
-该端点从 `Authorization` 读 token_id 而**不是**路径参数，所以永远找不到。真删只能 SQL 软删 + 重启刷缓存：
+⇒ **`record not found` 的含义 = 「该 id 在（未软删的）记录里找不到」**，可能是已经删过了、或不属于当前 user、或 id 不存在 —— **不代表端点坏了**。
+⇒ 软删**立即生效**（缓存自动失效，用旧 key 请求即 401），**不需要重启**刷缓存。旧条目里「只能 SQL 软删 + 重启」的说法作废。
 
-```sql
-UPDATE tokens SET deleted_at = <now> WHERE id = ?;
-```
-
-⚠️ 重启可能不可行（生产有其他用户在用），所以删除令牌前要先确认有别的途径。
+区分三个信号：`success:true` = 本次真的删了；`record not found` = 这次没删（因为本来就不在）；**别把「第二次调用」的结果当成「端点不可用」的证据**。
 
 ## GET /api/option/ 与 UserUsableGroups 的一个漏判坑
 
@@ -80,7 +95,7 @@ assert v["deepseek"] == "deepseek-v4-flash, deepseek-v4-pro"   # ✅ 查 value
 
 - 建令牌：body 扁平；`data` 为 null 是正常成功，别当失败。
 - 取 key：只从 `tokens.key` 读，列表接口是掩码；库里无前缀，别断言 `sk-`。
-- 删令牌：API 端点不可用，走 SQL 软删 + 重启；重启不可行时先想别的。
+- 删令牌：`DELETE /api/token/{id}` **可用**，走 user 作用域软删、**立即生效无需重启**；`record not found` 只说明「这次没删（本来就不在）」，**不能据此判定端点坏了**（复测已删对象必得此结果）。
 - 改 option：`UserUsableGroups` 查 value 不查 key；非映射类 option 的 value 不是 JSON。
 - **写操作后读 `success` 字段，不要只看 HTTP 码**（rc.26 大量「HTTP 200 + success=false + 一个字没改」）。
 - 复用名前先确认软删记录：`name` 可能被 2026-08-11 那批用户手动软删的令牌占用，重建属越界。

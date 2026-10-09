@@ -43,10 +43,13 @@ DIR_TO_TYPE = {v: k for k, v in TYPE_TO_DIR.items()}
 REQUIRED_FIELDS = ("name", "description", "type", "source", "date", "verified", "topic")
 
 # P3-1 受控领域词表（正交于 type；type 只回答「怎么用」，topic 回答「属于哪个领域」）
+# 词表是**代码里的固定元组**（无自动注册机制）：遇到库里还不存在的领域，直接往这里加一项
+# 即可（词表只被本文件的三处引用，改动零副作用），**不要**为了过校验把条目 topic 换成近似词。
 TOPIC_VOCAB = (
     "api-gateway", "agent-orchestration", "browser", "ci", "cnb", "container",
     "database", "sqlite", "delivery", "git", "llm", "mcp", "methodology", "office",
-    "powershell", "preference", "python", "security", "tauri", "windows", "zcode",
+    "powershell", "preference", "python", "registry", "rust", "safety", "security",
+    "tauri", "toolchain", "windows", "zcode",
 )
 
 _LINK_RE = re.compile(r"\[\[([^\]]+)\]\]")

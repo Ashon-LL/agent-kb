@@ -4,10 +4,12 @@
 > 目录：`tools/` 工具链 · `workflow/` 流程协作 · `pitfalls/` 失败教训
 
 ## pitfalls/ 教训与反模式
+- [错误日志归因按 baseURL 判线，模型名会重名](pitfalls/multi-line-log-attribution-use-baseurl-not-model.md) — ZCode model.* 事件归属字段在 context.baseURL；导出 txt 丢 baseURL，须回原始 jsonl 聚合
 - [上游排队错误必须 429 而非硬 403](pitfalls/upstream-queue-error-must-be-429-not-hard-403.md) — 排队先切号试遍、全号耗尽才 429+Retry-After；⛔错误常在 200 建流的 SSE 信封里不在 HTTP 层
 - [配置为空 ≠ 功能没做（空值常是正解）](pitfalls/empty-config-is-not-missing-feature.md) — 判断能力是否启用要读实现+实测产出；trae 设备隔离按账号 sha256 派生，填死 env 反而关掉换设备脱困；撞风控先分设备维度 vs 时段维度
 - [每日奖励要找「调度器→回调→端点」三级链](pitfalls/daily-reward-need-scheduler-to-endpoint-chain.md) — 「桌面端启动自动调 X」≠X 是发放源（推广活动幂等 claim vs 账号服务 init-app，连日 Δ0 才发现）；奖励脚本必须记余额 delta
 - [tool_choice 形态可能只收字符串 + 客户端参数错误不冷却账号池](pitfalls/gateway-tool-choice-string-only-and-no-cooldown-on-client-errors.md) — ⛔上游只收字符串 tool_choice（对象形态/max_tokens>65536/空arguments 三触发点=param invalid）；客户端形状错误绝不冷却整池；隔离参数用绕开账号池的上游直发矩阵
+- [伪装客户端门禁的占位工具必须合并不能替换](pitfalls/disguised-client-gate-needs-placeholder-tools-merged-not-replaced.md) — 免费档按模型要求 bash/read 占位工具在场；客户端带 tools 时整表替换⇒该族全 403/502（纯聊正常、agent 模式挂）；逐模型跑「真实工具/占位+真实」对照，探针别用 1×1 退化图
 - [多账号领取的「按人去重」会把第二号活动隐藏](pitfalls/multi-account-claim-per-person-dedup-hides-second-account.md) — 列表缺失≠无此活动；直接 claim 幂等兜底；别拿缓存字段下「没得领」结论
 - [账号池 credit-priority 必须服务账号=计费账号贯穿](pitfalls/pool-credit-priority-keep-serving-and-billing-account-tied.md) — 选号贯穿转发/上报/刷新；验证看余额差落谁家；无余额信号退化为健康轮询
 - [划界看调用方而非文件位置](pitfalls/classify-by-consumer-not-by-file-location.md) — 同一文件常混着多方共用件；「住在哪」不等于「属于谁」，re-export 转发层尤甚
@@ -76,6 +78,7 @@
 - [台账核对必须双向](pitfalls/ledger-audit-must-be-bidirectional.md) — 只跑单向会漏整类问题；库里有值≠线上在用
 - [待办台账会腐烂，开单前先复核](pitfalls/backlog-records-rot-verify-before-dispatch.md) — 未做≠还没做，按机制复核；实测 6/6 已闭环
 - [同名配置键在不同步骤类型下语义不同](pitfalls/same-config-key-different-semantics-per-step-type.md) — 脚本 Job=总时长超时，npc:go=单次执行
+- [守卫判据锚「写法」必被换写法绕过](pitfalls/guard-criteria-anchored-to-spelling-always-escape.md) — 四连逃逸实证；静态判结构、渲染占位交运行时几何门、变异集裁定强弱
 - [New API 禁用渠道/改分组都要重建 abilities](pitfalls/newapi-disable-must-sync-abilities.md) — abilities 是唯一路由事实源；须手工重建+回读
 - [产出端与消费端状态不匹配会静默空转](pitfalls/producer-consumer-status-mismatch-silently-noops.md) — 产出写 candidate、消费只查 active ⇒ 空转
 - [容器镜像内源码补丁必须配重放脚本](pitfalls/container-image-source-patches-need-replay-script.md) — 扛 restart 不扛 rm/升级；须配幂等重放脚本
@@ -122,6 +125,7 @@
 - [「只有浏览器成功」先查凭据失效再谈 TLS 指纹](pitfalls/browser-only-success-check-credential-first.md) — 同一 token 浏览器 200、curl/python/TLS伪装全 401 ⇒ 先页内裸 token 复测+指纹比对+新鲜凭据重放；实测真因=改密码吊销+cookie 轮换，WAF 假设是死凭据喂出来的
 - [ZCode provider_config 的 group 只收 standard-personal](pitfalls/zcode-provider-config-group-enum-standard-personal.md) — config.group 是内部枚举，写成站点组名整份配置拒载、UI 全空；站点分组隔离靠令牌；排障走 [provider-config] 日志 ZodError path
 - [新增宿主网关端口先放行白名单再固化开机重放](pitfalls/host-gateway-port-allowlist-before-relay-onboarding.md) — 绑网桥 IP 的服务白名单外被静默 DROP：直连 200、经容器网关 i/o timeout；iptables 一次性规则重启即丢，必须写进维护链的开机脚本
+- [同批同错先验同源再计数](pitfalls/same-error-across-batch-is-one-incident.md) — N 条相同错误 ≠ N 次故障；四验：锚点 ID/耗时=总时长÷N/时间戳齐发/原文逐字同；同源按「1 次事件、影响 N 个对象」叙述
 
 ## workflow/ 流程与协作
 
@@ -160,7 +164,11 @@
 - [别把待决定项包装成已定](workflow/never-pad-reports-with-desired-state.md) — 成果汇报只放已发生的事；需要拍板当场摆多选项独立成段；工具债是自己收拾不是塞给对方
 - [工作流是探针不是目的](workflow/workflow-is-a-probe-not-the-goal.md) — 问题充分取证就转派单修，比硬跑完更有价值；门禁没落地别续跑；"双线跟进"=两线互相把控
 - [动手前先只读盘点现状](workflow/survey-before-acting-on-own-project.md) — 连续迭代自有项目功能常早已存在；先列"已有什么vs缺什么"再决定动什么；连续踩墙2次→回到只读盘点
+- [子代理的"已关闭/已不存在/最新版"断言要抽查](workflow/subagent-absence-and-security-claims-need-selfcheck.md) — 三类转述错误：策略读错路径反向、Test-Path 遇带引号路径报假孤儿、winget 无驱动项≠无新版；进用户可见结论前自己跑一条命令；子代理>1h 未完成就停掉自己跑精简版
+- [PowerShell 子串匹配当删除条件的误伤](workflow/powershell-substring-match-bulk-delete-hazard.md) — `-match "ACC"` 连删 ACCESSIBILITY 与 ACCESS_TOKEN（含 GitHub PAT）；精确用 -eq/-ceq，先打印清单再删＋动手前 reg export/复制快照
 - [关掉某个对象时优先最小作用域原生开关](workflow/prefer-narrow-native-switch-over-broad-global-or-plugin.md) — 逐对象状态机 → prompt 软约束 → 全局开关 → 自写插件，找到第一档就停；全局 allow-list 会误伤
+- [派单前先查在跑面（重复派单）](workflow/check-inflight-work-before-dispatch.md) — 派单/开 issue 前三查（开放 PR / 远端分支 / 最近构建）；命中即不派，改为收窄在跑的那支；与「台账会腐烂」互补=两个核对面
+- [批准范围不做类推扩展](workflow/approval-is-explicit-not-analogous.md) — 点名批准只做那几项；关 issue/台账前先查背后有无在跑的流程（评审/返工挂它回奏）；可逆≠可以顺手做
 
 ## tools/ 环境与平台
 
@@ -186,6 +194,8 @@
 - [出版级中文配图：HTML/CSS 卡片 + 无头浏览器元素截图](tools/html-playwright-figure-pipeline.md) — 设计型中文图别用 matplotlib/AI 生图
 - [html-to-docx 在 Windows 的 venv 布局坑](tools/html-to-docx-windows-venv-layout.md) — 插件按 bin/python 判，uv 建 Scripts/ ⇒ 反复重建
 - [electron-builder NSIS 静默安装兜底](tools/electron-builder-nsis-silent-install-fallback.md) — /D 必崩、/S 会崩；须 7z 解包 + pylnk3 建快捷方式
+- [UAC 与 Windows 更新策略的真实注册表位置](tools/windows-uac-and-windows-update-policy-real-paths.md) — EnableLUA 在 `CurrentVersion\Policies\System`（`Policies\...` 同名路径为空＝读错会反向）；NoAutoUpdate 在 `WindowsUpdate\Automatic Updates`；同键不同值别互推
+- [rustup update 被缺失的 msvc rust-std 组件卡死](tools/rustup-update-fails-when-stale-msvc-std-component-missing.md) — `failure removing component` 且目标三元组≠主机＝指纹；旁路＝装新版本号工具链→default→验证→卸旧 stable，重试无用
 - [NPC 迭代：把红的原文回传](tools/npc-iterate-by-sending-failure-text-back.md) — 别自己改；给断言原文+失败行+期望语义；既有用例回归单标必修
 - [Windows 用户目录清理：可删的 vs 陷阱](tools/windows-home-cleanup-safe-vs-traps.md) — `*updater*`/缓存/解包暂存可删；⛔ `%APPDATA%\npm` 是全局 CLI 入口不是缓存；孤儿 MSI 记录单清
 - [ESP32 编译烧录链路（本机 arduino-cli）](tools/esp32-arduino-cli-flash-workflow.md) — 工具链落点 + FQBN 必带 huge_app + sketch 目录同名硬约束 + ELF 体积分析法；附 GFX/ST7789 三坑与"参考图别手绘"

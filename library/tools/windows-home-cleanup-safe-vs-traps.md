@@ -46,6 +46,7 @@ topic: windows, methodology
 - 判断"某软件是否已卸载"别只看注册表：查 `C:\Software`、`C:\Program Files` 里有没有活的 exe，没写注册表的绿色版常被误判成残留。
 - 删前记 `Get-PSDrive C` 的 Free 基线，删后核对释放量（本次 471.57→542.07 GB）。
 - 体积小但确认无引用的散落文件（根目录的 `*.bak`、临时脚本）单独一批删，别和目录清理混。
+- 删完空间没回来先别怀疑卸载失败：跑 `vssadmin list shadows`。卷影副本会把快照时点已存在文件的磁盘块钉住，文件删除后空间仍不归还，直到该副本被删/过期（实测 2026-10-07 05:59 的 ClientAccessible 副本钉住了 coreutils 删掉的 1.4 GB；同机器上 pagefile.sys 会随内存压力自动增减，测量释放量前先排除它）。
 - 删注册表键时 pwsh `Remove-Item -Recurse -Force` 可能对 ACL 完全正常的键报 `SecurityException: Requested registry access is not allowed`（实测 AskLink 残留键，重试无效）；换 `reg.exe delete "<key>" /f` 直接成功。另：Git Bash 里 reg.exe 的 `/f` 会被 MSYS 改写成路径报"无效语法"，须加 `MSYS_NO_PATHCONV=1` 或在 pwsh 内调用。
 
 关联 [[bulk-delete-requires-reverse-dep-check]]、[[user-instruction-is-not-evidence-of-no-dependency]]。
