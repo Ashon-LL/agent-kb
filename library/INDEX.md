@@ -30,7 +30,7 @@
 - [CreateWorkflow 提交 cwd 漂移与 amend 重名追加](pitfalls/zcode-workflow-cwd-drift-and-amend-same-name.md) — 提交前 cd 漂移把 run 的 workspace 根带歪（draft/artifact 相对解析全错）；同名 agent 追加任务须复用引用而非再 agent()
 - [Tauri 自定义命令的 ACL 三处一致](pitfalls/tauri-app-command-acl-three-places.md) — 命令名须同现三处 ACL，缺一静默失效
 - [校验器 `continue` 掉缺项 = 门禁全绿地漏检](pitfalls/silent-continue-masks-lost-check-coverage.md) — 缺项 continue ⇒ 校验被跳过、门禁仍全绿
-- [New API rc.26 渠道 CRUD 端点形状](pitfalls/newapi-rc26-channel-crud-shapes.md) — body 包 mode、删走路径参、option 非字典
+- [New API rc.26 渠道 CRUD 端点形状](pitfalls/newapi-rc26-channel-crud-shapes.md) — body 包 mode（POST）/扁平 body（PUT 走 PATCH+GORM 非零字段：稀疏安全、清空不行、免重启）、删走路径参且硬删、option value 类型不稳定、摘模型要连死 mapping 键一起清
 - [New API rc.26 令牌 CRUD 三坑](pitfalls/newapi-rc26-token-crud-shapes.md) — key 在响应里、列表是掩码、DELETE 恒失败
 - [New API model_limits 列是 CSV 不是 JSON](pitfalls/newapi-model-limits-column-is-csv-not-json.md) — 写 JSON 数组⇒该令牌全模型 403；SQL 改完必重启
 - [Tauri Linux CI 需 webkit2gtk-4.1，无 Ubuntu 镜像](pitfalls/tauri-linux-ci-needs-webkit-41-and-target-override.md) — 无 Ubuntu 镜像；本机只编 Windows 目标
@@ -60,7 +60,7 @@
 - [图-引用距离与图例遮挡](pitfalls/figure-placement-and-legend-occlusion.md) — 几何自检只判出界不判遮挡；图须紧邻引用句不跨页
 - [自动化"在跑"要查两件事](pitfalls/automation-artifacts-lie-existence-and-freshness.md) — 存在性与新鲜度须双层独立检查
 - [日志字面语义不是规格](pitfalls/log-text-is-not-spec-read-emitting-code.md) — 先 grep 发提示语的代码；汇报分三档
-- [shell 初始化文件是分层的](pitfalls/shell-init-files-are-layered-not-one.md) — 登录/交互/ssh命令执行三者读不同文件，只改一处会出现"同一台机器两个版本"；脚本用绝对路径
+- [shell 初始化文件是分层的](pitfalls/shell-init-files-are-layered-not-one.md) — 登录/交互/ssh命令执行三者读不同文件，只改一处会出现"同一台机器两个版本"；脚本用绝对路径；⛔Debian /etc/profile 会重置 PATH ⇒「登录壳报缺件」是假失败，须两种壳各验一次
 - [配置字段名不是规格](pitfalls/config-field-name-is-not-spec-read-consuming-code.md) — 名字像的字段各管一件事、改错无报错；读消费方代码
 - [自定义 LLM 端点能力默认全关](pitfalls/custom-llm-endpoint-capabilities-default-false.md) — 认不出的端点按「未知兼容端点」处理，`supportsTools` 默认 false ⇒ 不发 tools ⇒ 工具调用退化成正文；显式声明 + 反证 + 看真实配置文件
 - [覆盖式配置会丢掉隐式兜底](pitfalls/override-config-drops-implicit-fallbacks.md) — --config 驱动会丢向导默认；依赖能力须显式声明
@@ -79,6 +79,7 @@
 - [待办台账会腐烂，开单前先复核](pitfalls/backlog-records-rot-verify-before-dispatch.md) — 未做≠还没做，按机制复核；实测 6/6 已闭环
 - [同名配置键在不同步骤类型下语义不同](pitfalls/same-config-key-different-semantics-per-step-type.md) — 脚本 Job=总时长超时，npc:go=单次执行
 - [守卫判据锚「写法」必被换写法绕过](pitfalls/guard-criteria-anchored-to-spelling-always-escape.md) — 四连逃逸实证；静态判结构、渲染占位交运行时几何门、变异集裁定强弱
+- [fork 同步上游会静默覆盖本仓定制](pitfalls/fork-sync-force-update-wipes-local-customizations.md) — 同步=force update（重写历史）；定制行带标记+清单，同步后逐项 grep 复核再补回
 - [New API 禁用渠道/改分组都要重建 abilities](pitfalls/newapi-disable-must-sync-abilities.md) — abilities 是唯一路由事实源；须手工重建+回读
 - [产出端与消费端状态不匹配会静默空转](pitfalls/producer-consumer-status-mismatch-silently-noops.md) — 产出写 candidate、消费只查 active ⇒ 空转
 - [容器镜像内源码补丁必须配重放脚本](pitfalls/container-image-source-patches-need-replay-script.md) — 扛 restart 不扛 rm/升级；须配幂等重放脚本
@@ -126,6 +127,7 @@
 - [ZCode provider_config 的 group 只收 standard-personal](pitfalls/zcode-provider-config-group-enum-standard-personal.md) — config.group 是内部枚举，写成站点组名整份配置拒载、UI 全空；站点分组隔离靠令牌；排障走 [provider-config] 日志 ZodError path
 - [新增宿主网关端口先放行白名单再固化开机重放](pitfalls/host-gateway-port-allowlist-before-relay-onboarding.md) — 绑网桥 IP 的服务白名单外被静默 DROP：直连 200、经容器网关 i/o timeout；iptables 一次性规则重启即丢，必须写进维护链的开机脚本
 - [同批同错先验同源再计数](pitfalls/same-error-across-batch-is-one-incident.md) — N 条相同错误 ≠ N 次故障；四验：锚点 ID/耗时=总时长÷N/时间戳齐发/原文逐字同；同源按「1 次事件、影响 N 个对象」叙述
+- [纳号类请求超时 ≠ 失败](pitfalls/batch-account-onboarding-timeout-verify-before-retry.md) — 纳号/入池类 POST 客户端读超时后服务端常已完成；先只读核对池文件（在不在/令牌落没落）再决定重试；「回包成功」也不等于已落盘
 
 ## workflow/ 流程与协作
 
@@ -169,10 +171,11 @@
 - [关掉某个对象时优先最小作用域原生开关](workflow/prefer-narrow-native-switch-over-broad-global-or-plugin.md) — 逐对象状态机 → prompt 软约束 → 全局开关 → 自写插件，找到第一档就停；全局 allow-list 会误伤
 - [派单前先查在跑面（重复派单）](workflow/check-inflight-work-before-dispatch.md) — 派单/开 issue 前三查（开放 PR / 远端分支 / 最近构建）；命中即不派，改为收窄在跑的那支；与「台账会腐烂」互补=两个核对面
 - [批准范围不做类推扩展](workflow/approval-is-explicit-not-analogous.md) — 点名批准只做那几项；关 issue/台账前先查背后有无在跑的流程（评审/返工挂它回奏）；可逆≠可以顺手做
+- [批量纳号必须一号一登并逐条核对](workflow/batch-account-onboarding-one-per-login.md) — 同一浏览器登录态会把多条待授权 state 全部授权成同一账号（串号是静默的）；多号须换号/无痕 + 按返回体昵称/uid 逐条核对
 
 ## tools/ 环境与平台
 
-- [WSL 里的 Docker 按需启动（不装 Desktop）](tools/wsl-docker-on-demand-startup.md) — Windows 侧无 docker 命令须 wsl.exe 转发带 MSYS_NO_PATHCONV；关自启后按需启走 -u root；"装好却跑不了"=用户不在 docker 组
+- [WSL 里的 Docker 按需启动（不装 Desktop）](tools/wsl-docker-on-demand-startup.md) — Windows 侧无 docker 命令须 wsl.exe 转发带 MSYS_NO_PATHCONV；按需启走 -u root（不手搓 dockerd）；VM 中途重启清场法 / 基础镜像先 pull / build 进度看 /proc cmdline（20261012 四连坑）
 - [Git Bash 的 `&` 会拆掉 gh auth login 参数](tools/git-bash-ampersand-breaks-gh-auth-login.md) — 管道送 stdin；Fine-grained 全选=完全权限但删不了库
 - [GitHub 大陆双向通路（下载+推送）](tools/github-china-network-workarounds.md) — 下载用 jsdelivr/curl 续传；推送须探测+hosts 一体；`github-push-ip-retry.py` DoH 源已扩（阿里/腾讯×2 + UDP 电信/联通/百度/360/CNNIC，2026-10-06 实测国外 DoH 被墙）
 - [git 传输死时走 Git Data API 构造提交](tools/github-git-data-api-push-without-git-transport.md) — 零 git 二进制建分支推提交；须本地 SHA1 预验证
@@ -186,6 +189,7 @@
 - [ZCode 删会话是软删：状态与正文分两个库](tools/zcode-session-delete-is-soft-delete-two-dbs.md) — 状态在 tasks-index、正文在 cli/db 无删除标记
 - [数模论文图与摘要视觉基线](tools/mathmodel-paper-visual-baseline.md) — 高级图型清单、rcParams 固化、摘要按方法→数值
 - [stdio MCP 安装验收法](tools/mcp-stdio-install-smoke-test.md) — 装前必实测 initialize+tools/list
+- [浏览器扩展取证：profile + LevelDB](tools/browser-extension-forensics-profile-leveldb.md) — 判启停/权限读 Secure Preferences（userScripts 须 granted+active 都有）；LevelDB 锁定用 FileShare.ReadWrite 读；location=4 解包扩展删源即失效但注册项须 UI 删；油猴脚本可能依赖本机 RPC 端口（PanLinker→16800 无监听＝不可用）
 - [MCP 有没有用看 handler 返回什么](tools/mcp-prompt-template-servers-add-no-capability.md) — 别读 description 宣称，读 handler 返回什么
 - [CNB 密钥库与 imports 引用](tools/cnb-secret-repo-imports.md) — 密钥库拒一切令牌；.cnb.yml 顶层键须是分支名
 - [OpenClaw typed hook 目录](tools/openclaw-hook-catalog.md) — 拦工具调用叫 before_tool_call
@@ -195,6 +199,7 @@
 - [html-to-docx 在 Windows 的 venv 布局坑](tools/html-to-docx-windows-venv-layout.md) — 插件按 bin/python 判，uv 建 Scripts/ ⇒ 反复重建
 - [electron-builder NSIS 静默安装兜底](tools/electron-builder-nsis-silent-install-fallback.md) — /D 必崩、/S 会崩；须 7z 解包 + pylnk3 建快捷方式
 - [UAC 与 Windows 更新策略的真实注册表位置](tools/windows-uac-and-windows-update-policy-real-paths.md) — EnableLUA 在 `CurrentVersion\Policies\System`（`Policies\...` 同名路径为空＝读错会反向）；NoAutoUpdate 在 `WindowsUpdate\Automatic Updates`；同键不同值别互推
+- [Windows 更新恢复与"不自动重启"操作手册](tools/windows-update-resume-and-no-auto-reboot-playbook.md) — 搜索 0 项先查 UX\Settings 的 Pause*（能被设到 2053）而不是 NoAutoUpdate；防自动重启三件套；CU 历史码 0x80242014=已装待重启；新版本按机器分批推送搜不到≠没有
 - [rustup update 被缺失的 msvc rust-std 组件卡死](tools/rustup-update-fails-when-stale-msvc-std-component-missing.md) — `failure removing component` 且目标三元组≠主机＝指纹；旁路＝装新版本号工具链→default→验证→卸旧 stable，重试无用
 - [NPC 迭代：把红的原文回传](tools/npc-iterate-by-sending-failure-text-back.md) — 别自己改；给断言原文+失败行+期望语义；既有用例回归单标必修
 - [Windows 用户目录清理：可删的 vs 陷阱](tools/windows-home-cleanup-safe-vs-traps.md) — `*updater*`/缓存/解包暂存可删；⛔ `%APPDATA%\npm` 是全局 CLI 入口不是缓存；孤儿 MSI 记录单清
@@ -219,3 +224,4 @@ topic: 受控词表之一（见 kb 技能）
 **How to apply**：（可选）什么场景、如何应用。
 ```
 - [上游排队类错误先查社区实现再发明等待机制](pitfalls/upstream-queue-blind-wait-backfires.md) — 排队≠时间窗，盲等把快速失败变超长挂起；同类项目早有 queue-poll/串行化/不惩罚账号的答案
+- [Web自动化优先调页面函数与服务端接口](pitfalls/web-automation-call-page-functions-not-dom-clicks.md) — element.click()/UI模拟时灵时不灵；从onclick属性和源码reverse出页面函数与完成接口直接调用是确定性方案；iframe递归遍历/字体混淆用截图读/SPA切换后reload/验证看服务器快照

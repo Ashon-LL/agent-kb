@@ -22,13 +22,15 @@ PLATFORMS = [
 ]
 
 # 平台 -> 期望的 (hooks 目录相对 $HOME, 配置相对 $HOME)
+# workbuddy：与 CodeBuddy 不是同一产品，只有技能机制——装 SKILL.md 到 .workbuddy/skills/kb，
+# 不装钩子、不生成配置（2026-10-04 用户纠错后修正）。
 EXPECTED = {
     "trae":      (".trae-cn/hooks/agent-kb",      ".trae-cn/hooks.json"),
     "zcode":     (".zcode/hooks/agent-kb",        ".zcode/hooks.json"),
     "codex":     (".codex/hooks/agent-kb",        ".codex/hooks.json"),
     "claude":    (".claude/hooks/agent-kb",       ".claude/settings.json"),
     "qoder":     (".qoder/hooks/agent-kb",        ".qoder/settings.json"),
-    "workbuddy": (".codebuddy/hooks/agent-kb",    ".codebuddy/settings.json"),
+    "workbuddy": (".workbuddy/skills/kb",         None),
     "hermes":    (".hermes/hooks/agent-kb",       ".hermes/hooks.json"),
     "pi":        (".pi/hooks/agent-kb",           ".pi/hooks.json"),
     "kimi":      (".kimi-code/hooks/agent-kb",    None),
@@ -39,7 +41,7 @@ EXPECTED = {
 ADAPTER_FILE = {
     "trae": "trae_zcode_adapter.py", "zcode": "trae_zcode_adapter.py",
     "codex": "codex_adapter.py", "claude": "claude_adapter.py",
-    "qoder": "qoder_adapter.py", "workbuddy": "workbuddy_adapter.py",
+    "qoder": "qoder_adapter.py", "workbuddy": None,
     "hermes": "hermes_adapter.py", "pi": "pi_adapter.py",
     "kimi": "kimi_adapter.py", "opencode": "opencode_adapter.py",
     "openclaw": "openclaw_adapter.py",
@@ -125,9 +127,15 @@ class InstallerTestBase:
                     hooks_dir, cfg_rel = EXPECTED[platform]
                     hooks_path = Path(home) / hooks_dir
                     self.assertTrue(hooks_path.is_dir(), f"{platform}: missing {hooks_path}")
-                    self.assertTrue((hooks_path / "kb_core.py").is_file())
-                    self.assertTrue((hooks_path / "adapter_base.py").is_file())
-                    self.assertTrue((hooks_path / ADAPTER_FILE[platform]).is_file())
+                    self.assertTrue((hooks_path / "kb_core.py").is_file() if ADAPTER_FILE[platform]
+                                    else (hooks_path / "SKILL.md").is_file(),
+                                    f"{platform}: 核心文件缺失")
+                    if ADAPTER_FILE[platform]:
+                        # 2026-10-04 起安装清单补齐校验器与检索器（SKILL.md 规程依赖它们）
+                        for extra in ("adapter_base.py", "kb_validate.py", "kb_search.py"):
+                            self.assertTrue((hooks_path / extra).is_file(),
+                                            f"{platform}: missing {extra}")
+                        self.assertTrue((hooks_path / ADAPTER_FILE[platform]).is_file())
 
     def test_generated_config_is_valid_json_without_placeholders(self):
         for platform in PLATFORMS:
@@ -149,7 +157,7 @@ class InstallerTestBase:
                     self.assertIn("UserPromptSubmit", data["hooks"])
 
     def test_merge_preserves_unrelated_settings(self):
-        for platform in ("claude", "qoder", "workbuddy"):
+        for platform in ("claude", "qoder"):
             with self.subTest(platform=platform):
                 with tempfile.TemporaryDirectory() as home:
                     cfg_rel = EXPECTED[platform][1]
@@ -230,7 +238,11 @@ class TestInstallPs1(unittest.TestCase):
                         f"{platform}: {r.stderr.decode('utf-8', 'replace')}",
                     )
                     hooks_path = Path(home) / EXPECTED[platform][0]
-                    self.assertTrue((hooks_path / ADAPTER_FILE[platform]).is_file())
+                    if ADAPTER_FILE[platform]:
+                        self.assertTrue((hooks_path / ADAPTER_FILE[platform]).is_file())
+                    else:
+                        self.assertTrue((hooks_path / "SKILL.md").is_file(),
+                                        f"{platform}: 技能型平台应装 SKILL.md")
 
 
 if __name__ == "__main__":

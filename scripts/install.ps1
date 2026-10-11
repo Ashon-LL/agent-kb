@@ -72,10 +72,13 @@ $Platforms = @{
         Merge = $true; Manual = $false
     }
     "workbuddy" = @{
-        Adapter = "workbuddy_adapter.py"; Template = "workbuddy-hooks.json"
-        HooksDir = Join-Path $HomeDir ".codebuddy/hooks/agent-kb"
-        ConfigFile = Join-Path $HomeDir ".codebuddy/settings.json"
-        Merge = $true; Manual = $false
+        # ⚠️ WorkBuddy 与 CodeBuddy **不是一个产品**（2026-10-04 用户纠错）：
+        # WorkBuddy 只有技能机制（auto-discover ~/.workbuddy/skills 的 symlink），
+        # 没有 hooks 系统——绝不能往 ~/.codebuddy 装钩子（旧版错误已纠正）。
+        Adapter = ""; Template = ""
+        HooksDir = Join-Path $HomeDir ".workbuddy/skills/kb"
+        ConfigFile = $null
+        Merge = $false; Manual = $false; SkillOnly = $true
     }
     "hermes" = @{
         Adapter = "hermes_adapter.py"; Template = "hermes-hooks.json"
@@ -149,19 +152,33 @@ if (Test-Path $SkillSrc) {
     }
 }
 
-# --- 2. 安装 Hooks（adapter + kb_core + adapter_base） ---
+# --- 2. 安装 Hooks（adapter + kb_core + adapter_base + 校验器 + 检索器） ---
 $HooksSrc = Join-Path $RepoRoot "hooks"
 $HooksDst = $cfg.HooksDir
 
+if ($cfg.SkillOnly) {
+    # 技能型平台（WorkBuddy）：只装 SKILL.md，不装钩子脚本
+    if (-not (Test-Path $HooksDst)) {
+        New-Item -ItemType Directory -Path $HooksDst -Force | Out-Null
+    }
+    if (-not (Test-Path (Join-Path $HooksDst "SKILL.md")) -or $Force) {
+        Copy-Item (Join-Path $SkillSrc "SKILL.md") (Join-Path $HooksDst "SKILL.md") -Force
+        Write-Host "[OK] Skill 已安装 -> $HooksDst" -ForegroundColor Green
+        Write-Host "     （WorkBuddy 只支持技能；支持 junction 的环境可链接 ~/.agents/skills/kb 免双份维护）" -ForegroundColor DarkGray
+    } else {
+        Write-Host "[SKIP] Skill 已存在，加 -Force 覆盖" -ForegroundColor DarkGray
+    }
+}
+else {
 if (-not (Test-Path $HooksDst)) {
     New-Item -ItemType Directory -Path $HooksDst -Force | Out-Null
 }
 
-foreach ($f in @("kb_core.py", "adapter_base.py", $cfg.Adapter)) {
+foreach ($f in @("kb_core.py", "adapter_base.py", "kb_validate.py", "kb_search.py", $cfg.Adapter)) {
     Copy-Item (Join-Path $HooksSrc $f) (Join-Path $HooksDst $f) -Force
 }
 Write-Host "[OK] Hooks 已安装 -> $HooksDst" -ForegroundColor Green
-Write-Host "     adapter: $($cfg.Adapter)  (+ kb_core.py, adapter_base.py)" -ForegroundColor DarkGray
+Write-Host "     adapter: $($cfg.Adapter)  (+ kb_core.py, adapter_base.py, kb_validate.py, kb_search.py)" -ForegroundColor DarkGray
 
 # 找 python
 $Python = (Get-Command python -ErrorAction SilentlyContinue).Source
@@ -172,9 +189,13 @@ if (-not $Python) {
     Write-Host "[WARN] 找不到 python，请手动编辑生成配置里的 PYTHON_EXECUTABLE" -ForegroundColor Yellow
     $Python = "python"
 }
+}  # end else (非技能型平台)——技能型无钩子脚本/配置，直接进库模板段
 
-# --- 3. 生成 hook 配置 ---
-if ($cfg.Manual) {
+# --- 3. 生成 hook 配置（技能型平台无钩子配置） ---
+if ($cfg.SkillOnly) {
+    # WorkBuddy：无钩子可配置，跳过（直接进库模板段）
+}
+elseif ($cfg.Manual) {
     Write-Host ""
     Write-Host "[NEXT] $Platform 需手工注册 hook，模板见：" -ForegroundColor Yellow
     Write-Host "       templates/$($cfg.Template)" -ForegroundColor Yellow

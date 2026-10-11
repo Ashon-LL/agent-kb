@@ -78,10 +78,10 @@ done
 #   TEMPLATE     templates/ 下的模板名（空 = 无）
 #   MERGE        1 = 模板需合并进已有 settings.json（保留其他键）
 #   MANUAL       1 = 无 JSON 配置，需用户手工注册
-ADAPTER=""; HOOKS_DST=""; CONFIG_FILE=""; TEMPLATE=""; MERGE=0; MANUAL=0
+ADAPTER=""; HOOKS_DST=""; CONFIG_FILE=""; TEMPLATE=""; MERGE=0; MANUAL=0; SKILL_ONLY=0
 
 set_platform() {
-  ADAPTER=""; HOOKS_DST=""; CONFIG_FILE=""; TEMPLATE=""; MERGE=0; MANUAL=0
+  ADAPTER=""; HOOKS_DST=""; CONFIG_FILE=""; TEMPLATE=""; MERGE=0; MANUAL=0; SKILL_ONLY=0
   case "$1" in
     trae)
       ADAPTER="trae_zcode_adapter.py"; TEMPLATE="trae-hooks.json"
@@ -111,10 +111,15 @@ set_platform() {
       MERGE=1
       ;;
     workbuddy)
-      ADAPTER="workbuddy_adapter.py"; TEMPLATE="workbuddy-hooks.json"
-      HOOKS_DST="$HOME_DIR/.codebuddy/hooks/agent-kb"
-      CONFIG_FILE="$HOME_DIR/.codebuddy/settings.json"
-      MERGE=1
+      # ⚠️ WorkBuddy 与 CodeBuddy **不是一个产品**（2026-10-04 用户纠错）：
+      # WorkBuddy 只有技能机制（auto-discover ~/.workbuddy/skills 的 symlink），
+      # 没有 hooks 系统——绝不能往 ~/.codebuddy 装钩子（旧版错误已纠正）。
+      # 正确装配 = 技能目录放 kb（junction 或复制），见 SKILL_ONLY 分支。
+      ADAPTER=""; TEMPLATE=""
+      HOOKS_DST="$HOME_DIR/.workbuddy/skills/kb"
+      CONFIG_FILE=""
+      MANUAL=0; MERGE=0
+      SKILL_ONLY=1
       ;;
     hermes)
       ADAPTER="hermes_adapter.py"; TEMPLATE="hermes-hooks.json"
@@ -195,9 +200,20 @@ if [ -f "$SKILL_SRC/SKILL.md" ]; then
   fi
 fi
 
-# ------------------------------------------------------------------ 2. Hooks
+# ------------------------------------------------------------------ 2. Hooks / 技能
+if [ "$SKILL_ONLY" -eq 1 ]; then
+  # 技能型平台（WorkBuddy）：只装 SKILL.md，不装钩子脚本
+  mkdir -p "$HOOKS_DST"
+  if [ ! -f "$HOOKS_DST/SKILL.md" ] || [ "$FORCE" -eq 1 ]; then
+    cp -f "$SKILL_SRC/SKILL.md" "$HOOKS_DST/SKILL.md"
+    printf '[OK] Skill 已安装 -> %s\n' "$HOOKS_DST"
+    printf '     （WorkBuddy 只支持技能；若该平台支持 junction，可 ln 链接 ~/.agents/skills/kb 免双份维护）\n'
+  else
+    printf '[SKIP] Skill 已存在，加 -f 覆盖\n'
+  fi
+else
 mkdir -p "$HOOKS_DST"
-for f in kb_core.py adapter_base.py "$ADAPTER"; do
+for f in kb_core.py adapter_base.py kb_validate.py kb_search.py "$ADAPTER"; do
   if [ ! -f "$HOOKS_SRC/$f" ]; then
     echo "[ERROR] 缺少 $HOOKS_SRC/$f" >&2
     exit 2
@@ -205,9 +221,9 @@ for f in kb_core.py adapter_base.py "$ADAPTER"; do
   cp -f "$HOOKS_SRC/$f" "$HOOKS_DST/$f"
 done
 printf '[OK] Hooks 已安装 -> %s\n' "$HOOKS_DST"
-printf '     adapter: %s  (+ kb_core.py, adapter_base.py)\n' "$ADAPTER"
+printf '     adapter: %s  (+ kb_core.py, adapter_base.py, kb_validate.py, kb_search.py)\n' "$ADAPTER"
 
-# ------------------------------------------------------------------ 3. 配置
+# ------------------------------------------------------------------ 3. 配置（技能型平台不走此分支：在 else 内已整体跳过）
 if [ "$MANUAL" -eq 1 ]; then
   printf '\n[NEXT] %s 需手工注册 hook，模板见：%s\n' "$PLATFORM" "templates/$TEMPLATE"
   case "$PLATFORM" in
@@ -290,6 +306,7 @@ with open(path, "w", encoding="utf-8") as fh:
     fi
   fi
 fi
+fi  # if SKILL_ONLY=1/else（技能型平台无钩子脚本与配置）
 
 # ------------------------------------------------------------------ 4. 库模板
 if [ ! -d "$KB_PATH" ]; then

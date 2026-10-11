@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""WorkBuddy / CodeBuddy hook 适配器。
+"""CodeBuddy CLI hook 适配器（workbuddy_adapter.py 为历史文件名，保留防部署断裂）。
 
 ## 平台
-WorkBuddy IDE 与 CodeBuddy CLI（腾讯，共用同一 hooks 实现）。
+仅服务 CodeBuddy CLI（腾讯）。⚠️ WorkBuddy 与 CodeBuddy **不是一个产品**（2026-10-04 用户纠错）：WorkBuddy 只有技能机制（~/.workbuddy/skills 的 symlink auto-discover），没有 hooks 系统，本适配器对它无用。CodeBuddy 已于 2026-10-04 卸载，本适配器暂无活跃消费者，保留作历史与潜在回归。
 
 ## Hook 文档
 - 官方文档：https://www.codebuddy.ai/docs/cli/hooks
@@ -85,7 +85,7 @@ from kb_core import (  # noqa: E402
 
 
 def emit(event_name: str, context: str) -> None:
-    """CodeBuddy/WorkBuddy hook 输出：hookSpecificOutput.additionalContext。"""
+    """CodeBuddy hook 输出：hookSpecificOutput.additionalContext。"""
     emit_json(claude_style_payload(event_name, context))
 
 

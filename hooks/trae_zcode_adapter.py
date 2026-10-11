@@ -15,7 +15,8 @@ Trae（CN 版，ByteDance）与 ZCode —— 两者 hooks 契约**完全一致**
 1. **命令是 PowerShell 调用式**：hooks.json 里写
    `"& 'PYTHON_EXECUTABLE' 'HOOKS_DIR\\trae_zcode_adapter.py'"`。
    Windows 下 Trae/ZCode 用 PowerShell 起进程，**不是** POSIX 风格
-   （对比 WorkBuddy 走 Git Bash，要用 `python3 xxx.py`）。
+   （对比 CodeBuddy CLI 走 Git Bash，要用 `python3 xxx.py`；WorkBuddy 是另一产品，
+    只有技能机制、无 hooks，见 workbuddy_adapter.py 头注释）。
 
 2. **事件名 `SessionStart` / `UserPromptSubmit`，均无 matcher** ——
    触发词过滤靠适配器内部正则补位。

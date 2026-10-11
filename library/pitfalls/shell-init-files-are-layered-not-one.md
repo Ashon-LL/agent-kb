@@ -1,10 +1,10 @@
 ---
 name: shell-init-files-are-layered-not-one
-description: 改 PATH/环境变量时，登录 shell、交互 shell、ssh 命令执行三者读不同的初始化文件，只改一处会出现"同一台机器两个版本"的假象；另外 ssh host 'cmd' 两者都不读
+description: 改 PATH/环境变量时，登录 shell、交互 shell、ssh 命令执行三者读不同的初始化文件，只改一处会出现"同一台机器两个版本"的假象；另外 ssh host 'cmd' 两者都不读；2026-10-10 补：Debian 的 /etc/profile 会**重置** PATH，出现"非登录壳正常、登录壳丢"的反向假失败
 type: pitfall
-source: MH-Agent-Open / CNB 云原生开发容器（2026-09-30 调试 Python 3.13 + Node 26 落位）
+source: MH-Agent-Open / CNB 云原生开发容器（2026-09-30 调试 Python 3.13 + Node 26 落位）；2026-10-10 补 Docker 产品镜像 Node 26/openclaw/cnb-cli 登录壳丢失
 date: 2026-09-30
-verified: 2026-09-30
+verified: 2026-10-10
 topic: methodology
 ---
 
@@ -49,3 +49,19 @@ Dockerfile 里的 `ENV PATH=...` 只对**后续 RUN 与容器默认 env** 有效
 
 **相邻**：断言"改到了吗"要自证，见（消融自证那条已不在库中，链接暂缺）；
 配置字段名/注释不是规格，见 [[config-field-name-is-not-spec-read-consuming-code]]。
+
+**2026-10-10 补充实测（反向失败：非登录壳正常、登录壳丢）**
+
+- 现象（Docker 产品镜像，`FROM python:3.13-slim-bookworm` + Node 26 装 `/opt/node26` + `ENV PATH=/opt/node26/bin:$PATH`）：
+  `docker run --entrypoint bash <img> -c 'node -v'` → **v26.9.0 ✅**；同一镜像 `bash -lc 'node -v'` → **command not found**。
+  ⇒ 与上表"登录壳拿到新版"**方向相反**——因为 **Debian 的 `/etc/profile` 会把 PATH 重置为默认值**
+  （`/usr/local/sbin:/usr/local/bin:...`），`ENV PATH` 里的自定义前缀在登录壳里被**顶掉**。
+- 波及面：凡是靠 `ENV PATH` 落位的工具（node/npm/全局 npm 包如 openclaw、cnb-cli）在登录壳里全部失踪；
+  容器 `CMD` 与派生进程不受影响（走容器默认 env），所以**产品运行正常、只有"人/Agent 进容器敲命令"时才炸**。
+- 修法（一条 RUN，追加层缓存全命中）：
+  ```dockerfile
+  RUN printf '%s\n' 'export PATH=/opt/node26/bin:$PATH' > /etc/profile.d/00-node26-path.sh \
+   && chmod 0644 /etc/profile.d/00-node26-path.sh
+  ```
+- 判据：**"登录壳报缺件"是假失败**——判镜像缺件必须两种壳各验一次（`bash -c` 与 `bash -lc`），
+  或先查 `/etc/profile.d/` 是否已覆盖；只验一种会把好镜像误判成坏镜像（本次差点回退一个正确配置）。

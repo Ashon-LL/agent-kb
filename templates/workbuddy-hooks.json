@@ -1,5 +1,5 @@
 {
-  "_comment": "WorkBuddy / CodeBuddy：把 hooks 段合并进 ~/.codebuddy/settings.json（项目级用 <project>/.codebuddy/settings.json）。SessionStart 与 UserPromptSubmit 均无 matcher。官方文档 https://www.codebuddy.ai/docs/cli/hooks",
+  "_comment": "⚠️ 已废弃（2026-10-04）：WorkBuddy 与 CodeBuddy 不是一个产品——WorkBuddy 只有技能机制（junction ~/.workbuddy/skills/kb -> ~/.agents/skills/kb 即可），没有 hooks 系统，此模板不再被安装器引用。保留仅作历史。原服务对象 CodeBuddy CLI 已卸载。",
   "hooks": {
     "SessionStart": [
       {

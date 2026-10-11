@@ -1,10 +1,10 @@
 ---
 name: windows-scripting-terminal-gotchas
-description: Windows 脚本/终端/跨语言互操作高频坑合集：MSYS 路径转换、bash 双引号吞 $、PS1 BOM、grep -a、NSIS 转义、heredoc/管道/CRLF、/tmp 三套文件系统、进程 spawn 与僵尸
+description: Windows 脚本/终端/跨语言互操作高频坑合集：MSYS 路径转换、bash 双引号吞 $、PS1 BOM、grep -a、NSIS 转义、heredoc/管道/CRLF、/tmp 三套文件系统、进程 spawn 与僵尸；含 .bat 三条实测坑（中文必须存 GBK 否则 cmd 吞行、等待别用 timeout、goto 跳出 for 后 if/else 取过期值）
 type: pitfall
 source: mh-agent-open + apishow + default
 date: 2026-09-15
-verified: 2026-09-15
+verified: 2026-10-10
 topic: windows, container
 ---
 
@@ -12,7 +12,7 @@ topic: windows, container
 
 ## 路径 / 变量被 shell 抢处理
 
-- **Git Bash 调原生 exe**：`/flag` 被 MSYS 当路径转换（icacls/cmdkey）→ 前缀 `MSYS_NO_PATHCONV=1`；icacls 一条命令多个 `/remove` 静默 no-op，逐个删，孤立 SID 改走 PowerShell `Get-Acl`/`Set-Acl`；`$USERPROFILE` 反斜杠喂 find 假阴性 → 一律 `/c/Users/…`。中文输出乱码 → `chcp 65001`。
+- **Git Bash 调原生 exe**：`/flag` 被 MSYS 当路径转换（icacls/cmdkey）→ 前缀 `MSYS_NO_PATHCONV=1`；⚠ 2026-10-12 实测边界：**cmdkey 的 target 本身不会被改写**（写 `.../x` 就落 `.../x`，且能正常覆盖旧条目）⇒ 「cmdkey 写成功但凭据没更新」**不要归因到 MSYS**，先查真正取值方（本机 git 走系统级 `manager`=GCM；`~/.gitconfig` 的 `credential.https://cnb.cool.helper=cnb git-credential` 只匹配 `cnb.cool` 域、不匹配 `.../x.git` 这类带路径的 URL）；icacls 一条命令多个 `/remove` 静默 no-op，逐个删，孤立 SID 改走 PowerShell `Get-Acl`/`Set-Acl`；`$USERPROFILE` 反斜杠喂 find 假阴性 → 一律 `/c/Users/…`。中文输出乱码 → `chcp 65001`。
 - **bash 双引号吞 `$_`（今天连踩）**：`powershell -Command "... $_ ... $env:X ... $LASTEXITCODE"` 外层用**双引号**时，`$_`/`$var` 会被 **bash 先行展开**再交给 PS（实测 `$_` 被塞成启动脚本路径、`$LASTEXITCODE` 变空导致语法错）→ PS 内联命令一律用**单引号** `-Command '...$_...'`；含复杂引号/中文则 base64 走 `-EncodedCommand`（`python` 读脚本→`s.encode('utf-16-le')`→b64，彻底绕开 bash 插值）。
 - **NSIS 内嵌 PowerShell**：字面 `$` 会被当 NSIS 变量吞掉（编译仍成功、命令静默变坏）→ 一律写 `$$`；复杂逻辑落独立 .ps1 用 `-File` 调；warning 6000 是信号。
 - ⛔⛔ **裸名 `bash` 在 Windows 上不是 Git Bash，是 WSL**（实测 20260919，MH-Agent-Open）：`subprocess.run(["bash", script])` / 任何按 PATH 找 bash 的代码，会被 **CreateProcess 的搜索顺序**抢先命中 `C:\Windows\System32\bash.exe`（WSL 转发层）——因为 System32 **先于 PATH**。症状：
@@ -133,6 +133,24 @@ topic: windows, container
     `CRLF will be replaced by LF the next time Git touches it`）——
     **这条提示出现时，工作区那一刻可能仍是 CRLF**（测试直读工作区 ⇒ 照样红）。
     ⇒ 看到该提示就**以为已修**是错的；要按上面的取证三步复核字节。
+
+## `.bat` 批处理三条实测坑（20261010 补，均含最小复现）
+
+- ⛔⛔ **含中文的 .bat 必须存 GBK，不能存 UTF-8**：cmd 按**控制台代码页**（zh-CN = 936）读批处理文件，
+  UTF-8 的中文多字节序列会让解码器**吞掉行尾 CR** ⇒ 行被合并、`rem` 注释的尾段被当成命令执行，
+  屏幕上出现 `'瑰櫒' 不是内部或外部命令` 之类假错误（本次实测：`title ... 容器版` + 两行中文 `rem` 的最小 bat 即复现）。
+  ✅ 修法：`path.write_bytes(text.encode('gbk'))`（内容逐字等价，只换编码）；emoji 类符号（⛔✅⚠⇒）GBK 编不了，
+  换成 `[禁]/√/▲/→`。⚠ 转换后**别再用只按 UTF-8 存盘的编辑器直接改**，否则静默回退成坏形态。
+- ⛔ **批处理里做"等待"别用 `timeout`**：① 从 Git Bash 等带 MSYS PATH 的壳启动时，裸 `timeout` 会命中
+  GNU coreutils 版（报 `invalid time interval '/t'`）；② 写绝对路径 `%SystemRoot%\System32\timeout.exe` 也有暗礁——
+  **stdin 被重定向时它立即退出不睡**（`ERROR: Input redirection is not supported`）⇒ 等待循环空转、误报"超时失败"。
+  ✅ 用 `%SystemRoot%\System32\ping.exe -n 2 127.0.0.1 >nul 2>nul` 当 1 秒等待，两种情况下都可靠。
+- ⛔ **`goto` 从 `for` 块里跳出后，紧随其后的多行 `if (...) else (...)` 会取到过期的变量值**：
+  实测健康检查已命中（块内 `set OK=1` 确实执行了）却仍走失败分支——因为该 `if` 块在跳转前已被按旧值解析。
+  ✅ 改用免 goto 写法：`for /l %%i in (1,1,60) do if not defined HIT ( ... if not errorlevel 1 set HIT=1 ... )`，
+  循环结束后 `if defined HIT (...)` 判定（`defined` 是运行时求值，不受块内解析影响）。
+- 📌 这三条的**共同症状**都是"命令看起来成功/失败得莫名其妙"：务必先做**最小复现**（把可疑 bat 缩到 5 行再跑），
+  别在完整脚本里猜。
 
 **How to apply**：Windows 上写任何 bash/powershell/python 交织的命令，先想 `$` 归谁、`/` 归哪个 FS、进程几层。相关：[[mcp-stdio-install-smoke-test]]、[[env-claims-must-be-reverified]]。
 

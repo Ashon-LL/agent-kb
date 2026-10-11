@@ -4,7 +4,7 @@ description: New API rc.26 渠道 CRUD 端点形状与静默成功坑——POST 
 type: pitfall
 source: APIShow/New API rc.26（2026-09-28 修订补渠道 CRUD 端点形状）
 date: 2026-09-17
-verified: 2026-10-02
+verified: 2026-10-12
 topic: api-gateway
 
 ---
@@ -104,27 +104,44 @@ def norm(v):
 写回用 `PUT /api/option/`，body `{"key": "...", "value": "..."}`，**按 key 更新单个 option**——但 value 是整段 JSON，所以改 GroupRatio/ModelRatio 等映射类 option 必须：GET 原值 → 本地留副本 → normalize → 合并 → PUT 回完整值 → **回读验证全表**（键数 + 关键原键逐一对比备份，**不能只验新增键**——09-29 两次事故都是回读只查新键、原键被清空没发现）。同族全景（四类静默事故 + 标准六步）见 [[redacted-get-full-put-wipes-secrets]]；另参见 [[newapi-base-url-never-carry-v1]] 与记忆 `newapi-modelratio-wipe-20260826`。
 
 
-## PUT /api/channel/ —— **`models` 字段静默不落盘**（2026-10-01 实测，ch179）
+## PUT /api/channel/ —— **是 PATCH + GORM 非零字段更新**（2026-10-12 读源码定谳，推翻 2026-10-01 旧结论）
 
+```go
+// controller/channel.go
+channel := PatchChannel{}          // PATCH 语义：未提供的字段保持零值
+...
+if _, ok := requestData["status"]; ok { /* 显式拒绝改状态 */ }
+originChannel, _ := model.GetChannelById(channel.Id, true)
+channel.ChannelInfo = originChannel.ChannelInfo   // ChannelInfo 强制沿用原值
+// model/channel.go
+err = DB.Model(channel).Updates(channel).Error    // ← GORM：只写非零字段
+channel.UpdateAbilities(nil)                      // ← 保存后无条件重建 abilities
 ```
-PUT /api/channel/  body = {"channel": {...含 models...}, "id": 179, "mode": "update"}
--> 200 {"success": true, "data": {...models 仍是旧值...}}
-```
 
-**坑**：改渠道的模型清单时，rc.26 的 `PUT /api/channel/` **返回 `success=true` 但 `channels.models` 与 `abilities` 均不变**，且**旧的 ability 行也不会被清**。这是「改了渠道没改 abilities」族坑的第三次复现（见 [[newapi-disable-must-sync-abilities]]）——只读 `success` 字段不足以判定生效。
+**结论（三件事，全都反直觉）**：
 
-**正确做法**：改模型清单一律直接 SQL + 全量重建该 channel_id 的 abilities，再重启：
+1. **稀疏 body 是安全的**：`{"id":176,"name":"..."}` 这种只带少数字段的 PUT **不会**把
+   `key`/`base_url`/`group` 清零——GORM 的 struct `Updates` 跳过零值。实测：6 条渠道 PUT 后
+   DB 回读 `key` 长度 / `status` / `group` 一字未变。
+2. **反过来也成立：无法用这个端点把字段清空**（空字符串/空对象是零值，会被静默跳过）——
+   想清空 `model_mapping` 只能给非空值或走 SQL。
+3. **`status` 被控制器显式拒绝**（body 里带 `status` → `MsgInvalidParams`），改状态用
+   `PUT /api/channel/{id}/status`（body `{"status":1|2}`，只收这两个值）。
 
-```sql
-UPDATE channels SET models=?, model_mapping=? WHERE id=?;
-DELETE FROM abilities WHERE channel_id=?;
--- 按 models 逐行 INSERT 回同一 group
-```
-之后 `docker restart <new-api>` 清缓存并回读核对。
+**⛔ 2026-10-01 旧结论「PUT 不落 models，必须 SQL + 重建 abilities + 重启」已被推翻**：
+当时用的是 `{"channel": {...}, "id":.., "mode":"update"}` 包裹形状（POST 的形状套在 PUT 上），
+字段没绑进 `PatchChannel` ⇒ 看起来「success=true 但什么都没改」。**正确形状是扁平 body**：
+`PUT /api/channel/` body `{"id": N, "models": "a,b", "model_mapping": "<json 字符串>"}`
+（`models` 与 `model_mapping` 都必须是**字符串**，数组/对象直接 unmarshal 报错）。
+走这个形状：models 落盘、abilities 自动重建（`UpdateAbilities` + `InitChannelCache`）、
+**无需重启**。2026-10-02 与 2026-10-12 两轮共 11 条渠道实测一致。
 
-**另一处形状坑**：`channel_info` 必须是**对象**，传 JSON 字符串报 `cannot unmarshal string into Go struct field`；`model_mapping` 才必须是 JSON **字符串**。二者相反。
+**PUT 响应里 `key` 显示为 `''` 是回显脱敏，不是把 key 写空了** —— 但仍要回读 DB 核对 `key` 与预期真值一致。
 
-**PUT 响应里 `key` 显示为 `''` 是回显脱敏，不是把 key 写空了** —— 但仍要回读 DB 核对 `key` 与预期真值一致（本轮已核，长度与 unit 里的令牌相同）。
+**摘除模型时的收尾动作**（少一步就是「视图摘除」）：渠道 `models` 删名 → **同批删该模型的
+`model_mapping` 死键**（键不在本渠道白名单内即永不路由，留着会让已摘模型看起来仍在供）→
+渠道 `name` 里的模型计数 → `UserUsableGroups` 分组描述里逐模型列名的字符串 → 本地目录条目降级为
+**墓碑**（groups/adapters 皆空，保留沿革）。
 
 **token 的 PUT 更危险**，见 [[newapi-rc26-token-crud-shapes]] 与 [[redacted-get-full-put-wipes-secrets]]：改 token **只能 `POST` 删旧建新**，绝不 PUT。
 
@@ -132,7 +149,7 @@ DELETE FROM abilities WHERE channel_id=?;
 ## How to apply
 
 - 建渠道：`{"channel": {...}, "mode": "single"}`，别指望 `data` 返回 id，反查；`channel_info` 传对象、`model_mapping` 传 JSON 字符串。
-- **改渠道模型清单：`PUT` 不落 `models` 字段，必须 SQL + 全量重建 abilities + 重启**；PUT 成功不等于生效。
+- **改渠道模型清单：`PUT /api/channel/` 扁平 body `{id, models, model_mapping}` 即可落盘并自动重建 abilities（免重启）**；`models`/`model_mapping` 传字符串、别带 `status`；写后回读 DB 核对 key 长度/status/group。
 - 删渠道：`DELETE /api/channel/{id}`，删完查孤儿 abilities。
 - 验连通：`GET /api/channel/test/{id}?model=X`，**要 admin Bearer**；401 说明没带认证，与模型是否存在无关。
 - 改 option：GET 是列表、**value 类型不稳定（dict/字符串混合）**，必须先 `isinstance` normalize；映射类 option 走 GET→留档→normalize→合并→PUT→**回读全表**（键数+原键 diff，不只看新增）六步。
