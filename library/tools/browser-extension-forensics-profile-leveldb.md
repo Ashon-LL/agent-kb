@@ -5,7 +5,7 @@ type: tool
 source: 2026-10-08 default 会话排查 Edge 篡改猴(Tampermonkey 5.5.0 / iikmkjmpaadaobahmlepeloendndfphd) 脚本失效 + 卸载 Browser Relay
 date: 2026-10-08
 verified: 2026-10-08
-topic: browser, methodology
+topic: browser, reverse-engineering
 ---
 
 **判"扩展为什么不工作"的取证顺序**（全只读，不改浏览器配置）：
@@ -23,4 +23,4 @@ topic: browser, methodology
 - 顺带安全提示：这类存储里常躺明文账号 token（本次见到某网盘 access_token 明文）——**诊断输出里不要复述该值**，并提醒用户刷新/吊销。
 - **卸载解包扩展**：源目录删掉即失效，但 Secure Preferences 里的注册项 HMAC 受保护、不能手改（改了会被 Edge 重置），须用户在 `edge://extensions` 点"删除"；彻底一点可加策略 `ExtensionSettings` 阻断。
 
-关联 [[subagent-absence-and-security-claims-need-selfcheck]]、[[powershell-substring-match-bulk-delete-hazard]]。
+关联 [[web-automation-call-page-functions-not-dom-clicks]]、[[browser-only-success-check-credential-first]]。

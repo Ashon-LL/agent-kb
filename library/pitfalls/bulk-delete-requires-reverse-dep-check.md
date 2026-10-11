@@ -5,7 +5,7 @@ type: pitfall
 source: MH-Agent-Open（20261005 删 claude.exe 与编辑器 Agent 通道，两次误删）
 date: 2026-10-05
 verified: 2026-10-05
-topic: methodology
+topic: change-discipline
 ---
 
 **经验**：删除任何东西之前，先把「谁依赖它」查清楚，且**依赖面要按目录逐包核实，不能按目录名推断**。删一个文件 ≠ 删它所在的目录。

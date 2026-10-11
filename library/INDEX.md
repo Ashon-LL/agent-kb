@@ -35,7 +35,7 @@
 - [New API model_limits 列是 CSV 不是 JSON](pitfalls/newapi-model-limits-column-is-csv-not-json.md) — 写 JSON 数组⇒该令牌全模型 403；SQL 改完必重启
 - [Tauri Linux CI 需 webkit2gtk-4.1，无 Ubuntu 镜像](pitfalls/tauri-linux-ci-needs-webkit-41-and-target-override.md) — 无 Ubuntu 镜像；本机只编 Windows 目标
 - [GitHub PR 表单是 details 折叠开关](pitfalls/github-pr-form-is-a-details-disclosure.md) — 大按钮非导航；用原生 setter+requestSubmit
-- [孤儿常量与导入期告警不是阻塞项](pitfalls/orphan-constants-and-import-warnings-are-not-blockers.md) — 判阻塞先 grep 使用点；只有终点可观测物算证据
+- [孤儿常量与导入期告警不是阻塞项](pitfalls/orphan-constants-and-import-warnings-are-not-blockers.md) — 9 条：判阻塞先 grep 使用点、只有终点可观测物算证据、附两层证据排障法（中间态 vs 终态）
 - [读-改-写全量 PUT 事故家族](pitfalls/redacted-get-full-put-wipes-secrets.md) — GET 脱敏/结构判错/白名单拒收四类静默事故；option 写操作六步铁律（留档→normalize→合并→PUT→回读全表→实测）
 - [脱敏必须按键名判定并做负向自测](pitfalls/redaction-must-key-on-field-not-value.md) — 掩码判值不判键、行首锚定漏注释行，密钥静默裸奔；自测=断言输出不含已知密钥
 - [环境变更陈述必须命令复测](pitfalls/env-claims-must-be-reverified.md) — 环境陈述一律命令复测；“通过”字样不可信
@@ -49,7 +49,7 @@
 - [PS here-string 定界符语法与运行时字节分岔](pitfalls/powershell-herestring-grammar-and-runtime-divergence.md) — 开闭不对称、<< 是重定向、UTF8 不跨运行时
 - [bind mount 属主必须匹配容器 uid](pitfalls/bind-mount-owner-must-match-container-uid.md) — 属主由宿主决定、容器内 chown 无效；看容器真读到
 - [吞掉 OSError 会把权限错配伪装成「未配置」](pitfalls/broad-oserror-swallow-hides-permission-misconfig.md) — 只吞 FileNotFoundError、其余 OSError 冒泡
-- [Qoder Office pptx 图片管线故障与页内动画注入](pitfalls/qoder-office-pptx-image-and-animation-workarounds.md) — 带图 put_page 会挂→拆两步；动画只能 zip 注 timing
+- [Qoder Office pptx 图片管线故障与页内动画注入](pitfalls/qoder-office-pptx-image-and-animation-workarounds.md) — 12 条：带图 put_page 拆两步、动画 zip 注 timing、GIF 循环直替、字体须装 HKLM、slide rels 相对路径等
 - [裸 wait 会被常驻子进程永久阻塞](pitfalls/bare-wait-deadlocks-on-long-lived-children.md) — 裸 wait 被常驻子进程永久阻塞；兜底包整个脚本
 - [空值 credential.helper 阻塞 git fetch，unset-all 误删好条目](pitfalls/credential-helper-empty-value-blocks-git-fetch.md) — 空值 helper 让 git 阻塞；unset-all 误删好条目
 - [凭据管理器里的 host 级条目会抢先命中](pitfalls/credential-rotation-must-cover-all-entries.md) — host 级条目抢先命中；按库隔离挂专用 helper
@@ -61,7 +61,7 @@
 - [自动化"在跑"要查两件事](pitfalls/automation-artifacts-lie-existence-and-freshness.md) — 存在性与新鲜度须双层独立检查
 - [日志字面语义不是规格](pitfalls/log-text-is-not-spec-read-emitting-code.md) — 先 grep 发提示语的代码；汇报分三档
 - [shell 初始化文件是分层的](pitfalls/shell-init-files-are-layered-not-one.md) — 登录/交互/ssh命令执行三者读不同文件，只改一处会出现"同一台机器两个版本"；脚本用绝对路径；⛔Debian /etc/profile 会重置 PATH ⇒「登录壳报缺件」是假失败，须两种壳各验一次
-- [配置字段名不是规格](pitfalls/config-field-name-is-not-spec-read-consuming-code.md) — 名字像的字段各管一件事、改错无报错；读消费方代码
+- [配置字段名不是规格](pitfalls/config-field-name-is-not-spec-read-consuming-code.md) — 10 条：名字像的字段各管一事、声明式列表缺项会清掉无关能力、默认值在代码不在配置、UI 字段先证有消费者、反向验证能力
 - [自定义 LLM 端点能力默认全关](pitfalls/custom-llm-endpoint-capabilities-default-false.md) — 认不出的端点按「未知兼容端点」处理，`supportsTools` 默认 false ⇒ 不发 tools ⇒ 工具调用退化成正文；显式声明 + 反证 + 看真实配置文件
 - [覆盖式配置会丢掉隐式兜底](pitfalls/override-config-drops-implicit-fallbacks.md) — --config 驱动会丢向导默认；依赖能力须显式声明
 - [多主人 config 必须读-合并-写](pitfalls/shared-config-multi-owner-merge-write.md) — 多写入者 config 全量覆盖会抹掉别人的键；读-合并-写
@@ -184,9 +184,9 @@
 - [CNB NPC 派单要点](tools/cnb-npc-dispatch-essentials.md) — 大任务书走 argv 会截断；workMode 嵌 npc 内
 - [CNB token 用量统计方法](tools/cnb-token-usage-audit.md) — 正解=逐构建 get-build-ai-audit 累加；credit 是额度≠token（免费期 0 credit 照记 token）；charge_type_token 是平台 bug；截止时刻默认北京时间
 - [CNB issue 附件下载坑](tools/cnb-issue-attachment-download.md) — asset_link 是 Cookie 鉴权路由；200 可能是假 SPA
-- [LLM 网关排障优先级](tools/llm-gateway-triage-priorities.md) — 命中率波动先查 429 切渠道/前缀缓存
+- [LLM 网关排障优先级](tools/llm-gateway-triage-priorities.md) — 8 条：429 切渠道致缓存全 miss、system 前缀增长作废缓存、cache_creation 恒 0 非 bug、模型别名映射、改历史=毁前缀缓存
 - [ZCode 平台实测事实](tools/zcode-platform-verified-facts.md) — 资源落点 + hooks 默认关与 trust 门控
-- [ZCode 删会话是软删：状态与正文分两个库](tools/zcode-session-delete-is-soft-delete-two-dbs.md) — 状态在 tasks-index、正文在 cli/db 无删除标记
+- [ZCode 删会话是软删：状态与正文分两个库](tools/zcode-session-delete-is-soft-delete-two-dbs.md) — 17 条：删除/归档纯软删、状态在 tasks-index、正文在 cli/db 无删除标记；排查前先认清分层
 - [数模论文图与摘要视觉基线](tools/mathmodel-paper-visual-baseline.md) — 高级图型清单、rcParams 固化、摘要按方法→数值
 - [stdio MCP 安装验收法](tools/mcp-stdio-install-smoke-test.md) — 装前必实测 initialize+tools/list
 - [浏览器扩展取证：profile + LevelDB](tools/browser-extension-forensics-profile-leveldb.md) — 判启停/权限读 Secure Preferences（userScripts 须 granted+active 都有）；LevelDB 锁定用 FileShare.ReadWrite 读；location=4 解包扩展删源即失效但注册项须 UI 删；油猴脚本可能依赖本机 RPC 端口（PanLinker→16800 无监听＝不可用）

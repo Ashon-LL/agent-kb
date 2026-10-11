@@ -5,7 +5,7 @@ type: pitfall
 source: MH-Agent-Open（20261005 下线「编辑器 Agent 通道」，同型三次）
 date: 2026-10-05
 verified: 2026-10-05
-topic: methodology
+topic: reverse-engineering
 related: [[bulk-delete-requires-reverse-dep-check]], [[user-instruction-is-not-evidence-of-no-dependency]]
 ---
 

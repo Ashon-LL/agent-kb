@@ -1,0 +1,15 @@
+# 强制行尾：脚本必须 LF，否则 Linux/macOS 下 bash 报 `$'\r': command not found`
+# （2026-10-12 实测：Windows 侧编辑 install.sh 引入 CRLF 后，WSL/Linux CI 全挂）
+*.sh            text eol=lf
+*.bash          text eol=lf
+*.ps1           text eol=lf
+*.py            text eol=lf
+*.yml           text eol=lf
+*.yaml          text eol=lf
+*.json          text eol=lf
+*.md            text eol=lf
+# 二进制/数据文件不做转换
+*.png           binary
+*.jpg           binary
+*.zip           binary
+*.db            binary

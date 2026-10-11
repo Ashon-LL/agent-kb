@@ -203,4 +203,4 @@ NPC 主动指出冲突并请裁决是好事；但**裁决给了却不执行** �
 ### 读官方文档技巧
 索引 `https://docs.cnb.cool/zh/llms.txt`；**每篇把 `.html` 换成 `.md` 直接 curl**，干净且省 token。
 
-关联 [[taskbook-write-the-property-not-your-guessed-mechanism]]。
+关联 [[cnb-token-usage-audit]]、[[npc-iterate-by-sending-failure-text-back]]。

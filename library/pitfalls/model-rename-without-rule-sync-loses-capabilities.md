@@ -5,7 +5,7 @@ type: pitfall
 source: APIShow / ZCode provider_config 2026-10-04（Trae deepseek-v4-flash→v4.1-flash 换名漏同步）
 date: 2026-10-04
 verified: 2026-10-04
-topic: methodology
+topic: llm
 ---
 
 **经验**：给自定义 provider 的模型换名（上游只供新名、旧名 502 时）如果只改了

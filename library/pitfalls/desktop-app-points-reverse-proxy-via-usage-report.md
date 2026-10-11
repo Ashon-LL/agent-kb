@@ -5,7 +5,7 @@ type: pitfall
 source: APIShow / 讯飞 AStudio 积分反代（2026-10-04 端到端实证）
 date: 2026-10-04
 verified: 2026-10-04
-topic: methodology
+topic: reverse-engineering
 ---
 
 **经验**：用户要求「把软件里的积分反代出来用，像 workbuddy 那样」时，不要假设扣分发生在**请求通道**

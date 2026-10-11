@@ -28,3 +28,5 @@ topic: mcp, zcode
 - 排"hook 没触发"：先查已保存的 allow 规则，再重启验证。无独立 `zcode` CLI（桌面应用）；ZCode 日志时间戳是 UTC。
 
 **How to apply**：动 ZCode 扩展前先按"落点语义"定位文件；新增 skill/subagent 后重启会话再验证；跨项目规则写全局 AGENTS.md，项目专属状态写项目 memory；装 hooks 默认关要显式 enabled:true 且重启。相关：[[mcp-stdio-install-smoke-test]]、[[github-china-network-workarounds]]。
+
+关联 [[kb-accident-three-layer-lessons]]、[[zcode-provider-config-group-enum-standard-personal]]、[[zcode-workflow-cwd-drift-and-amend-same-name]]。

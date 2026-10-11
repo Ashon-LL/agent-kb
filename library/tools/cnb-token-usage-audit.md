@@ -5,7 +5,7 @@ type: tool
 source: default 2026-10-05 apigogo 组织用量统计（27.57 亿 tokens）
 date: 2026-10-05
 verified: 2026-10-05
-topic: cnb, methodology
+topic: cnb, reverse-engineering
 ---
 
 **经验**:统计 CNB 组织「token 总用量」唯一可靠口径 = **构建级 AI 账本逐 pipeline 累加**：
@@ -25,3 +25,5 @@ topic: cnb, methodology
 **Why**：口径错一次就是 6 个数量级的错误数；charge_type_token 的假入口会烧掉大量无效尝试；截止时刻差 8 小时会错收/漏收整天运行；⚠️ 只按 npc 事件过滤会漏掉整个 AI IDE 通道（占总量近 1/4）。
 
 **How to apply**：任何"统计 CNB AI token 消耗"的需求都走上面的四步；组织全量含私有库需要 Owner 账号令牌（NPC 令牌读不了私有仓，可见性是硬边界）。结果示例口径：`{仓库, tokens, 请求数, 运行数}` + 按月 + 按模型（deepseek-v4.1-flash/space-bunny 等）拆分，输入/输出/思维链/缓存读分列。
+
+关联 [[npc-iterate-by-sending-failure-text-back]]、[[cnb-npc-dispatch-essentials]]。

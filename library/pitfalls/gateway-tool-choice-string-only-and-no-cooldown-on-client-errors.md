@@ -5,7 +5,7 @@ type: pitfall
 source: APIShow / HITZY2002 codearts2api 网关 tool_choice 根因修复（2026-10-06 端到端实证 + 上游 PR#6/Issue#7）
 date: 2026-10-06
 verified: 2026-10-06
-topic: methodology
+topic: api-gateway
 ---
 
 # 网关侧 tool_choice 形态 + 参数错误处理（2026-10-06，CodeArts2api 实测）

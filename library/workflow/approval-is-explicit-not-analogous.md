@@ -26,3 +26,5 @@ verified: 2026-10-08
 与 [[destructive-actions-must-be-reported-explicitly]] 同族：**可逆 ≠ 可以顺手做**——
 "关 issue 能重开"不构成自行做的理由；它是「我打算做、等你点头」级别。
 与 [[check-inflight-work-before-dispatch]] 同源：**动手前先核当前在跑面**，那一条用在"派"，本条用在"关"。
+
+关联 [[never-pad-reports-with-desired-state]]、[[user-authority-overrides-default-discipline]]。

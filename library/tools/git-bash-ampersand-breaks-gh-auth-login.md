@@ -39,4 +39,4 @@ printf '%s\n' '<token>' | gh auth login --hostname github.com --with-token
 - token 已在对话里出现过就该 revoke 重发。
 - 记 token 用 `gh auth login` 存进 keyring，别让 token 明文留在项目目录。
 
-关联 [[redacted-get-full-put-wipes-secrets]]、[[env-claims-must-be-reverified]]。
+关联 [[shell-init-files-are-layered-not-one]]、[[ssh-heredoc-delimiter-must-be-quoted]]。

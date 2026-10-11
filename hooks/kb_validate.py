@@ -50,6 +50,8 @@ TOPIC_VOCAB = (
     "database", "sqlite", "delivery", "git", "llm", "mcp", "methodology", "office",
     "powershell", "preference", "python", "registry", "rust", "safety", "security",
     "tauri", "toolchain", "windows", "zcode",
+    # 2026-10-12 从 methodology 超级桶（90/188）细分出的 5 个领域：
+    "verification", "diagnosis", "reverse-engineering", "change-discipline", "reporting",
 )
 
 _LINK_RE = re.compile(r"\[\[([^\]]+)\]\]")
@@ -305,10 +307,17 @@ _KB_CORE_COPIES = (
     Path.home() / "Downloads" / "Project" / "trae" / "trae_huanjing"
     / "agent-kb" / "hooks" / "kb_core.py",
 )
-_TRIGGER_RE = re.compile(
-    r'(?:BUILTIN_TRIGGER|TRIGGER_PATTERN)\s*=\s*.{0,60}?re\.compile\(\s*r?["\']([^"\']+)["\']',
+# 触发词定义可能是**多行拼接**（2026-10-12 扩词后 TRIGGER_PATTERN 由多段字符串相加）：
+#   TRIGGER_PATTERN = re.compile(
+#       r"a|b"
+#       r"|c|d"
+#   )
+# 故先定位 `TRIGGER_PATTERN = re.compile(` 后的括号体，再抽取其中全部字符串字面量拼接。
+_TRIGGER_ASSIGN_RE = re.compile(
+    r"(?:BUILTIN_TRIGGER|TRIGGER_PATTERN)\s*=\s*re\.compile\(([^)]*)\)",
     re.S,
 )
+_TRIGGER_STR_RE = re.compile(r"r?[\"\']([^\"\']*)[\"\']")
 
 
 def _norm_trigger(raw):
@@ -330,8 +339,13 @@ def _read_trigger_from_source(path):
         return "missing", None
     except Exception:
         return "unreadable", None
-    m = _TRIGGER_RE.search(text)
-    return ("ok", m.group(1)) if m else ("nomatch", None)
+    m = _TRIGGER_ASSIGN_RE.search(text)
+    if not m:
+        return "nomatch", None
+    parts = _TRIGGER_STR_RE.findall(m.group(1))
+    if not parts:
+        return "nomatch", None
+    return "ok", "|".join(parts)
 
 
 def _read_trigger_from_config(path=None):

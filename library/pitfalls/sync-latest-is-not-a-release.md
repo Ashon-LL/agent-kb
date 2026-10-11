@@ -5,7 +5,7 @@ type: pitfall
 source: MH-Agent-Open（2026-10-06 用户制止：我把「安装区也要最新」执行成 0.9.1 全套发版）
 date: 2026-10-06
 verified: 2026-10-06
-topic: delivery, methodology
+topic: delivery, change-discipline
 ---
 
 **经验**：用户说「同步 / 更新 / 都要最新 / 落实」时，动作上限 = **把目标载体对齐到同一最新状态**（本地检出、远端分支、安装区、消费方各端），**做到即停**。⛔ 不得升格为「bump 版本号 → 重新构建 → 出安装包 → 打 tag → 合并发布线」的发布动作链——发布链只有用户**明说**「发版 / 出包 / bump / 打 tag」才启动。

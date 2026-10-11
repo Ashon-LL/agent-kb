@@ -2,7 +2,7 @@
 name: plan-before-acting-and-verify-before-claiming
 description: 先理清全局给计划再动手；外发/破坏动作前报状态等确认；声称完成必须附验证证据
 type: workflow
-topic: methodology
+topic: verification
 source: mh-agent-open
 date: 2026-10-03
 verified: 2026-10-03
@@ -13,3 +13,5 @@ verified: 2026-10-03
 **Why**：用户说"api_trigger_npc可以用，你试试"这句在回答凭据问题，却读成"去触发它"，于是去抓构建通道端点——用户纠正"它是用于云原生构建的，不是用于云原生开发的"。停构建和推提交前没先报状态，两次都被骂。Stop hook指出"本轮声称完成，但没有给出验证证据"——说了"改名就能修好CI红"却没跑那条用例。
 
 **How to apply**：使用方式的事实（入口/通道/模式）要直接问别假设一整轮——入口（哪个界面操作）、通道（归构建还是归开发）、模式（要我派单还是他自己在环境里干活）。交付前自问三句：改的那条判据用例真跑过吗？新写的配置有没有守卫扫它？哪些验不了？明说"验不了+为什么"。
+
+关联 [[ablation-must-self-verify-change-applied]]、[[guard-must-cover-the-changed-layer]]、[[stated-provenance-needs-evidence-and-conditions]]。

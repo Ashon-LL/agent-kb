@@ -25,3 +25,5 @@ jwt_note = "换得，scopes 为全量星号（含 system）"
 **How to apply:** 描述性文字含双引号时，优先改写措辞（自然语言转述，如 scopes=["*"] 写成「scopes 为全量星号」）；其次用单引号字面串 `'...'`（注意单引号串不处理转义，内部也不能有单引号）。改完立刻 `python -c "import tomllib,pathlib;tomllib.loads(pathlib.Path('x.toml').read_text(encoding='utf-8'))"` 当场验，别攒到最后。
 
 同类引号归属问题：[[powershell-herestring-grammar-and-runtime-divergence]]、[[powershell-start-process-argumentlist-strips-quotes]]、[[windows-scripting-terminal-gotchas]]。
+
+关联 [[fail-open-except-swallows-caller-type-errors]]、[[ssh-heredoc-delimiter-must-be-quoted]]。

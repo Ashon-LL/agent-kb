@@ -5,7 +5,7 @@ type: pitfall
 source: APIShow / qoder 尾号4600 每日领取排查（2026-10-05 端到端实证）
 date: 2026-10-05
 verified: 2026-10-05
-topic: methodology
+topic: reverse-engineering
 ---
 
 **经验**：多账号池里做「每日签到/领奖励」时，服务端常按**人/机器指纹**去重而不是按账号

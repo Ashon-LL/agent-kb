@@ -5,7 +5,7 @@ type: pitfall
 source: MH-Agent-Open T17 守卫收口链（PR #179/#181，台账 #178；中书令/门下/工部三方对抗 + 本机复算一致）
 date: 2026-10-09
 verified: 2026-10-09
-topic: methodology
+topic: change-discipline
 ---
 
 **经验**：「守卫绿」只证明**它检查的那种写法**没出现，不证明被守护的语义成立。
@@ -51,3 +51,5 @@ topic: methodology
 相关：[[ci-status-success-can-be-fake-when-jobs-skipped]]（「绿」不等于「真检查过」同族）、
 [[config-field-name-is-not-spec-read-consuming-code]]（名义≠实际语义同族）、
 ablation-must-self-verify-change-applied（自证「改到了吗」同族）。
+
+关联 [[dont-open-frontline-for-edge-features]]、[[prefer-narrow-native-switch-over-broad-global-or-plugin]]、[[minimal-change-and-no-scope-creep]]。

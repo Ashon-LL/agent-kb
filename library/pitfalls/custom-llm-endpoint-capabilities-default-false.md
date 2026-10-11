@@ -5,7 +5,7 @@ type: pitfall
 source: MH-Agent-Open / openclaw 2026.9.4 自定义 provider（CUMCM A 题实弹，2026-09-30）
 date: 2026-09-30
 verified: 2026-09-30
-topic: methodology
+topic: llm
 ---
 
 **经验**：当 LLM 客户端**无法从 baseUrl 认出模型身份**（自建网关、中转站、自定义 provider id）时，
@@ -51,3 +51,5 @@ looks like a tool call, but no structured tool invocation was emitted`、回合�
 **相邻**：字段名/注释不是规格见 [[config-field-name-is-not-spec-read-consuming-code]]；
 日志文案同样不是规格见 [[log-text-is-not-spec-read-emitting-code]]；
 自定义 provider 的配置生成逻辑见（该条目已不在库中，链接暂缺）。
+
+关联 [[disguised-client-gate-needs-placeholder-tools-merged-not-replaced]]、[[empty-config-is-not-missing-feature]]。

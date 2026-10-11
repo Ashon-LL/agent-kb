@@ -2,7 +2,7 @@
 name: workflow-is-a-probe-not-the-goal
 description: 跑工作流是找软件问题的手段不是目的——问题充分取证就转派单修，比硬跑完更有价值
 type: workflow
-topic: methodology
+topic: change-discipline
 source: mh-agent-open
 date: 2026-10-03
 verified: 2026-10-03

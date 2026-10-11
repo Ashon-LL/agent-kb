@@ -5,7 +5,7 @@ type: pitfall
 source: mh-agent-open
 date: 2026-10-05
 verified: 2026-10-05
-topic: methodology
+topic: diagnosis
 ---
 
 # 运行态异常也可能是用户造成的——别默认它在报故障
@@ -43,3 +43,5 @@ topic: methodology
 **关联**：[[user-instruction-is-not-evidence-of-no-dependency]]（用户动过的东西，
 不要拿"他让删了"当"没人用"的证据）；项目内对应记忆：工作区多方共用
 （非我造成的改动只报告、不追查不提交）。
+
+关联 [[fail-open-except-swallows-caller-type-errors]]、[[pipeline-subshell-swallows-exit-code]]、[[same-error-across-batch-is-one-incident]]。

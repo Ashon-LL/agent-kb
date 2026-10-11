@@ -5,7 +5,7 @@ type: pitfall
 source: mh-agent-open
 date: 2026-10-05
 verified: 2026-10-05
-topic: methodology
+topic: verification
 ---
 
 # 「出处」写错三连：未见记录当不存在、4 个样本编 P90、来源一致当条件成立
@@ -44,3 +44,5 @@ topic: methodology
 **同族条目**：`runtime-anomalies-may-be-operator-actions`（把「与预期不符」当故障）、
 `config-field-name-is-not-spec-read-consuming-code`（字段名不是规格）、
 `handbook-commands-must-verify-consuming-code`（手册凭记忆写 3 处错）。
+
+关联 [[handbook-commands-must-verify-consuming-code]]、[[adr-over-pr-description-and-code-history]]。

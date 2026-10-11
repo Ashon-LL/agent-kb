@@ -5,7 +5,7 @@ type: pitfall
 source: MH-Agent-Open wf5415 炼制批次实弹（2026-10-08，23 张工单被一次会话级失败整批归因）
 date: 2026-10-08
 verified: 2026-10-08
-topic: methodology, llm
+topic: llm, diagnosis
 ---
 
 **经验**：日志/报表里看到「N 条相同（或高度相似）错误」时，先别按 N 次故障叙述，先跑**同源四验**：
@@ -25,3 +25,5 @@ topic: methodology, llm
 - 归因链里显式写清「事件数 vs 对象数」，且**别拿均摊耗时当单对象耗时**（35s 不是每张的真实用时）。
 - 与 [[log-full-read-not-just-errors]] 互补——那条讲读全量（别只筛 error），本条讲读出的条数**先去重同源**；
   与 [[log-text-is-not-spec-read-emitting-code]] 互补——那条讲别信文案字面，本条讲别信条数。
+
+关联 [[fail-open-except-swallows-caller-type-errors]]、[[pipeline-subshell-swallows-exit-code]]、[[runtime-anomalies-may-be-operator-actions]]。

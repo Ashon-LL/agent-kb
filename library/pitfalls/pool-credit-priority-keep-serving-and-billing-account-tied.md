@@ -5,7 +5,7 @@ type: pitfall
 source: APIShow / Astron relay 双号池 + qoder pick() 改造（2026-10-05 端到端实证）
 date: 2026-10-05
 verified: 2026-10-05
-topic: methodology
+topic: api-gateway
 ---
 
 **经验**：把多账号源改成「credit-priority」（剩余额度高者优先，同 Trae）时，最容易漏的不是

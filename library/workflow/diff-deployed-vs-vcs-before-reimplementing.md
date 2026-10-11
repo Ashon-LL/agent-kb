@@ -5,7 +5,7 @@ type: workflow
 source: agent-kb kb_validate --check-triggers 本机版 18KB 未回流仓库（2026-10-04）
 date: 2026-10-04
 verified: 2026-10-04
-topic: methodology, git
+topic: git, change-discipline
 ---
 
 **经验**：接手「上一会话没做完」的任务、发现某个声明的机制缺失时，**先找实现副本再动手写**：
@@ -17,3 +17,5 @@ topic: methodology, git
 **Why**：重写会丢掉上一轮的踩坑修正（都在代码注释里，不在任何文档里），且引入「实现分叉」——恰是任务本来要消灭的东西。
 
 **How to apply**：接手遗留工作的第一组命令就是 `ls -la` 两边 + `diff` 同名文件 + `git status`（未提交改动也是线索）；确认「实现只在部署面」后再动手。判断依据：文件大小/mtime 差异显著、仓库版缺部署版有的功能段。相关：[[hardlink-unify-shared-scripts-across-tools]]（副本治理）、[[report-what-you-did-not-what-you-meant-to-do]]。
+
+关联 [[fork-sync-force-update-wipes-local-customizations]]、[[git-remote-ownership-check]]。

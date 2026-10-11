@@ -20,3 +20,5 @@ topic: container
 **How to apply:** 需要跨边界的临时产物一律走 `docker cp`，或直接写进 bind-mount 目录，别指望 `/tmp` 相通；改容器内 DB 或配置的前置是「容器处于 stopped」，操作对象换成 bind-mount 的宿主路径，然后重启容器。凡 `exec` 失败先看容器是不是 running，别先怀疑代码。
 
 相关：[[container-heredoc-needs-stdin-flag]]（stdin 转发）、[[bind-mount-owner-must-match-container-uid]]（bind mount 属主）。
+
+关联 [[docker-compose-config-expands-secrets]]、[[host-gateway-port-allowlist-before-relay-onboarding]]、[[wsl-docker-on-demand-startup]]。

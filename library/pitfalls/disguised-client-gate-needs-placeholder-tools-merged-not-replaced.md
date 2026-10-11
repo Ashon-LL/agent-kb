@@ -52,3 +52,5 @@ topic: methodology
 [[gateway-tool-choice-string-only-and-no-cooldown-on-client-errors]]（同族「上游只认一种请求形状，写错全挂」）、
 [[model-rename-without-rule-sync-loses-capabilities]]（工具能力声明三处同步）、
 [[redacted-get-full-put-wipes-secrets]]（同类「静默整表覆盖」反模式）
+
+关联 [[empty-config-is-not-missing-feature]]、[[custom-llm-endpoint-capabilities-default-false]]。

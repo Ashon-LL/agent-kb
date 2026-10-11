@@ -132,7 +132,7 @@ class InstallerTestBase:
                                     f"{platform}: 核心文件缺失")
                     if ADAPTER_FILE[platform]:
                         # 2026-10-04 起安装清单补齐校验器与检索器（SKILL.md 规程依赖它们）
-                        for extra in ("adapter_base.py", "kb_validate.py", "kb_search.py"):
+                        for extra in ("adapter_base.py", "kb_validate.py", "kb_search.py", "kb_lock.py"):
                             self.assertTrue((hooks_path / extra).is_file(),
                                             f"{platform}: missing {extra}")
                         self.assertTrue((hooks_path / ADAPTER_FILE[platform]).is_file())

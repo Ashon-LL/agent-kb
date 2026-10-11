@@ -5,7 +5,7 @@ type: pitfall
 source: APIShow / 讯飞 Astron Studio 每日积分链路定谳（2026-10-06 asar 逆向 + 余额差实测到账）
 date: 2026-10-06
 verified: 2026-10-06
-topic: methodology
+topic: reverse-engineering
 ---
 
 **经验**：找「每日自动到账的奖励」触发点时，逆向必须追到**三级链**：

@@ -36,4 +36,4 @@ arduino-cli upload  -p COM3 --fqbn <上面那串> <同名sketch目录>
 
 **用户偏好**：嵌入式/烧录类任务由我直接走 CLI 完成，不让用户装 IDE；**烧录会覆盖板子，动手前先确认**。
 
-关联 [[github-china-network-workarounds]]。
+关联 [[windows-update-resume-and-no-auto-reboot-playbook]]、[[windows-home-cleanup-safe-vs-traps]]。

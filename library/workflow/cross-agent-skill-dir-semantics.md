@@ -5,7 +5,7 @@ type: workflow
 source: workbuddy 装配实测 + Agent Skills spec 与 awesome-dsh 文档检索（2026-10-04）
 date: 2026-10-04
 verified: 2026-10-04
-topic: agent-orchestration, methodology
+topic: agent-orchestration, reporting
 ---
 
 **经验**：给多工具装同一份技能时，每个工具的「技能目录语义」都不同，装法跟着语义走：
@@ -17,3 +17,5 @@ topic: agent-orchestration, methodology
 **Why**：误判语义的代价双向——把链接当实体复制会产生多副本漂移源；把实体当链接支持而直接建链接，不识别链接的工具里技能就静默缺失。本次先错装成真目录（没看本机 35 个链接先例），后靠「同目录惯例 + 官方文档」双证改回。
 
 **How to apply**：给新工具装技能的固定顺序——① `ls` 该工具 skills 目录看**既有条目的形态**（链接还是实体，跟多数走）；② 搜该工具文档确认 symlink 支持与目录名；③ 动手后让工具实际识别一次再收工。用户对平台行为的口头陈述是**线索不是定论**，先用 ①② 取证。相关：[[hardlink-unify-shared-scripts-across-tools]]、[[zcode-platform-verified-facts]]。
+
+关联 [[npc-iterate-by-sending-failure-text-back]]、[[approval-is-explicit-not-analogous]]、[[two-agents-waiting-on-each-other-is-deadlock]]。

@@ -77,4 +77,4 @@ git rev-parse --abbrev-ref origin/HEAD      # origin/feat
 两条命令输出首次一致。⇒ **同一件事要做两次**：①.protocol 里写死正确命令；②把本机污染值清掉。
 只做①，下个会话用顺手的 `symbolic-ref` 一查还是假答案。
 
-关联 [[cnb-secret-repo-imports]]。
+关联 [[fork-sync-force-update-wipes-local-customizations]]、[[diff-deployed-vs-vcs-before-reimplementing]]。

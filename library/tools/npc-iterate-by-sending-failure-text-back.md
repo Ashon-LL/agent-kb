@@ -21,3 +21,5 @@ verified: 2026-10-02
 - ⛔ 不许写「把断言放宽让它绿」——那是取消判据。
 - 让它**更新同一分支**（不新建），我这边 `git fetch` 后在同一 verify 分支上复跑即可。
 - 复算范围 = 改动到的 tests + 相关既有门禁用例，**必须全绿**才合入。
+
+关联 [[cnb-token-usage-audit]]、[[cnb-npc-dispatch-essentials]]。

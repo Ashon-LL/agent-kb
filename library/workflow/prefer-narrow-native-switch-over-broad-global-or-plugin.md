@@ -5,7 +5,7 @@ type: workflow
 source: apishow（2026-10-05 AstrBot 单会话静默 10 小时）
 date: 2026-10-05
 verified: 2026-10-05
-topic: methodology
+topic: change-discipline
 ---
 
 **经验**：诉求「让对象 A 不再做 X」而 A 只是众多同类中的一个时，按这个顺序找机制，找到第一档就停：
@@ -22,3 +22,5 @@ topic: methodology
 **How to apply:** 按 ①→④ 顺序找，停在第一档；每个「关掉」都要留回滚（备份原配置 + 定时恢复脚本 + 失败时保留排查入口）。连续踩墙 2 次以上就回到只读盘点，别继续盲试。
 
 相关：[[survey-before-acting-on-own-project]]、[[verify-with-real-pipeline-and-readonly-probes]]、[[custom-llm-endpoint-capabilities-default-false]]。
+
+关联 [[dont-open-frontline-for-edge-features]]、[[guard-criteria-anchored-to-spelling-always-escape]]、[[minimal-change-and-no-scope-creep]]。

@@ -19,3 +19,5 @@ verified: 2026-10-11
 - 验证页面状态看服务器快照（reload 后读侧栏计数）而非同页 DOM（不实时更新）；权威进度在列表页顶部计数。
 - 外层 `window.scrollTo` 可能被页面脚本重置：优先对目标元素 `scrollIntoView({block:'center'})`。
 - 截图读长页面：给内容容器设 `style.zoom = 0.55~0.8` 一屏看更多。
+
+关联 [[browser-extension-forensics-profile-leveldb]]、[[browser-only-success-check-credential-first]]。

@@ -5,7 +5,7 @@ type: workflow
 source: apishow + mh-agent-open（用户 2026-08-23 / 09-04 / 09-03 / 09-15 多次固化）
 date: 2026-09-15
 verified: 2026-08-23
-topic: methodology
+topic: change-discipline
 ---
 
 **经验**（用户三条铁律，同族合并）：
@@ -18,4 +18,4 @@ topic: methodology
 
 **How to apply**：动手前先在心里圈定字面范围；涉及 UI/术语/信息层级的改动，先把改动清单逐条列给用户确认再开工。
 
-关联 [[log-full-read-not-just-errors]]。
+关联 [[dont-open-frontline-for-edge-features]]、[[guard-criteria-anchored-to-spelling-always-escape]]、[[prefer-narrow-native-switch-over-broad-global-or-plugin]]。

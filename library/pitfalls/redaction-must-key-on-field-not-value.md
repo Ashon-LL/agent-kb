@@ -5,7 +5,7 @@ type: pitfall
 source: MH-Agent-Open（2026-10-06 密钥库 envs 更新导出，对话预览两次漏出 API key）
 date: 2026-10-06
 verified: 2026-10-06
-topic: security, methodology
+topic: security
 ---
 
 **经验**：任何「把敏感值替换成 `<masked>`」的函数，判定条件必须取自**键名/字段名或整行形态**，绝不能取自**值本身的内容**；且上线/使用前必须对**输出**做一次负向自测（断言输出文本里不含那条已知密钥），否则脱敏会静默失效——看起来在脱敏、跑起来零报错、部分行确实被掩，最容易被当成已生效。
@@ -19,4 +19,4 @@ topic: security, methodology
 
 **How to apply**：① 写掩码先问一句「我判的是**键**还是**值**」；② 正则用**包含式**判定（`re.search(r'api_key\s*:', line)` 而非 `^…` 锚定），或统一对「行」走同一个掩码函数，不要为注释行/旧值行另写小正则；③ 自测固定三步：造一条**带假密钥的样本**（覆盖普通行 + 注释前缀行 + 旧值行）→ 跑脱敏 → **断言输出不含该假密钥**；④ 涉及真实凭据的对话预览/报告输出，一律走同一个已验证的掩码函数，不要临场手写正则（临场正则没人测）；⑤ 发现漏出后：如实报告 + 评估轮换需要，别指望「撤回消息」。
 
-关联 [[redacted-get-full-put-wipes-secrets]]。
+关联 [[ecdsa-raw-signature-must-reject-r-equals-s]]、[[dont-handroll-spec-encoders-use-libraries-plus-fallback]]。

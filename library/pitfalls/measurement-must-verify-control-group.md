@@ -5,7 +5,7 @@ type: pitfall
 source: MH-Agent-Open（20261005 液态玻璃性能判断反了两次）
 date: 2026-10-05
 verified: 2026-10-05
-topic: methodology
+topic: verification
 related: [[classify-by-consumer-not-by-file-location]]
 ---
 

@@ -5,7 +5,7 @@ type: pitfall
 source: MH-Agent-Open（20261005 用户指令「删而且清掉」→ 编辑器功能被打坏）
 date: 2026-10-05
 verified: 2026-10-05
-topic: methodology
+topic: change-discipline
 related: [[bulk-delete-requires-reverse-dep-check]]
 ---
 

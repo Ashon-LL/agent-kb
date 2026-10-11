@@ -2,7 +2,7 @@
 name: summary-scope-qualifiers-must-be-explicit
 description: 摘要行的限定词必须带作用域否则单读反向——别给通用规律乱加作用域标记，别用代理指标判定检查坏没坏
 type: pitfall
-topic: methodology
+topic: verification
 source: default
 date: 2026-10-03
 verified: 2026-10-03

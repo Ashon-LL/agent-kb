@@ -13,3 +13,5 @@ verified: 2026-10-03
 **Why**：报本轮成果时在末尾加了一句"有两处你看到时也可以现在决定要不要我做"——属于把未定事项塞进成果汇报，读者会以为"这是已定的事/我已经点头了"，实际什么都还没定。更糟的是让汇报失焦：成果被一条待办尾巴污染。
 
 **How to apply**：派单前分清产品缺陷（对方的活）vs 我自己的工具/流程债（我自己收拾）。把工具债塞给对方被纠正"这个就不是人家的任务"。需要拍板时当场用 AskUserQuestion 独立成段，不夹在成果汇报末尾。
+
+关联 [[approval-is-explicit-not-analogous]]、[[user-authority-overrides-default-discipline]]。

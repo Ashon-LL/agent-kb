@@ -27,3 +27,5 @@ topic: zcode
 往 provider_config 写任何字段前，**先看存量条目都用了什么值**（枚举字段照抄既有取值），再按 [[zcode-provider-config-no-reasoning-enabled-schema]] 的规程做备份+原子替换+回读断言；写完用 mtime 分界确认 `[provider-config]` 日志零失败。平台侧事实见 [[zcode-platform-verified-facts]]。
 
 相关：[[zcode-provider-config-no-reasoning-enabled-schema]]
+
+关联 [[kb-accident-three-layer-lessons]]、[[zcode-workflow-cwd-drift-and-amend-same-name]]。

@@ -24,3 +24,5 @@ topic: methodology
 
 **相关**：[[daily-reward-need-scheduler-to-endpoint-chain]]（同样「先读实现再下结论」）、
 [[quantity-and-config-claim-three-errors]]（「把程序默认值当谁设的」的镜像：**把空配置当未实现**）
+
+关联 [[disguised-client-gate-needs-placeholder-tools-merged-not-replaced]]、[[custom-llm-endpoint-capabilities-default-false]]。

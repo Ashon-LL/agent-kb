@@ -5,7 +5,7 @@ type: tool
 source: 2026-10-06 default 会话清理 C:\Users\MECHREVO（释放 70.5 GB）
 date: 2026-10-06
 verified: 2026-10-06
-topic: windows, methodology
+topic: windows
 ---
 
 **经验**：清 Windows 用户目录前，先把「缓存」和「CLI 入口」分开——两者长得像，删错直接废掉命令行。
@@ -49,4 +49,4 @@ topic: windows, methodology
 - 删完空间没回来先别怀疑卸载失败：跑 `vssadmin list shadows`。卷影副本会把快照时点已存在文件的磁盘块钉住，文件删除后空间仍不归还，直到该副本被删/过期（实测 2026-10-07 05:59 的 ClientAccessible 副本钉住了 coreutils 删掉的 1.4 GB；同机器上 pagefile.sys 会随内存压力自动增减，测量释放量前先排除它）。
 - 删注册表键时 pwsh `Remove-Item -Recurse -Force` 可能对 ACL 完全正常的键报 `SecurityException: Requested registry access is not allowed`（实测 AskLink 残留键，重试无效）；换 `reg.exe delete "<key>" /f` 直接成功。另：Git Bash 里 reg.exe 的 `/f` 会被 MSYS 改写成路径报"无效语法"，须加 `MSYS_NO_PATHCONV=1` 或在 pwsh 内调用。
 
-关联 [[bulk-delete-requires-reverse-dep-check]]、[[user-instruction-is-not-evidence-of-no-dependency]]。
+关联 [[esp32-arduino-cli-flash-workflow]]、[[windows-update-resume-and-no-auto-reboot-playbook]]。

@@ -2,7 +2,7 @@
 name: survey-before-acting-on-own-project
 description: 对连续迭代的自有项目，动手前必须先只读盘点"已有什么"再定"缺什么"
 type: workflow
-topic: methodology
+topic: reverse-engineering
 source: apishow
 date: 2026-10-03
 verified: 2026-10-03
@@ -13,3 +13,5 @@ verified: 2026-10-03
 **Why**：没查协议面就动手改造撞三轮墙回退——如果先只读盘点：responses2chat本就带/v1/responses转换、anthropic_adapter现成在线、nginx早反代/v1/messages。没查网关已有功能就派3个子代理并发开发——自查源码才发现指纹隔离/抽奖/连登兑换/补签本就存在，真正缺的只有两处小补丁。
 
 **How to apply**：生产改动（尤其adapter/渠道/网关）动手前先列：现在有什么、要改什么、怎么回滚。APIShow是长期迭代的自有项目，功能经常"早已存在"（只是没在文档里或分散在各包），靠猜"缺什么"会重复造轮子、乱改、浪费配额。
+
+关联 [[survey-false-negatives-substring-and-enumeration]]、[[browser-extension-forensics-profile-leveldb]]。

@@ -28,6 +28,18 @@ SRC_OK = (
 )
 SRC_NO_TRIGGER = "# -*- coding: utf-8 -*-\nprint('hello')\n"
 
+# 多行拼接形状（2026-10-12 扩词后 TRIGGER_PATTERN 的真实写法）：校验器须拼出完整词表
+SRC_MULTILINE = (
+    "# -*- coding: utf-8 -*-\n"
+    "import re\n\n"
+    "TRIGGER_PATTERN = re.compile(\n"
+    '    r"记住|沉淀"\n'
+    '    r"|值得记|记一下"\n'
+    '    r"|复盘"\n'
+    ")\n"
+)
+SRC_MULTILINE_FLAT = "记住|沉淀|值得记|记一下|复盘"
+
 HOOKS_CLEAN = (
     "# -*- coding: utf-8 -*-\n"
     "import kb_core\n\n"
@@ -213,6 +225,17 @@ class TestSourceParsing(CheckTriggersCase):
         self.src.unlink()
         problems, _ = self.run_check()
         self.assertTrue(any("解析不出触发词（missing）" in p for p in problems))
+
+    def test_multiline_pattern_parses_fully(self):
+        """多行拼接的 TRIGGER_PATTERN（2026-10-12 扩词后的真实写法）须被完整解析。
+
+        旧解析器只认单行 `re.compile(r"...")`，多行拼接会报 nomatch 假故障。
+        """
+        _write(self.src, SRC_MULTILINE)
+        state, val = kb_validate._read_trigger_from_source(self.src)
+        self.assertEqual(state, "ok")
+        self.assertEqual(kb_validate._norm_trigger(val),
+                         kb_validate._norm_trigger(SRC_MULTILINE_FLAT))
 
 
 class TestHooksEnabled(CheckTriggersCase):

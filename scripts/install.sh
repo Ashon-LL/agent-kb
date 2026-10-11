@@ -213,7 +213,7 @@ if [ "$SKILL_ONLY" -eq 1 ]; then
   fi
 else
 mkdir -p "$HOOKS_DST"
-for f in kb_core.py adapter_base.py kb_validate.py kb_search.py "$ADAPTER"; do
+for f in kb_core.py adapter_base.py kb_validate.py kb_search.py kb_lock.py "$ADAPTER"; do
   if [ ! -f "$HOOKS_SRC/$f" ]; then
     echo "[ERROR] 缺少 $HOOKS_SRC/$f" >&2
     exit 2

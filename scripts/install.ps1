@@ -174,11 +174,11 @@ if (-not (Test-Path $HooksDst)) {
     New-Item -ItemType Directory -Path $HooksDst -Force | Out-Null
 }
 
-foreach ($f in @("kb_core.py", "adapter_base.py", "kb_validate.py", "kb_search.py", $cfg.Adapter)) {
+foreach ($f in @("kb_core.py", "adapter_base.py", "kb_validate.py", "kb_search.py", "kb_lock.py", $cfg.Adapter)) {
     Copy-Item (Join-Path $HooksSrc $f) (Join-Path $HooksDst $f) -Force
 }
 Write-Host "[OK] Hooks 已安装 -> $HooksDst" -ForegroundColor Green
-Write-Host "     adapter: $($cfg.Adapter)  (+ kb_core.py, adapter_base.py, kb_validate.py, kb_search.py)" -ForegroundColor DarkGray
+Write-Host "     adapter: $($cfg.Adapter)  (+ kb_core.py, adapter_base.py, kb_validate.py, kb_search.py, kb_lock.py)" -ForegroundColor DarkGray
 
 # 找 python
 $Python = (Get-Command python -ErrorAction SilentlyContinue).Source

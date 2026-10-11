@@ -5,7 +5,7 @@ type: workflow
 source: 2026-10-08 default 会话全机体检（三路子代理 + 主-agent 抽查）
 date: 2026-10-08
 verified: 2026-10-08
-topic: methodology, agent-orchestration
+topic: agent-orchestration, verification
 ---
 
 派子代理做全机盘点省时间，但它们的结果是**转述**，以下三类断言在写进方案/报告前必须自己跑一条命令抽查：

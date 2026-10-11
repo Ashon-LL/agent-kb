@@ -26,3 +26,5 @@ topic: windows, container
 **Why**：Docker Desktop 形态（2~3G、后台常驻 1~2G）与"只给 Agent 开发用"的定位不匹配；WSL 内装零额外产品，但 Windows 侧天然没有 docker 二进制、systemd=关自启后无 daemon，两次转发给 Agent 造成"明明装了却调不动"的假故障；长构建期 daemon 生命周期脆弱（VM 回收）叠加手搓启动 = 连环误诊。
 
 **How to apply**：Agent 需要容器时按上面前缀命令；daemon 不在先 `-u root` 拉起；报错先分清"没起 daemon / socket 权限（组）/ 真命令错误"三种再动手。**跑 docker build 等长任务前先读本条目**——2026-10-12 四连坑里有两条（MSYS 转换、-u root）本条目早已写明，当时没读才是根因。相关：[[windows-scripting-terminal-gotchas]]、[[container-heredoc-needs-stdin-flag]]、[[bind-mount-owner-must-match-container-uid]]。
+
+关联 [[container-host-file-and-exec-boundary]]、[[docker-compose-config-expands-secrets]]、[[host-gateway-port-allowlist-before-relay-onboarding]]。

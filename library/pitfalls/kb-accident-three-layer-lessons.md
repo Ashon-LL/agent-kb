@@ -13,3 +13,5 @@ verified: 2026-10-03
 **Why**：改了运行中 ZCode 的 hook 路径，扩展点全部失效但验证全绿（因为验证也是在内存态里跑的）。存在多个同名近似文件时只改了一个，另一个还在旧位置继续生效。用户连问两次"这个怎么用"时我继续操作没理他，他其实是在表达困惑。
 
 **How to apply**：改扩展点路径前先确认应用是否需要重启才生效。grep 找文件时把所有同名近似物都列出来再动手。用户重复问同一个问题 = 信号，停下来解释清楚比继续操作更重要。
+
+关联 [[zcode-provider-config-group-enum-standard-personal]]、[[zcode-workflow-cwd-drift-and-amend-same-name]]、[[zcode-platform-verified-facts]]。

@@ -5,7 +5,7 @@ type: pitfall
 source: APIShow Trae relay 升级（2026-10-06 实测；验证 compose 端口/网络时误打印 TRAE_TOKEN/RELAY_API_KEYS）
 date: 2026-10-06
 verified: 2026-10-06
-topic: methodology
+topic: container
 ---
 
 # `docker compose config` 会打印全部 env 真值（含密钥）
@@ -35,3 +35,5 @@ topic: methodology
 「校验/预览类命令顺带 dump 全量配置」是反复出现的一类泄漏：`docker compose config`、
 `kubectl get ... -o yaml`（含 Secret）、`terraform show`、`env`/`printenv` 等。
 用最小化/静默/过滤输出，或改用不接触敏感值的旁证命令。
+
+关联 [[container-host-file-and-exec-boundary]]、[[host-gateway-port-allowlist-before-relay-onboarding]]、[[wsl-docker-on-demand-startup]]。

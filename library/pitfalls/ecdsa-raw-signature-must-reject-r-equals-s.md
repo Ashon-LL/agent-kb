@@ -45,3 +45,5 @@ ECDSA 要求 `r ≠ 0`、`s ≠ 0`、**`r ≠ s`**。第三种退化概率极低
 - 压力验证比单测更早暴露：连签 300 次、逐次公钥验签，比跑 5 遍单测可信。
 - **加固项（本条未做）**：`s` 低 S 归一化（`if s > N//2: s = N - s`）防签名 malleable；
   JOSE 场景一般不强制，但同一消息能出两个有效签名本身不是好性质。
+
+关联 [[redaction-must-key-on-field-not-value]]、[[dont-handroll-spec-encoders-use-libraries-plus-fallback]]。

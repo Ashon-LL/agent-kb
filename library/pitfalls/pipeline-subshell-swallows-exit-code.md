@@ -5,7 +5,7 @@ type: pitfall
 source: apishow（2026-10-05 systemd oneshot 恢复脚本）
 date: 2026-10-05
 verified: 2026-10-05
-topic: methodology
+topic: diagnosis
 ---
 
 **经验**：需要「既落日志又保留退出码」时，把主体包进函数用 `return`，末尾统一取第一个元素的退出码：
@@ -27,3 +27,5 @@ exit "$rc"
 **How to apply:** 主体包函数 + `return`，末尾 `rc=${PIPESTATUS[0]}; exit "$rc"`；`set -o pipefail` 只解决「管道整体取非零」，不解决 exit 在子 shell 的问题，两者互补不替代。⛔ 不要用「日志里有 FAIL 字样」代替退出码——调度器不读日志。
 
 相关：[[verify-with-real-pipeline-and-readonly-probes]]、[[automation-artifacts-lie-existence-and-freshness]]。
+
+关联 [[fail-open-except-swallows-caller-type-errors]]、[[runtime-anomalies-may-be-operator-actions]]、[[same-error-across-batch-is-one-incident]]。

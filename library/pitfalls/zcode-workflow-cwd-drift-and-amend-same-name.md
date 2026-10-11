@@ -17,3 +17,5 @@ topic: zcode
 **Why**：实测一轮三跑：第一次因 cwd 漂移在简报发布阶段 errored（文件其实好好在盘上）；第二次因重名在验证执行前 errored，各浪费一个完整 amend 周期；第三次修复后才闭环。
 
 **How to apply**：写 workflow 脚本时把「发布路径常量化 + files.read 预检 + catch 内不裸抛」作为模板默认；任何预期后续轮次复用的 fan-out agent，创建时一律赋引用变量。
+
+关联 [[kb-accident-three-layer-lessons]]、[[zcode-provider-config-group-enum-standard-personal]]、[[zcode-platform-verified-facts]]。

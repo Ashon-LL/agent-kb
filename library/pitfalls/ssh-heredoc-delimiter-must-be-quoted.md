@@ -22,3 +22,5 @@ ssh host 'bash -s' <<'REMOTE'   # 好：逐字送到远端，$SRV 由远端 shel
 **How to apply:** 凡跨 shell 边界送脚本（ssh / docker exec / nsis / 转义层），定界符一律加引号 `<<'EOF'`。确实需要本地展开的地方，把变量在正文外用 `-e` 或参数注入，别混写在正文里。判据：脚本里出现 `[ -f "$X" ]` 之类断言且 `$X` 定义在远端，就必须在远端求值。
 
 相关：[[windows-scripting-terminal-gotchas]]（引号归属）、[[container-heredoc-needs-stdin-flag]]（stdin 转发）。
+
+关联 [[shell-init-files-are-layered-not-one]]、[[git-bash-ampersand-breaks-gh-auth-login]]。

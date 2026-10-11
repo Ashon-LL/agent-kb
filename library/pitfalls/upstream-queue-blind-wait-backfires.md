@@ -5,7 +5,7 @@ type: pitfall
 source: APIShow / qoder 网关 qwen3.8-flash 10605 等待补丁两次试错回退（2026-10-05 实测）
 date: 2026-10-05
 verified: 2026-10-05
-topic: methodology
+topic: api-gateway
 ---
 
 # 上游「排队」类错误：先查社区成熟实现，别自己发明等待机制

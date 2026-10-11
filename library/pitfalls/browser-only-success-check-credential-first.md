@@ -5,7 +5,7 @@ type: pitfall
 source: APIShow 商汤小浣熊(RaccoonWork) relay 调试（2026-10-07，误诊半天后由用户一句"我改了密码"破案）
 date: 2026-10-07
 verified: 2026-10-07
-topic: methodology
+topic: diagnosis
 ---
 
 # 「只有浏览器成功」先查凭据失效，再谈 TLS 指纹/WAF
@@ -29,3 +29,5 @@ topic: methodology
 任何「仅浏览器/官方客户端可用，第三方请求 401/403」的排障，按序做：①`credentials:"omit"` 页内裸 token 复测；②token 指纹比对（是否同一份）；③新鲜凭据重放；④以上全过仍 401 才升级到头族/TLS/IP 假设。改密码、登出、会话吊销类操作会让**已导出的所有副本**（含 refresh token）一起报废，多账号收割场景尤其要先核这份。
 
 相关：[[leak-probe-false-positive-three-guards]]（下结论前先设对照与复现的同族纪律）、[[env-claims-must-be-reverified]]、[[measurement-must-verify-control-group]]
+
+关联 [[web-automation-call-page-functions-not-dom-clicks]]、[[browser-extension-forensics-profile-leveldb]]。

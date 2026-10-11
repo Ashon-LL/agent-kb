@@ -65,3 +65,5 @@ Dockerfile 里的 `ENV PATH=...` 只对**后续 RUN 与容器默认 env** 有效
   ```
 - 判据：**"登录壳报缺件"是假失败**——判镜像缺件必须两种壳各验一次（`bash -c` 与 `bash -lc`），
   或先查 `/etc/profile.d/` 是否已覆盖；只验一种会把好镜像误判成坏镜像（本次差点回退一个正确配置）。
+
+关联 [[ssh-heredoc-delimiter-must-be-quoted]]、[[git-bash-ampersand-breaks-gh-auth-login]]。

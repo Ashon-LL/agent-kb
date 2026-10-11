@@ -5,7 +5,7 @@ type: pitfall
 source: mh-agent-open
 date: 2026-10-03
 verified: 2026-10-03
-topic: methodology
+topic: change-discipline
 ---
 
 # 最小面原则会退化成「发现了但不修」

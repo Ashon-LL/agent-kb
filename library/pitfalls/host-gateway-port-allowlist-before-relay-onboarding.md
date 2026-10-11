@@ -27,3 +27,5 @@ topic: container
 凡新增「绑宿主网桥 IP 供容器调用的服务」，接网关**之前**：①查 `iptables-save | grep <port>` 与维护链的脚本；②加放行并固化进开机脚本；③从**容器内**实测一次连通（宿主直连 200 不算数）。反向同理：容器网关报 i/o timeout 而宿主直连正常时，先查中间防火墙链再怀疑服务本身。
 
 相关：[[browser-only-success-check-credential-first]]（同族"表象相似、真凶在别处"的排障纪律）
+
+关联 [[container-host-file-and-exec-boundary]]、[[docker-compose-config-expands-secrets]]、[[wsl-docker-on-demand-startup]]。

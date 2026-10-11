@@ -108,3 +108,37 @@
 > 结论：现状**不需要**大规模补标（本库多数是通用规律，硬贴标签正是任务书警告的误用）。
 > 缺口在**机制**：`hooks/kb_validate.py` 已加 `[scope]` 规则——description 引用强版本/模型签名
 > 却未点名作用域即报错；写入流程（`skill/SKILL.md` 第 6 步）会跑校验器。模板要求见 `schema/entry.md`。
+
+---
+
+## 2026-10-12 机械核对（agent 执行）
+
+> 口径：逐条读 P1 13 条正文 + frontmatter，判定 ①时效敏感（版本绑定 vs 通用规律）
+> ②`verified` 距今（基准 2026-10-12）③建议动作。**只标注，未改任何条目结论**（复审=核对不是重测）。
+> 三类：「仍成立」=近期有实测注记/verified 新；「待验证」=版本绑定且 verified >20 天无新实证；「保持」=通用规律不涉版本。
+
+| 条目 | 时效敏感 | verified 距今 | 建议 | 理由 |
+|---|---|---|---|---|
+| `pitfalls/newapi-rc26-channel-crud-shapes.md` | 是（rc.26） | 0 天 | 仍成立 | verified 已更新至 2026-10-12，正文含 09-28~10-02 多次实证 |
+| `pitfalls/newapi-rc26-token-crud-shapes.md` | 是（rc.26） | 3 天 | 仍成立 | 10-09 有令牌 CRUD 新实证 |
+| `pitfalls/newapi-disable-must-sync-abilities.md` | 是（rc.26） | 25 天 | 待验证 | 绑定 New API abilities 路由，25 天无新实证；升版后须先复核 |
+| `pitfalls/silent-continue-masks-lost-check-coverage.md` | 是（rc26 校验） | 14 天 | 待验证 | 结论绑定该校验逻辑；属通用反模式但证据来自 rc26 现场 |
+| `pitfalls/third-party-db-columns-typed-by-reading-code.md` | 是（AstrBot v4.27.4） | 24 天 | 保持 | 结论是通用规律（列类型由读它的代码决定），版本只是现场，不需版本复审 |
+| `pitfalls/llm-context-window-is-input-plus-output.md` | 是（AstrBot tdp + qwen3.8-27b） | 13 天 | 待验证 | 强绑定具体网关+模型名，模型换代即可能失效 |
+| `pitfalls/dsh-llm-pi-ai-reasoning-config-traps.md` | 是（DSH pi-ai） | 12 天 | 待验证 | 绑定 DSH 配置 schema，属活跃更新组件 |
+| `pitfalls/zcode-provider-config-no-reasoning-enabled-schema.md` | 是（ZCode） | 21 天 | 待验证 | 绑定 ZCode provider_config schema，21 天无新实证 |
+| `tools/zcode-platform-verified-facts.md` | 是（ZCode） | 6 天 | 仍成立 | 10-06 刚更新过平台事实 |
+| `tools/zcode-session-delete-is-soft-delete-two-dbs.md` | 是（ZCode 双库） | 12 天 | 仍成立 | 正文含 10-04/10-06 新注记，近期复核过 |
+| `tools/mcp-stdio-install-smoke-test.md` | 是（uvx / mcp<2） | 27 天 | 待验证 | 27 天最陈旧之一；mcp 版本迭代快（<2 约束可能已变） |
+| `pitfalls/tauri-linux-ci-needs-webkit-41-and-target-override.md` | 是（webkit2gtk-4.1 / tauri 2.0） | 20 天 | 待验证 | 绑定 webkit 版本与 Tauri 2 目标覆写 |
+| `pitfalls/tauri-remote-url-has-no-ipc.md` | 是（tauri 2.11） | 21 天 | 待验证 | 绑定 Tauri 具体版本行为 |
+
+**汇总**：仍成立 4 条 / 待验证 8 条 / 保持 1 条。
+
+**最需关注的三条待验证**：
+1. `tools/mcp-stdio-install-smoke-test.md`（27 天，`mcp<2` 约束随 MCP 生态迭代最易失效）
+2. `pitfalls/newapi-disable-must-sync-abilities.md`（25 天，New API 属活跃更新，abilities 同步逻辑可能已变）
+3. `pitfalls/llm-context-window-is-input-plus-output.md`（强绑定 qwen3.8-27b 单模型，模型换代即静默失效）
+
+> 说明：本次核对为**机械判读**（读正文+日期），未实际重跑任何环境；「待验证」=下次在该环境作业时优先实测，
+> 不是「结论已错」。实测确认后再更新对应条目的 `verified`。

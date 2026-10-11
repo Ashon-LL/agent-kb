@@ -5,7 +5,7 @@ type: pitfall
 source: mh-agent-open
 date: 2026-10-03
 verified: 2026-10-03
-topic: methodology
+topic: verification
 ---
 
 # 「以为在做」与「做了」要分开报——后台/自动化尤其容易

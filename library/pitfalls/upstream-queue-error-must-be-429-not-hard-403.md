@@ -5,7 +5,7 @@ type: pitfall
 source: APIShow / qoder 网关 403-10605 排队修复（2026-10-05 端到端实证）
 date: 2026-10-05
 verified: 2026-10-05
-topic: methodology
+topic: api-gateway
 ---
 
 **经验**：上游返回「服务排队/暂不可用」语义（如 `code=10605, isQueued=true,

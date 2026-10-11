@@ -43,3 +43,5 @@ fork 上所有**本仓定制行**（配置、锚点、超时、地址…）**会
 
 相关：[[automation-artifacts-lie-existence-and-freshness]]（「看起来还在」不等于「生效」同族）、
 [[backlog-records-rot-verify-before-dispatch]]（记录会腐烂：同步后现值以实测为准）。
+
+关联 [[diff-deployed-vs-vcs-before-reimplementing]]、[[git-remote-ownership-check]]。

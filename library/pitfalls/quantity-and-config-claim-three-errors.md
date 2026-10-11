@@ -2,7 +2,7 @@
 name: quantity-and-config-claim-three-errors
 description: 数字/配置张口就来的三类错——量纲错配、作用域错、归属没查；统计口径也要写明
 type: pitfall
-topic: methodology
+topic: verification
 source: apishow
 date: 2026-10-03
 verified: 2026-10-03
