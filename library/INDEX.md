@@ -15,6 +15,7 @@
 - [账号池 credit-priority 必须服务账号=计费账号贯穿](pitfalls/pool-credit-priority-keep-serving-and-billing-account-tied.md) — 选号贯穿转发/上报/刷新；验证看余额差落谁家；无余额信号退化为健康轮询
 - [划界看调用方而非文件位置](pitfalls/classify-by-consumer-not-by-file-location.md) — 同一文件常混着多方共用件；「住在哪」不等于「属于谁」，re-export 转发层尤甚
 - [测量前先自检对照组与测量层](pitfalls/measurement-must-verify-control-group.md) — 对照组选「改动前真实状态」而非「本来就正常的状态」；GPU/合成开销主线程测不到；测试抓到错≠机制在生效
+- [对平台能力零实测就零断言](pitfalls/no-assertion-without-measurement.md) — 别臆测/想当然/凭记忆下结论；口头陈述是线索不是定论；先看本机先例再搜文档，用户纠正后最小修正
 - [批量删除前必须逐包核实反向依赖](pitfalls/bulk-delete-requires-reverse-dep-check.md) — 删一个可执行文件 ≠ 删它所在目录；同目录兄弟包常被别的组件直接 import，删前逐个 grep
 - [用户指令不是依赖已消失的证据](pitfalls/user-instruction-is-not-evidence-of-no-dependency.md) — 「删掉 X」只定义目标，X 是否还有人用要去查；验证到矛盾时当场报告而非硬办
 - [「同步/都要最新」≠发版](pitfalls/sync-latest-is-not-a-release.md) — 动作上限=对齐到最新即停；bump/重建/tag 必须用户明说才做（动作不得升格）
@@ -145,7 +146,7 @@
 
 - [跨工具技能目录语义各异](workflow/cross-agent-skill-dir-semantics.md) — ~/.agents/skills 是共享约定但支持不一；各工具装法跟着语义走；装前先看本机惯例再搜文档，未实测不断言
 - [接手半途任务先 diff 部署面与版本面](workflow/diff-deployed-vs-vcs-before-reimplementing.md) — 新实现常写在部署目录没回流仓库；找到现成版做回流别重写，丢注释里的踩坑修正是重写最大代价
-- [多工具共享脚本用硬链接统一](workflow/hardlink-unify-shared-scripts-across-tools.md) — 留一个真相源其余同 inode；git 会断链，校验器按内容兜底；改配置指向换不掉副本漂移
+- [多工具共享脚本用硬链接统一](workflow/hardlink-unify-shared-scripts-across-tools.md) — 留一个真相源其余同 inode；**仓库 scripts/ ↔ ~/.agents/kb/tools/ 副本必须双向同步（跨项目使用，两处不能硬链）**；git 会断链、校验器按内容兜底；改配置指向换不掉副本漂移
 - [哨兵（后台监查进程）](workflow/sentinel-background-watch.md) — 起后台进程轮询并自己判终态 exit；响≠好消息
 - [最小改动与不越界三铁律](workflow/minimal-change-and-no-scope-creep.md) — 按字面范围改、闭环即止、不做表面修补
 - [线上是运营态、全量扫描双扫对齐](workflow/online-is-authoritative-dual-scan.md) — 漂移以线上为权威先问再修；只扫本地不算全量
