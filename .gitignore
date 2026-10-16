@@ -31,3 +31,7 @@ docs/video-subtitles.srt
 docs/narration.md
 docs/video-script.md
 docs/*.mp4
+
+# kb 会话扫描的分析数据（可由脚本+会话库重建，不进 git）
+.analysis/kb-session-scan/*.jsonl
+.analysis/kb-session-scan/*.txt
