@@ -35,6 +35,7 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
 | `kb_validate.py` | 写入后校验 schema/topic/双链/索引一致性/触发词副本 | 写入规程第 5 步，手动跑 |
 | `kb_search.py` | 关键词/症状词/topic 全文检索 + `--similar` 写入前查重 | 检索（Recall）与写入规程第 2 步 |
 | `kb_lock.py` | 跨平台写入锁（多会话并发写库时互斥，防读-改-写丢条目） | 写入规程第 3 步前 `with kb_write_lock():` |
+| `kb_trigger_miner.py` | 触发词挖掘器（扫新会话 → Jev 判定沉淀意图 → 产候选词报告） | 定期跑，人工过目后扩词表 |
 | `kb_hooks.py` | ZCode 钩子适配器，只做协议转换，**不存文案或触发词副本** | ZCode `config.json` 的 hooks.events |
 
 ⚠️ 钩子若 import 失败，退化成一句极短提示，**绝不退回旧文案副本**（退回副本等于重新引入漂移）。
