@@ -15,7 +15,7 @@
 - [账号池 credit-priority 必须服务账号=计费账号贯穿](pitfalls/pool-credit-priority-keep-serving-and-billing-account-tied.md) — 选号贯穿转发/上报/刷新；验证看余额差落谁家；无余额信号退化为健康轮询
 - [划界看调用方而非文件位置](pitfalls/classify-by-consumer-not-by-file-location.md) — 同一文件常混着多方共用件；「住在哪」不等于「属于谁」，re-export 转发层尤甚
 - [测量前先自检对照组与测量层](pitfalls/measurement-must-verify-control-group.md) — 对照组选「改动前真实状态」而非「本来就正常的状态」；GPU/合成开销主线程测不到；测试抓到错≠机制在生效
-- [对平台能力零实测就零断言](pitfalls/no-assertion-without-measurement.md) — 别臆测/想当然/凭记忆下结论；口头陈述是线索不是定论；先看本机先例再搜文档，用户纠正后最小修正
+- [对平台能力零实测就零断言](pitfalls/no-assertion-without-measurement.md) — 别臆测/想当然/凭记忆下结论；口头陈述是线索不是定论；先看本机先例再搜文档，用户纠正后最小修正；症状词：搞错、又错、越做越错
 - [批量删除前必须逐包核实反向依赖](pitfalls/bulk-delete-requires-reverse-dep-check.md) — 删一个可执行文件 ≠ 删它所在目录；同目录兄弟包常被别的组件直接 import，删前逐个 grep
 - [用户指令不是依赖已消失的证据](pitfalls/user-instruction-is-not-evidence-of-no-dependency.md) — 「删掉 X」只定义目标，X 是否还有人用要去查；验证到矛盾时当场报告而非硬办
 - [「同步/都要最新」≠发版](pitfalls/sync-latest-is-not-a-release.md) — 动作上限=对齐到最新即停；bump/重建/tag 必须用户明说才做（动作不得升格）
@@ -25,7 +25,7 @@
 - [fail-open 的 except 会吞调用方类型错误](pitfalls/fail-open-except-swallows-caller-type-errors.md) — 宽 except 把 AttributeError 归到「环境读不出」，真故障变静默跳过；入口 Path() 归一 + except 收窄
 - [运行态异常也可能是用户造成的](pitfalls/runtime-anomalies-may-be-operator-actions.md) — 进程没了/端口空着/文件变了先想「是不是用户自己关的改的」；叙述去定性、恢复态动作先问；先查人为操作再查故障
 - [出处要分「事实/推断/未见记录」三档](pitfalls/stated-provenance-needs-evidence-and-conditions.md) — 没找到记录≠不存在；4 样本编不出 P90；来源一致≠条件成立；「统一/全部」类词必须逐项复核
-- [「以为在做」与「做了」要分开报](pitfalls/report-what-you-did-not-what-you-meant-to-do.md) — 后台/自动化尤其易犯：创建成功≠进程存活；说「已生效」前必须另起一次独立验证；错误的监控声明比没监控更糟
+- [「以为在做」与「做了」要分开报](pitfalls/report-what-you-did-not-what-you-meant-to-do.md) — 后台/自动化尤其易犯：创建成功≠进程存活；说「已生效」前必须另起一次独立验证；错误的监控声明比没监控更糟；症状词：我以为
 - [最小面原则会退化成「发现了但不修」](pitfalls/minimal-change-degenerates-into-skipping-real-bugs.md) — 最小面是「先修哪个」的规则，不是「能不能不修」的许可；复算见红要先分「真缺陷 vs 用例自身问题」两种都修
 - [并行测试必须先隔离「会写仓库工作树的用例」](pitfalls/parallel-test-run-must-isolate-repo-mutators.md) — 会写工作树的用例独占跑；-n 别进 addopts
 - [动态工作流的子代理身份与门禁三坑](pitfalls/dynamic-workflow-agent-identity-and-gates.md) — 循环内建 agent 撞重名；门禁先清被拦对象
@@ -83,7 +83,7 @@
 - [New API 多密钥 size 必须跟段数](pitfalls/newapi-multikey-size-must-track-key-count.md) — ⛔追加 key 不改 size⇒新钥当后缀；**10-08 起加钥首选原生 PUT**（GET 掩码→回填真钥→禁带 status→自动重建 size/BLOB→免重启）
 - [台账核对必须双向](pitfalls/ledger-audit-must-be-bidirectional.md) — 只跑单向会漏整类问题；库里有值≠线上在用
 - [待办台账会腐烂，开单前先复核](pitfalls/backlog-records-rot-verify-before-dispatch.md) — 未做≠还没做，按机制复核；实测 6/6 已闭环
-- [同名配置键在不同步骤类型下语义不同](pitfalls/same-config-key-different-semantics-per-step-type.md) — 脚本 Job=总时长超时，npc:go=单次执行
+- [同名配置键在不同步骤类型下语义不同](pitfalls/same-config-key-different-semantics-per-step-type.md) — 脚本 Job=总时长超时，npc:go=单次执行；症状词：卡住
 - [守卫判据锚「写法」必被换写法绕过](pitfalls/guard-criteria-anchored-to-spelling-always-escape.md) — 四连逃逸实证；静态判结构、渲染占位交运行时几何门、变异集裁定强弱
 - [fork 同步上游会静默覆盖本仓定制](pitfalls/fork-sync-force-update-wipes-local-customizations.md) — 同步=force update（重写历史）；定制行带标记+清单，同步后逐项 grep 复核再补回
 - [New API 禁用渠道/改分组都要重建 abilities](pitfalls/newapi-disable-must-sync-abilities.md) — abilities 是唯一路由事实源；须手工重建+回读
@@ -109,7 +109,7 @@
 - [应用自生成的凭据文件权限默认是宽的](pitfalls/generated-credential-files-default-permissive.md) — 程序写的凭据多 644、明文 token 同机可读
 - [ZCode 配置无 reasoning.enabled，禁用须用 reasoningLevel.map](pitfalls/zcode-provider-config-no-reasoning-enabled-schema.md) — 写 enabled:false 被静默忽略
 - [同一概念有多套实现，选错会静默丢语义](pitfalls/same-concept-multiple-implementations-pick-semantics.md) — 禁用多实现语义差别大、选错不报错；先枚举读注释
-- [Tauri 非 tauri:// 来源的 invoke 被 ACL 拦而非对象缺失](pitfalls/tauri-remote-url-has-no-ipc.md) — 坏的是 invoke 被 ACL 拒，非对象缺失
+- [Tauri 非 tauri:// 来源的 invoke 被 ACL 拦而非对象缺失](pitfalls/tauri-remote-url-has-no-ipc.md) — 坏的是 invoke 被 ACL 拒，非对象缺失；症状词：没反应
 - [Windows 标题栏颜色由系统主题说了算](pitfalls/windows-titlebar-theme-dictated-by-system.md) — 由系统设置支配，IMMERSIVE_DARK_MODE 被忽略
 - [被周期覆盖的状态文件不能手改](pitfalls/periodically-overwritten-state-file-cannot-be-hand-edited.md) — 周期全量重写的文件手改双重无效
 - [CI status=success 可能两 job 全 skipped](pitfalls/ci-status-success-can-be-fake-when-jobs-skipped.md) — ifModify 按需触发让 job 跳过仍报 success；判绿必须看 stages 不看顶层 status
@@ -148,14 +148,14 @@
 - [接手半途任务先 diff 部署面与版本面](workflow/diff-deployed-vs-vcs-before-reimplementing.md) — 新实现常写在部署目录没回流仓库；找到现成版做回流别重写，丢注释里的踩坑修正是重写最大代价
 - [多工具共享脚本用硬链接统一](workflow/hardlink-unify-shared-scripts-across-tools.md) — 留一个真相源其余同 inode；**仓库 scripts/ ↔ ~/.agents/kb/tools/ 副本必须双向同步（跨项目使用，两处不能硬链）**；git 会断链、校验器按内容兜底；改配置指向换不掉副本漂移
 - [哨兵（后台监查进程）](workflow/sentinel-background-watch.md) — 起后台进程轮询并自己判终态 exit；响≠好消息
-- [最小改动与不越界三铁律](workflow/minimal-change-and-no-scope-creep.md) — 按字面范围改、闭环即止、不做表面修补
+- [最小改动与不越界三铁律](workflow/minimal-change-and-no-scope-creep.md) — 按字面范围改、闭环即止、不做表面修补；症状词：往返、回撤、返工
 - [线上是运营态、全量扫描双扫对齐](workflow/online-is-authoritative-dual-scan.md) — 漂移以线上为权威先问再修；只扫本地不算全量
 - [上游异常先查现状再动手](workflow/research-upstream-before-fixing.md) — 免费源脆弱；是否已切换以 DB/API 实测为准
 - [子代理编排实战细节](workflow/subagent-orchestration-lessons.md) — 契约先行+文件不相交才并行；失败先续跑勿重派
 - [Jev 与 KB 的适用场景及 DSH 清单核验](workflow/use-jev-and-kb-deliberately.md) — Jev 做类型化判断、KB 做检索沉淀
 - [日志全量通读方法论](workflow/log-full-read-not-just-errors.md) — 只筛 error 会漏显示假象与产品缺陷
 - [平台操作优先 CLI 而非浏览器](workflow/cli-over-browser-automation.md) — 先读文档用命令/API；浏览器只留扫码与一次性 token
-- [ZCode 内嵌浏览器（IAB）web 自动化能力边界](pitfalls/zcode-iab-web-automation-capability-boundary.md) — 能做：DOM 读写/受控表单/需用户激活的交互用 cua 真实点击（坐标=截图栅格）/同源 iframe；⛔ 不能做：文件选择器与 window.open 弹窗（真实点击也不够）⇒ 上传与弹窗类必须真浏览器；用 aria-expanded/value 验证是否真生效
+- [ZCode 内嵌浏览器（IAB）web 自动化能力边界](pitfalls/zcode-iab-web-automation-capability-boundary.md) — 能做：DOM 读写/受控表单/需用户激活的交互用 cua 真实点击（坐标=截图栅格）/同源 iframe；⛔ 不能做：文件选择器与 window.open 弹窗（真实点击也不够）⇒ 上传与弹窗类必须真浏览器；用 aria-expanded/value 验证是否真生效；症状词：没反应
 - [凭据卫生](workflow/token-and-secrets-hygiene.md) — token 不内联命令行、公开内容零敏感痕迹
 - [git 操作先核对仓库归属](workflow/git-remote-ownership-check.md) — 先 remote -v 认角色；默认分支=ls-remote --symref
 - [数值结论必须带基准与主语](workflow/numeric-claims-need-baseline-and-subject.md) — 数字全真但表述错也会被读成离谱结论
@@ -179,7 +179,7 @@
 - [先理清全局给计划再动手](workflow/plan-before-acting-and-verify-before-claiming.md) — 外发/破坏动作前报状态等确认；声称完成必须附验证证据；入口/通道/模式三类使用方式要直接问别假设
 - [别把待决定项包装成已定](workflow/never-pad-reports-with-desired-state.md) — 成果汇报只放已发生的事；需要拍板当场摆多选项独立成段；工具债是自己收拾不是塞给对方
 - [工作流是探针不是目的](workflow/workflow-is-a-probe-not-the-goal.md) — 问题充分取证就转派单修，比硬跑完更有价值；门禁没落地别续跑；"双线跟进"=两线互相把控
-- [动手前先只读盘点现状](workflow/survey-before-acting-on-own-project.md) — 连续迭代自有项目功能常早已存在；先列"已有什么vs缺什么"再决定动什么；连续踩墙2次→回到只读盘点
+- [动手前先只读盘点现状](workflow/survey-before-acting-on-own-project.md) — 连续迭代自有项目功能常早已存在；先列"已有什么vs缺什么"再决定动什么；连续踩墙2次→回到只读盘点；症状词：忘了吗、说过很多次、不是说了
 - [子代理的"已关闭/已不存在/最新版"断言要抽查](workflow/subagent-absence-and-security-claims-need-selfcheck.md) — 三类转述错误：策略读错路径反向、Test-Path 遇带引号路径报假孤儿、winget 无驱动项≠无新版；进用户可见结论前自己跑一条命令；子代理>1h 未完成就停掉自己跑精简版
 - [PowerShell 子串匹配当删除条件的误伤](workflow/powershell-substring-match-bulk-delete-hazard.md) — `-match "ACC"` 连删 ACCESSIBILITY 与 ACCESS_TOKEN（含 GitHub PAT）；精确用 -eq/-ceq，先打印清单再删＋动手前 reg export/复制快照
 - [关掉某个对象时优先最小作用域原生开关](workflow/prefer-narrow-native-switch-over-broad-global-or-plugin.md) — 逐对象状态机 → prompt 软约束 → 全局开关 → 自写插件，找到第一档就停；全局 allow-list 会误伤
@@ -209,7 +209,7 @@
 - [stdio MCP 安装验收法](tools/mcp-stdio-install-smoke-test.md) — 装前必实测 initialize+tools/list
 - [浏览器扩展取证：profile + LevelDB](tools/browser-extension-forensics-profile-leveldb.md) — 判启停/权限读 Secure Preferences（userScripts 须 granted+active 都有）；LevelDB 锁定用 FileShare.ReadWrite 读；location=4 解包扩展删源即失效但注册项须 UI 删；油猴脚本可能依赖本机 RPC 端口（PanLinker→16800 无监听＝不可用）
 - [MCP 有没有用看 handler 返回什么](tools/mcp-prompt-template-servers-add-no-capability.md) — 别读 description 宣称，读 handler 返回什么
-- [CNB 密钥库与 imports 引用](tools/cnb-secret-repo-imports.md) — 密钥库拒一切令牌；.cnb.yml 顶层键须是分支名
+- [CNB 密钥库导入与消费链路](tools/cnb-secret-repo-imports.md) — 密钥库拒一切令牌、只能网页编辑；`.cnb.yml` 顶层键须是分支名；**云开发环境的 env 分层（注入层=容器主进程非 ssh shell）/bootstrap 正确跑法/settings 被上传 DB 覆盖/跨套错配 401 判读**；Prepare 秒失败无日志的取证手法
 - [OpenClaw typed hook 目录](tools/openclaw-hook-catalog.md) — 拦工具调用叫 before_tool_call
 - [present_files 传 URL 即开侧栏浏览器](tools/workbuddy-present-files-url-opens-sidebar-browser.md) — URL→侧栏浏览器、本地 .html→预览面板
 - [无 sourcemap 时复原前端 bundle 全量与 API 面](tools/frontend-bundle-recovery-without-sourcemap.md) — 入口只有 runtime 别判失败；对齐 chunk 清单

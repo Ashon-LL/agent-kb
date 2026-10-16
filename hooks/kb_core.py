@@ -198,7 +198,8 @@ def session_start_reminder(kb_path=None) -> str:
         head = f"全局经验库 {shown} 尚无条目（未找到可读的 INDEX.md）。"
     return (
         f"【kb 开工钩子】{head}"
-        "非平凡任务动手前先扫 INDEX.md，命中读条目全文再干。"
+        "动手前按任务关键词跑 `python ~/.agents/kb/kb_search.py <关键词>`"
+        "（全文检索，症状词/口语也能命中；比扫 INDEX 快），命中读条目全文再干。"
     )
 
 
@@ -206,7 +207,7 @@ def user_prompt_reminder() -> str:
     """UserPromptSubmit 命中触发词时注入的沉淀规程。"""
     return (
         "【kb 沉淀钩子】用户本条消息疑似要求沉淀经验。执行："
-        "1) 读 ~/.agents/kb/INDEX.md 查重——同族条目优先扩充现有文件而非新建；"
+        "1) 先 `python ~/.agents/kb/kb_search.py --similar 「本次内容关键词」` 查重（同族条目优先扩充现有文件而非新建）；若本条消息涉及既有主题，顺手 kb_search 该主题看有无同类既有教训；"
         "2) 按 kb 技能规程落盘（frontmatter: name/description/type/source/date/verified/topic；正文: 经验/Why/How to apply）；"
         "3) 更新 INDEX.md 并核对索引行数=实际文件数；"
         "4) ⛔ 跑校验器 `python ~/.agents/kb/kb_validate.py`，看到 [PASS] 才算完"

@@ -55,6 +55,12 @@ TOPIC_VOCAB = (
 )
 
 _LINK_RE = re.compile(r"\[\[([^\]]+)\]\]")
+_HOOK_NOTES = []  # validate() 产出的钩子一致性提示（供 main 打印，不计入 FAIL）
+# INDEX 条目行：- [标题](路径) — 钩子
+_IDX_LINE_RE = re.compile(r"^\s*[-*]\s+\[([^\]]*)\]\(([^)]+)\)\s*[—\-]?\s*(.*)$")
+# 正文中的「更新痕迹」——出现即提示确认 INDEX 钩子已同步
+_UPDATE_MARK_RE = re.compile(
+    r"变体：|2026-\d\d-\d\d (?:补|新增|修订|更新)|已更新|已更正|补充：")
 _PATH_IN_LINE_RE = re.compile(r"\(([^)]+)\)")
 
 # --- P1-2 作用域标记机制 -------------------------------------------------
@@ -200,6 +206,16 @@ def validate(kb_path=None):
 
     entries = collect_entries(kb)
 
+    # INDEX 钩子映射（供 5c 用）：路径 -> (标题, 钩子)
+    idx_hooks, notes_hook = {}, []
+    try:
+        for line in index_entry_lines((kb / INDEX_FILENAME).read_text(encoding="utf-8")):
+            m = _IDX_LINE_RE.match(line)
+            if m:
+                idx_hooks[m.group(2).strip().replace("\\", "/")] = (m.group(1), m.group(3))
+    except Exception:
+        pass
+
     # 收集 slug 与 name，供链接解析
     slugs = {Path(p).stem for p in entries}
     names = set()
@@ -281,6 +297,21 @@ def validate(kb_path=None):
     for bad_line in index_paths_with_spaces(kb):
         err(f"[index] 条目行路径含空格（markdown 渲染必断链）：{bad_line}")
 
+    # 5c) 钩子-正文一致性：正文有「补充/变体/新增」痕迹时提示确认钩子已同步。
+    #     2026-10-16 自查发现的真实退化：把跨项目同步语义并进 hardlink 正文却漏改钩子
+    #     ⇒ 检索层完全看不到新内容（校验器此前不查这一项）。
+    for p, text in entries.items():
+        marks = _UPDATE_MARK_RE.findall(text)
+        if not marks:
+            continue
+        hook = idx_hooks.get(p, ("", ""))[1]
+        if not any(m in hook for m in marks):
+            notes_hook.append(
+                f"[hook] {p}: 正文含更新痕迹 {sorted(set(marks))}，但 INDEX 钩子未体现"
+                f"——确认钩子覆盖新增内容（检索全靠钩子行，漏改=检索降级）")
+
+    global _HOOK_NOTES
+    _HOOK_NOTES = notes_hook
     return problems
 
 
@@ -538,7 +569,12 @@ def main(argv=None):
         return 1
     for n in t_notes:
         print(f"[info] {n}")
-    print(f"[PASS] kb 校验通过 —— 库：{kb}")
+    for h in _HOOK_NOTES:
+        print(f"[warn] {h}")
+    if _HOOK_NOTES:
+        print(f"[PASS] kb 校验通过（{len(_HOOK_NOTES)} 条钩子待确认，见上）—— 库：{kb}")
+    else:
+        print(f"[PASS] kb 校验通过 —— 库：{kb}")
     return 0
 
 
