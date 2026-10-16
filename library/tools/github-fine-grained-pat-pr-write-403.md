@@ -1,10 +1,10 @@
 ---
 name: github-fine-grained-pat-pr-write-403
-description: gh pr create / POST .../pulls 在细粒度 PAT 缺 pull requests: write 时返回 403 Resource not accessible；Git Data API 能推 ≠ PR 权限够；两条出路（浏览器会话提交 / 用户加 scope）
+description: gh pr create / POST .../pulls 在细粒度 PAT 缺 pull requests: write 时返回 403 Resource not accessible；POST .../issues 同样被挡；Git Data API 能推 ≠ PR/issue 权限够；两条出路（浏览器会话提交 / 用户加 scope）
 type: tool
-source: ps-heredoc-todie（mokuyoaxis/PowerShell-Reliability-Framework PR #1，2026-09-21 实测）
+source: ps-heredoc-todie（mokuyoaxis/PowerShell-Reliability-Framework PR #1，2026-09-21 实测）；default（2026-10-13 POST /issues 同样 403，用侧栏浏览器已登录会话提交成功）
 date: 2026-09-21
-verified: 2026-09-21
+verified: 2026-10-13
 topic: git, browser, security
 ---
 
@@ -22,6 +22,8 @@ PR 创建是**另一个 scope**。
   （compare 页表单填法见 [[github-pr-form-is-a-details-disclosure]]）。
 - ⚠️ 用 `--head owner:branch` 时别把 owner 拼错——`GET /pulls` 的 404 会冒充成"仓库
   不存在"；对照浏览器 compare URL 里的真实 owner 段。
+
+- **同理适用于 issue 创建**：`POST /repos/{o}/{r}/issues` 同样返回这句 403（2026-10-13 实测：`gh api repos/O/R/issues --method POST --input payload.json`）。走浏览器兜底时注意两点：①仓库若用 **YAML issue 表单**（`.github/ISSUE_TEMPLATE/*.yml`）且 `blank_issues_enabled: false`，UI 上必须先选模板；②**`?title=` 能预填，正文不能**——`body` URL 参数对 YAML 表单无效，各字段只能逐个填（`fill()` 对 GitHub 的 Markdown 编辑器有效，填完用 `evaluate` 读 `textarea.value.length` 复核）。浏览器内核若走系统代理，提交前先确认网络可达（见 [[chromium-proxy-behavior-socks4-vs-socks5-and-pac]]）。
 
 **Why**：同一台机子反复撞这句 403 会被误判成网络或仓库权限配置问题，整条提交链路
 空转。

@@ -4,7 +4,7 @@ description: bind mount 的文件属主由宿主机决定，容器内 chown 无�
 type: pitfall
 source: APIShow 部署 workbuddy2api（2026-09-19）：config.json 设 600 + 容器 uid 10001 → 崩溃循环；管理端 data/ 同款
 date: 2026-09-19
-verified: 2026-09-19
+verified: 2026-10-15
 topic: container
 ---
 
@@ -33,3 +33,9 @@ load config: read config: open /app/config.json: permission denied
 6. **安全与可用的折中**：`chmod 600` + `chown <container_uid>` 是既保权限又保可读的正解，不要因为踩坑就直接 `chmod 777`。
 
 **相邻教训**：容器内改源码的补丁问题见 [[container-image-source-patches-need-replay-script]]；进容器跑 here-doc 的 stdin 坑见 [[container-heredoc-needs-stdin-flag]]。
+
+**补充（2026-10-15，APIShow trae-cn-relay）**：属主错配还会**事后发生**——文件本来是对的（容器 uid），
+某次宿主机上的 root 操作（改名/回填）把它重写成 `root:root 0600`；容器**运行中不显形**（池已在内存里
+照常工作），**重启后**才以 `could not load account store: Permission denied: '/app/data/accounts.json'`
+暴露。⇒ 排查顺序：`ls -ln` 看数字属主（别信名字显示）→ `docker inspect --format '{{.Config.User}}'`
+比对 uid → `chown <container_uid>` → **重启验证**（警告消失 + 日志出现池条数才算数）。

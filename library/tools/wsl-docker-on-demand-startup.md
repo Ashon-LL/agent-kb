@@ -21,6 +21,18 @@ topic: windows, container
 - ⛔ **WSL VM 会自己重启**（空闲回收/系统事件；实测 daemon 正在跑构建时 VM 整体重启、进程全灭）。跑大活时失联的处置：`pkill -9 -f dockerd; pkill -9 -f containerd; rm -f /var/run/docker.pid; rm -rf /var/run/docker/containerd` 清场→重启；**daemon 与构建必须放同一个后台任务**（跨任务的 daemon 会被会话回收连带杀掉）。
 - **基础镜像可能不在本地 store**（`docker system prune -a` 类清理后）：build 前先 `docker pull <base>`；daocloud 镜像源的 502 是**瞬时抖动**（健康判据 `curl -sI https://docker.m.daocloud.io/v2/` 返 401），隔一会儿重试即过，不要急着换源。
 - **构建进度可见性**：`docker build … | tail -N` 会把输出缓冲到结束才吐（外层再套 `| tail` 双重缓冲更看不见）。要看实时进度：`ps -eo pid,comm | grep MainThread` 找到 buildkit 步骤进程，读 `/proc/<pid>/cmdline` 即知当前在跑哪步（如 `playwright install chromium`）。
+- ⛔ **`docker build .` 直接在 `/mnt/c` 上跑会挂死（2026-10-14 实测，第五坑）**：build context 要先**遍历整棵仓库树**——
+  `.dockerignore` 只决定最终带哪些文件，**不减少遍历**；`/mnt/c` 跨文件系统遍历 + 仓库含 `.git`/`node_modules` ⇒ 客户端卡在
+  `futex_do_wait`、`/var/lib/docker/buildkit` 零增长、dockerd 无日志、无网络，**看起来像"构建卡死"，实为 context 扫描挂住**。
+  **判据（三同现即判卡）**：`du -sm /var/lib/docker/buildkit` 两次采样不变 + `pgrep -af "[d]ocker build"` 有进程但无活动 +
+  `journalctl -u docker --since "3 min ago"` 无输出。**解法**：最小 context 用 tar 流拷进 WSL 内部再构建——
+  `tar -C /mnt/c/<仓库> -cf - --exclude='*node_modules*' --exclude='*__pycache__*' Dockerfile Dockerfile.npc .dockerignore backend frontend/dist | tar -C /root/mha-build -xf -`，
+  然后 `cd /root/mha-build && docker build --progress=plain -t <tag> -f Dockerfile .`（`--progress=plain` 让输出**逐行**落日志；
+  默认 TTY 进度条在重定向时几乎不可见。`Dockerfile.npc` 只需它自己 + 本地已有产品镜像，无需额外 context）。
+- ⚠️ **别把 push 重试误读成 pull 失败（2026-10-14 同日）**：日志里 `d310d80567ba: Retrying in N seconds` 这类行在 **`docker push`**
+  阶段同样出现（daemon 侧原文是 `Upload failed, retrying: received unexpected HTTP status: 502 Bad Gateway`——
+  推 `docker.cnb.cool` 也会 502 抖动，docker 内建重试通常能过）。**判据**：`journalctl -u docker` 的原文（`Upload failed` = push；
+  `failed to resolve`/`dial tcp` = pull）+ `pgrep -af "[d]ocker pull"` 是否有进程。⛔ 只看「Retrying」字样会把"正在推"误判成"拉不动"。
 - 推库凭据：WSL root 的 `/root/.docker/config.json` 常驻 `docker.cnb.cool` 部署令牌凭据，直接 `docker push` 即可（无需每次 login）。
 
 **Why**：Docker Desktop 形态（2~3G、后台常驻 1~2G）与"只给 Agent 开发用"的定位不匹配；WSL 内装零额外产品，但 Windows 侧天然没有 docker 二进制、systemd=关自启后无 daemon，两次转发给 Agent 造成"明明装了却调不动"的假故障；长构建期 daemon 生命周期脆弱（VM 回收）叠加手搓启动 = 连环误诊。

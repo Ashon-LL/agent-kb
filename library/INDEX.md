@@ -4,6 +4,7 @@
 > 目录：`tools/` 工具链 · `workflow/` 流程协作 · `pitfalls/` 失败教训
 
 ## pitfalls/ 教训与反模式
+- [JOSE 定长 r‖s 转 DER 必须剥前导零](pitfalls/jose-raw-sig-to-der-must-strip-leading-zero.md) — DER 要求最小编码；首字节为 0 时被 OpenSSL/cryptography 拒签，伪装成「签名器 10% 随机失败」；先统计失败样本特征再怀疑 nonce
 - [错误日志归因按 baseURL 判线，模型名会重名](pitfalls/multi-line-log-attribution-use-baseurl-not-model.md) — ZCode model.* 事件归属字段在 context.baseURL；导出 txt 丢 baseURL，须回原始 jsonl 聚合
 - [上游排队错误必须 429 而非硬 403](pitfalls/upstream-queue-error-must-be-429-not-hard-403.md) — 排队先切号试遍、全号耗尽才 429+Retry-After；⛔错误常在 200 建流的 SSE 信封里不在 HTTP 层
 - [配置为空 ≠ 功能没做（空值常是正解）](pitfalls/empty-config-is-not-missing-feature.md) — 判断能力是否启用要读实现+实测产出；trae 设备隔离按账号 sha256 派生，填死 env 反而关掉换设备脱困；撞风控先分设备维度 vs 时段维度
@@ -60,6 +61,10 @@
 - [图-引用距离与图例遮挡](pitfalls/figure-placement-and-legend-occlusion.md) — 几何自检只判出界不判遮挡；图须紧邻引用句不跨页
 - [自动化"在跑"要查两件事](pitfalls/automation-artifacts-lie-existence-and-freshness.md) — 存在性与新鲜度须双层独立检查
 - [日志字面语义不是规格](pitfalls/log-text-is-not-spec-read-emitting-code.md) — 先 grep 发提示语的代码；汇报分三档
+- [采集件必须「先落盘后统计」](pitfalls/collected-data-must-be-persisted-before-analysis.md) — ⛔ `collect();stats();dump()` 会把数据困在内存：实测 1.26M tokens 采集随 kill 归零；顺序铁律=采集→dump→push→统计，跑器归档进仓、分批增量落盘、统计特征预计算
+- [pkill 的 pattern 会杀到承载它的 shell 自己](pitfalls/pkill-self-match-kills-own-shell.md) — `pkill -f "x"` 连带杀掉外层命令链：部分生效+后续静默丢失；先取 PID 再杀 / 方括号技巧 / 破坏性动作拆两次独立调用
+- [本机 SSH 断 ≠ 云端任务死](pitfalls/local-ssh-fail-is-not-cloud-task-death.md) — 判完成看 git 远端新提交、判环境看平台 status/duration；心跳 FAIL 只说明本机通道断（实测：心跳 02:54 全 FAIL，容器内执行者一路干到 04:18 并全部完成归档）
+- [把历史工作流导进 MH-Agent-Open 的三个必核点](workflow/importing-historical-runs-into-mh-agent-open.md) — ①先确认形态（桌面 `~/.MHAgentOpen` vs 容器 `/data`，导错=白干）②文件须在**契约声明位置**（工作区根，不是归档目录）③校验=按 output_files 逐个 test -f；缺件分「在别处」与「真丢了」，后者如实报不造空壳
 - [shell 初始化文件是分层的](pitfalls/shell-init-files-are-layered-not-one.md) — 登录/交互/ssh命令执行三者读不同文件，只改一处会出现"同一台机器两个版本"；脚本用绝对路径；⛔Debian /etc/profile 会重置 PATH ⇒「登录壳报缺件」是假失败，须两种壳各验一次
 - [配置字段名不是规格](pitfalls/config-field-name-is-not-spec-read-consuming-code.md) — 10 条：名字像的字段各管一事、声明式列表缺项会清掉无关能力、默认值在代码不在配置、UI 字段先证有消费者、反向验证能力
 - [自定义 LLM 端点能力默认全关](pitfalls/custom-llm-endpoint-capabilities-default-false.md) — 认不出的端点按「未知兼容端点」处理，`supportsTools` 默认 false ⇒ 不发 tools ⇒ 工具调用退化成正文；显式声明 + 反证 + 看真实配置文件
@@ -128,6 +133,13 @@
 - [新增宿主网关端口先放行白名单再固化开机重放](pitfalls/host-gateway-port-allowlist-before-relay-onboarding.md) — 绑网桥 IP 的服务白名单外被静默 DROP：直连 200、经容器网关 i/o timeout；iptables 一次性规则重启即丢，必须写进维护链的开机脚本
 - [同批同错先验同源再计数](pitfalls/same-error-across-batch-is-one-incident.md) — N 条相同错误 ≠ N 次故障；四验：锚点 ID/耗时=总时长÷N/时间戳齐发/原文逐字同；同源按「1 次事件、影响 N 个对象」叙述
 - [纳号类请求超时 ≠ 失败](pitfalls/batch-account-onboarding-timeout-verify-before-retry.md) — 纳号/入池类 POST 客户端读超时后服务端常已完成；先只读核对池文件（在不在/令牌落没落）再决定重试；「回包成功」也不等于已落盘
+- [外层失败文案 ≠ 子操作失败](pitfalls/run-level-failure-text-is-not-sub-operation-failure.md) — 「Auto-compaction failed」是 run 级聚合文案，同日志 3 次压缩其实全部 succeeded；判"机制失效"要按层核对 attempt 级结算，配额墙真因常在溢出次数而非单次大小
+
+- [整份配置加载失败先查"指向文件"的键](pitfalls/config-load-failure-check-file-refs-and-schema.md) — 文件存在≠合法，还要合该 build 的 schema；第三方工具先写引用后落盘会竞态；表现为设置页改不了/沙盒装不上
+- ["不可行"必须先做探针](pitfalls/negative-feasibility-claims-need-a-probe.md) — 机制推断出的否定结论最容易错、代价最大；探针要摘掉混淆变量（IP+SNI 直连 / 假服务记录请求）
+- [上游升级的行尾噪声与锚点补丁](pitfalls/upstream-merge-crlf-noise-and-anchor-patches.md) — 整文件级 diff 多为 CRLF 噪声（`--ignore-cr-at-eol` 判真伪）；合并后归一 LF 再跑锚点补丁；补丁脚本写盘须 `newline=\"\n\"`；落后 fork 按 SHA 挑单点
+- [Windows 硬件保留内存归因：核显 UMA 切分与独显直连无关](pitfalls/windows-hardware-reserved-memory-attribution.md) — 大头=BIOS 划给核显的固定显存；**首选解法=AMD Software→内存优化器→产能档**（实测 4.255→0.755GiB）；**512MB=终局地板（四轮互证：用户态白名单/驱动掩码{1,2}/固件无选项表/AmdSetup 字段级直写实测不生效——16G 极端值+安全模式双刀判决；256 不可达）**；游戏档=4GB 非 2G；总量=SMBIOS 求和−可见量，dxdiag/qwMemorySize 定位；独显直连只管输出路径不释放它；**跨机型固件字段表用前必做同构性校验**
+- [含空格路径不加引号的怪文件事故](pitfalls/windows-unquoted-path-redirect-accidents.md) — C:\Program 类残留=重定向在空格处被截断；三步排查（读内容→创建时间/属主→Prefetch 与应用日志对账）；处置=核对后删除，弹窗自然消失
 
 ## workflow/ 流程与协作
 
@@ -142,6 +154,7 @@
 - [Jev 与 KB 的适用场景及 DSH 清单核验](workflow/use-jev-and-kb-deliberately.md) — Jev 做类型化判断、KB 做检索沉淀
 - [日志全量通读方法论](workflow/log-full-read-not-just-errors.md) — 只筛 error 会漏显示假象与产品缺陷
 - [平台操作优先 CLI 而非浏览器](workflow/cli-over-browser-automation.md) — 先读文档用命令/API；浏览器只留扫码与一次性 token
+- [ZCode 内嵌浏览器（IAB）web 自动化能力边界](pitfalls/zcode-iab-web-automation-capability-boundary.md) — 能做：DOM 读写/受控表单/需用户激活的交互用 cua 真实点击（坐标=截图栅格）/同源 iframe；⛔ 不能做：文件选择器与 window.open 弹窗（真实点击也不够）⇒ 上传与弹窗类必须真浏览器；用 aria-expanded/value 验证是否真生效
 - [凭据卫生](workflow/token-and-secrets-hygiene.md) — token 不内联命令行、公开内容零敏感痕迹
 - [git 操作先核对仓库归属](workflow/git-remote-ownership-check.md) — 先 remote -v 认角色；默认分支=ls-remote --symref
 - [数值结论必须带基准与主语](workflow/numeric-claims-need-baseline-and-subject.md) — 数字全真但表述错也会被读成离谱结论
@@ -173,19 +186,23 @@
 - [批准范围不做类推扩展](workflow/approval-is-explicit-not-analogous.md) — 点名批准只做那几项；关 issue/台账前先查背后有无在跑的流程（评审/返工挂它回奏）；可逆≠可以顺手做
 - [批量纳号必须一号一登并逐条核对](workflow/batch-account-onboarding-one-per-login.md) — 同一浏览器登录态会把多条待授权 state 全部授权成同一账号（串号是静默的）；多号须换号/无痕 + 按返回体昵称/uid 逐条核对
 
+- [规格先读上游再实测，别盲探](workflow/read-upstream-specs-before-probing.md) — 参数规格（上下文/输出上限/档位）先读源码/`gh release view`/PR/目录元数据；实测只作验收且要有判别力；上游不可达时用 AST 断言+符号检查做证据链
+- [工具与产物的位置纪律](workflow/no-new-artifacts-in-c-root.md) — 工具装正规位（C:\Software / C:\Program Files(x86)，别丢 temp）；产物不许给 C 盘卫生添乱（工作区/项目位、一次性 temp 随手清）；已散落=搬家→更新引用→删原位
+
 ## tools/ 环境与平台
 
+- [Electron 渲染进程 JS 堆耗尽：判读与兜底治理](tools/electron-renderer-heap-oom-governance.md) — 先读 v8-oom 注解：有 4096MB main-cage ⇒ `--max-old-space-size` 无效；Mark-Compact reduce 回收 0 字节 = 真泄漏；崩溃点≠泄漏点；用产品自带计数器做跨进程对照排除；兜底形状=早期 `--expose-gc`＋低档抓堆快照＋软档释放&GC＋硬档优雅 reload＋崩溃自恢复；附 `tsc -b` 污染 src 与 bundle 默认 mac 目标两个构建坑
 - [WSL 里的 Docker 按需启动（不装 Desktop）](tools/wsl-docker-on-demand-startup.md) — Windows 侧无 docker 命令须 wsl.exe 转发带 MSYS_NO_PATHCONV；按需启走 -u root（不手搓 dockerd）；VM 中途重启清场法 / 基础镜像先 pull / build 进度看 /proc cmdline（20261012 四连坑）
 - [Git Bash 的 `&` 会拆掉 gh auth login 参数](tools/git-bash-ampersand-breaks-gh-auth-login.md) — 管道送 stdin；Fine-grained 全选=完全权限但删不了库
 - [GitHub 大陆双向通路（下载+推送）](tools/github-china-network-workarounds.md) — 下载用 jsdelivr/curl 续传；推送须探测+hosts 一体；`github-push-ip-retry.py` DoH 源已扩（阿里/腾讯×2 + UDP 电信/联通/百度/360/CNNIC，2026-10-06 实测国外 DoH 被墙）
 - [git 传输死时走 Git Data API 构造提交](tools/github-git-data-api-push-without-git-transport.md) — 零 git 二进制建分支推提交；须本地 SHA1 预验证
 - [细粒度 PAT 缺 PR 写权限 → 403](tools/github-fine-grained-pat-pr-write-403.md) — 能推≠能开 PR；先 GET /pulls 分辨权限 vs 不存在
-- [直连云环境里的 AI Agent（CNB 工作区）](tools/cnb-workspace-agent-direct-channel.md) — 附**可执行脚本** `tools/cnb-workspace-agent-cli.py`（reply/history/sessions/keepalive/**watch**） — SSH 进容器 + `POST :8688/api/v1/sessions/{id}/reply` 发消息（⛔ 必带 `x-codebuddy-request: 1`）；顺带解掉「容器无心跳 10 分钟即被回收」；附「工作区 start 不能指定模型」「Dockerfile 构建期无 git 凭据」等 4 条相邻事实
-- [CNB NPC 派单要点](tools/cnb-npc-dispatch-essentials.md) — 大任务书走 argv 会截断；workMode 嵌 npc 内
+- [直连云环境里的 AI Agent（CNB 工作区）](tools/cnb-workspace-agent-direct-channel.md) — 附**可执行脚本** `tools/cnb-workspace-agent-cli.py`（reply/history/sessions/keepalive/**watch**） — SSH 进容器 + `POST :8688/api/v1/sessions/{id}/reply` 发消息（⛔ 必带 `x-codebuddy-request: 1`）；⭐20261016 新增：**CLI 打通=继承 serve 进程注入环境（含 CNB_TOKEN 本库令牌，~7 天过期）**、**保活硬门槛=「进页面」（创建后 10 分钟内未进 VS Code 页面即回收，SSH 不算）**（旧「SSH 即心跳」已更正）；附「工作区 start 不能指定模型」「Dockerfile 构建期无 git 凭据」等相邻事实；关闭取证看 backup_status/commit_count/备份自述（file_count 非未提交口径）、平台全量日志不含对话、对话关闭后不可追
+- [CNB NPC 派单要点](tools/cnb-npc-dispatch-essentials.md) — ⭐需求单开在**目标仓**（官方：流水线跑在 Issue 所属仓，不是 NPC 注册仓）；大任务书走 argv 会截断；workMode 嵌 npc 内
 - [CNB token 用量统计方法](tools/cnb-token-usage-audit.md) — 正解=逐构建 get-build-ai-audit 累加；credit 是额度≠token（免费期 0 credit 照记 token）；charge_type_token 是平台 bug；截止时刻默认北京时间
 - [CNB issue 附件下载坑](tools/cnb-issue-attachment-download.md) — asset_link 是 Cookie 鉴权路由；200 可能是假 SPA
 - [LLM 网关排障优先级](tools/llm-gateway-triage-priorities.md) — 8 条：429 切渠道致缓存全 miss、system 前缀增长作废缓存、cache_creation 恒 0 非 bug、模型别名映射、改历史=毁前缀缓存
-- [ZCode 平台实测事实](tools/zcode-platform-verified-facts.md) — 资源落点 + hooks 默认关与 trust 门控
+- [ZCode 平台实测事实](tools/zcode-platform-verified-facts.md) — 资源落点 + hooks 默认关与 trust 门控 + 后台任务重启后成孤儿（进程活但新实例不列管 ⇒ 停孤儿+重拉；要抗重启改独立进程）
 - [ZCode 删会话是软删：状态与正文分两个库](tools/zcode-session-delete-is-soft-delete-two-dbs.md) — 17 条：删除/归档纯软删、状态在 tasks-index、正文在 cli/db 无删除标记；排查前先认清分层
 - [数模论文图与摘要视觉基线](tools/mathmodel-paper-visual-baseline.md) — 高级图型清单、rcParams 固化、摘要按方法→数值
 - [stdio MCP 安装验收法](tools/mcp-stdio-install-smoke-test.md) — 装前必实测 initialize+tools/list
@@ -205,6 +222,13 @@
 - [Windows 用户目录清理：可删的 vs 陷阱](tools/windows-home-cleanup-safe-vs-traps.md) — `*updater*`/缓存/解包暂存可删；⛔ `%APPDATA%\npm` 是全局 CLI 入口不是缓存；孤儿 MSI 记录单清
 - [ESP32 编译烧录链路（本机 arduino-cli）](tools/esp32-arduino-cli-flash-workflow.md) — 工具链落点 + FQBN 必带 huge_app + sketch 目录同名硬约束 + ELF 体积分析法；附 GFX/ST7789 三坑与"参考图别手绘"
 
+- [WARP 分隧道：外网走隧道、大陆直连](tools/warp-split-tunnel-china-direct.md) — 消费版只能"排除"，故排除大陆 v4+v6 网段；DNS 必须随隧道走故勿用 mode proxy；裸 Python 测国内站点会误判超时
+- [Chromium 代理实测：SOCKS4/SOCKS5 与 PAC](tools/chromium-proxy-behavior-socks4-vs-socks5-and-pac.md) — 系统代理 socks= 与 PAC 的 SOCKS 令牌都是 SOCKS4（本地解析、读 hosts），SOCKS5 才远端发域名；用探针 SOCKS 服务看 ATYP 判定
+- [Codex hooks 与 Claude 同构](tools/codex-hooks-are-claude-compatible.md) — 事件名与 stdin/stdout 协议一致、脚本可原样复用；用户级只能写 config.toml [hooks]；解析失败只 warning 不报错；桥接 .cmd 需 CRLF、路径用正斜杠绝对路径、改后必复测（fail-open 吞错）
+- [Tencent BrowserSkill（bsk）：接入与使用](tools/tencent-browser-skill-setup.md) — 三件套安装（CLI/扩展/技能）+ 收割型宿主 daemon 托管启动（run_in_background + --foreground + BSK_AUTO_START=0）+ upload 需扩展「允许访问文件 URL」+ instance_id 重装即变勿写死（20261014 实测）
+- [WSL2 内存账目核对法](tools/windows-wsl2-memory-accounting.md) — 三层取证：.wslconfig 上限（memory/swap/vmIdleTimeout，autoMemoryReclaim 默认不回收）、WSL 内 free -m + docker stats、宿主 vmmemWSL 工作集/提交；WSLg 是第二个隐藏 VM（guiApplications=false 可关）；改配置须 wsl --shutdown
+- [NVIDIA 升级"拒绝访问"=服务键被安全软件禁改放删](tools/nvidia-driver-update-denied-by-service-key-lock.md) — UserPnp 20003 返回值 5 即卡点；ACL 清白+SYSTEM 也拒=内核过滤（实测火绒禁改放删）；退出火绒→sc delete 两个容器服务→重装即成；在用驱动包删不掉属保护
+- [Windows 用户态读写 UEFI 变量四件套](tools/windows-uefi-variable-read-write.md) — 特权 argtypes 假失败/GUID 规范序坑（枚举小端存序）/attr 保留写入+回读验证；枚举条目 NextEntryOffset 布局；carveout-re/uefi-*.py 可复用
 ## 条目格式
 
 
@@ -225,3 +249,4 @@ topic: 受控词表之一（见 kb 技能）
 ```
 - [上游排队类错误先查社区实现再发明等待机制](pitfalls/upstream-queue-blind-wait-backfires.md) — 排队≠时间窗，盲等把快速失败变超长挂起；同类项目早有 queue-poll/串行化/不惩罚账号的答案
 - [Web自动化优先调页面函数与服务端接口](pitfalls/web-automation-call-page-functions-not-dom-clicks.md) — element.click()/UI模拟时灵时不灵；从onclick属性和源码reverse出页面函数与完成接口直接调用是确定性方案；iframe递归遍历/字体混淆用截图读/SPA切换后reload/验证看服务器快照
+- [Codex hook 命令必须是合法 PowerShell](pitfalls/codex-hook-command-must-be-valid-in-powershell.md) — Windows 上 hook 走 pwsh，「"a.exe" "b.py"」双引号串写法 ParserError 且发生在进程创建前（日志无痕，易误判成没调度）；改用无空格 .cmd 桥或加 & 调用符；~/.agents 不是 hook 配置源
