@@ -33,14 +33,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from kb_core import TRIGGER_PATTERN  # noqa: E402
 
-# Jev 调用器位置探测（技能目录；仓库内为 skills/agent-jev/）
-_THIS = Path(__file__).resolve().parent
-for _cand in (Path.home() / ".agents/skills/agent-jev",
-              _THIS.parent / "skills/agent-jev",
-              _THIS.parent.parent / "agent-jev/skills/agent-jev"):
-    if (_cand / "jev.py").is_file():
-        sys.path.insert(0, str(_cand))
-        break
+# Jev 客户端：kb 自带（kb_jev.py，内联）。**不依赖 agent-jev 技能**——
+# 只装 agent-kb 即可用（密钥自配，见 kb_jev 文档头）。
+import kb_jev  # noqa: E402
 
 DB = Path.home() / ".zcode/cli/db/db.sqlite"
 STATE = Path.home() / ".agents/kb/.trigger-miner-state.json"
@@ -106,15 +101,12 @@ def extract_user_msgs(since_ts=0):
 
 
 def jev_judge(text, timeout=12):
-    """用 Jev 判定是否沉淀意图；失败返回 None（不计入）。"""
+    """用内联 kb_jev 判定是否沉淀意图；失败返回 None（不计入）。"""
     try:
-        import jev
-        out = jev.call({"state": text[:1500],
-                        "questions": {JEV_Q[0]: JEV_Q[1]}},
-                       retries=2, timeout=6, deadline=timeout)
-        a = (out.get("answers") or {}).get(JEV_Q[0]) or {}
-        p = a.get("noul")
-        return float(p) if isinstance(p, (int, float)) else None
+        out = kb_jev.call({"state": text[:1500],
+                           "questions": {JEV_Q[0]: JEV_Q[1]}},
+                          retries=2, timeout=6, deadline=timeout)
+        return kb_jev.probability(out, JEV_Q[0])
     except Exception:
         return None
 
@@ -135,6 +127,11 @@ def main():
     ap.add_argument("--threshold", type=float, default=0.6, help="Jev 判定阈值")
     ap.add_argument("--out", default=None, help="报告路径")
     args = ap.parse_args()
+
+    if not kb_jev.has_key():
+        print("× 未找到 Jev 密钥——配置 KB_JEV_KEY 环境变量，或放 ~/.agents/kb/jev.key。", file=sys.stderr)
+        print("  （端点默认 tokenrhythm→apigogo→zen，详见 kb_jev.py 文档头）", file=sys.stderr)
+        return 2
 
     since = 0 if args.all else load_since()
     rows = extract_user_msgs(since)
@@ -187,7 +184,9 @@ def main():
     for p, text in sorted(misses)[:15]:
         report.append(f"- [{p:.2f}] {text.strip()[:150]}")
 
-    out = Path(args.out) if args.out else Path.home() / ".agents/kb/.trigger-miner-report.md"
+    # 报告落「本机库」（~/.agents/kb/，部署态）——规范命名与 CHANGELOG/VERIFICATION-BACKLOG 并列；
+    # ⛔ 不落 /tmp 或 workspace：它是库的运维产物，该随库一起被版本化与查阅。
+    out = Path(args.out) if args.out else Path.home() / ".agents/kb/TRIGGER-MINER-REPORT.md"
     out.write_text("\n".join(report), encoding="utf-8")
     print(f"报告 -> {out}")
 

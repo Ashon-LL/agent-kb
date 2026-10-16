@@ -36,9 +36,22 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
 | `kb_search.py` | 关键词/症状词/topic 全文检索 + `--similar` 写入前查重 | 检索（Recall）与写入规程第 2 步 |
 | `kb_lock.py` | 跨平台写入锁（多会话并发写库时互斥，防读-改-写丢条目） | 写入规程第 3 步前 `with kb_write_lock():` |
 | `kb_trigger_miner.py` | 触发词挖掘器（扫新会话 → Jev 判定沉淀意图 → 产候选词报告） | 定期跑，人工过目后扩词表 |
+| `kb_jev.py` | **kb 自带**的 Jev 客户端（TypeSafe System One 决策模型，多端点冗余） | 挖掘器等需要「高频小判断」的工具 |
 | `kb_hooks.py` | ZCode 钩子适配器，只做协议转换，**不存文案或触发词副本** | ZCode `config.json` 的 hooks.events |
 
 ⚠️ 钩子若 import 失败，退化成一句极短提示，**绝不退回旧文案副本**（退回副本等于重新引入漂移）。
+
+### Jev 能力（kb 自带，无需另装技能）
+
+部分 kb 工具需要「高频小判断」（如挖掘器判一条消息是否表达沉淀意图）。
+该能力由 `kb_jev.py` **内联**提供——**只装 agent-kb 即可用**，不需要额外安装其他技能。
+
+配置（按优先级）：环境变量 `KB_JEV_KEY`（+ 可选 `KB_JEV_ENDPOINT`/`KB_JEV_MODEL`），
+或密钥文件 `~/.agents/kb/jev.key`（单行密钥；兼容读 `~/.jev/{tokenrhythm,apigogo,zen}.key`）。
+默认多端点冗余：tokenrhythm → apigogo → opencode zen，前一个失败自动切下一个。
+自检：`python ~/.agents/kb/kb_jev.py`（打印各端点可用性，**不打印密钥**）。
+
+⛔ 密钥绝不入库（`.gitignore` 已排除 `*.key` / `jev.key`）。
 
 ## 何时检索（Recall）
 

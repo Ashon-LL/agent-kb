@@ -174,7 +174,7 @@ if (-not (Test-Path $HooksDst)) {
     New-Item -ItemType Directory -Path $HooksDst -Force | Out-Null
 }
 
-foreach ($f in @("kb_core.py", "adapter_base.py", "kb_validate.py", "kb_search.py", "kb_lock.py", "kb_trigger_miner.py", $cfg.Adapter)) {
+foreach ($f in @("kb_core.py", "adapter_base.py", "kb_validate.py", "kb_search.py", "kb_lock.py", "kb_trigger_miner.py", "kb_jev.py", $cfg.Adapter)) {
     Copy-Item (Join-Path $HooksSrc $f) (Join-Path $HooksDst $f) -Force
 }
 Write-Host "[OK] Hooks 已安装 -> $HooksDst" -ForegroundColor Green
