@@ -1,6 +1,6 @@
 ---
 name: kb
-description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/kb <关键词>` 检索库内经验；`/kb add <一条经验>` 按规范写入。非命令时：开始非平凡任务前先检索本库相关经验避免重复踩坑；任务闭环、修复踩坑、用户说'记住这个/沉淀经验/晋升到全局/以后别再犯'时把可复用教训写入本库。跨项目可复用经验入本库，项目专属记忆留各项目 memory。关键词：经验、教训、最佳实践、沉淀、记住、全局、复盘、踩坑。"
+description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/kb <关键词>` 检索库内经验（底层 python ~/.agents/kb/kb_search.py，支持症状词与 topic 过滤）；`/kb add <一条经验>` 按规范写入；`/kb-harvest` 从各项目 memory 收割跨项目可复用经验。**写入后必须跑 `python ~/.agents/kb/kb_validate.py`，看到 [PASS] 才算完**。非命令时：开始非平凡任务前先检索本库相关经验避免重复踩坑；任务闭环、修复踩坑、总结教训、复盘、发现值得记或引以为戒的内容，以及用户说'记住这个/沉淀经验/晋升到全局/以后别再犯/下次注意/这个坑记一下/写进知识库/长点记性/做个笔记/纳入kb/纳入记忆/记入/订正记忆/修正kb/值得一记'等一切表达沉淀意图时（含「…纳入kb了吗/修正kb了吗」这类确认疑问句），把可复用教训写入本库。跨项目可复用经验入本库，项目专属记忆留各项目 memory。关键词：经验、教训、最佳实践、沉淀、记住、全局、复盘、踩坑、值得记、引以为戒、记性、笔记、备忘、存起来、写进知识库。"
 ---
 
 # kb — 全局经验知识库
@@ -18,6 +18,18 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
 | `workflow/` | 流程与协作方法（改代码、验收标准、跨平台链路） |
 | `pitfalls/` | 失败教训与反模式（踩过的坑、静默失败、假阳性） |
 
+配套脚本（**与库同目录，`kb_validate.py` 平铺 import `kb_core.py`，三个必须一起移动**）：
+
+| 文件 | 作用 | 谁调用 |
+|---|---|---|
+| `kb_core.py` | 消息文本与触发词的**唯一真相源**；索引解析、库路径解析 | 只被 `kb_validate.py` 与 `kb_hooks.py` import |
+| `kb_validate.py` | 写入后校验 schema/topic/双链/索引一致性/触发词副本 | 写入规程第 5 步，手动跑 |
+| `kb_search.py` | 关键词/症状词/topic 全文检索 + `--similar` 写入前查重 | 检索（Recall）与写入规程第 2 步 |
+| `kb_lock.py` | 跨平台写入锁（多会话并发写库时互斥，防读-改-写丢条目） | 写入规程第 3 步前 `with kb_write_lock():` |
+| `kb_hooks.py` | ZCode 钩子适配器，只做协议转换，**不存文案或触发词副本** | ZCode `config.json` 的 hooks.events |
+
+⚠️ 钩子若 import 失败，退化成一句极短提示，**绝不退回旧文案副本**（退回副本等于重新引入漂移）。
+
 ## 何时检索（Recall）
 
 开始以下任务前，先读 `INDEX.md`，命中相关条目则读全文再动手：
@@ -26,7 +38,7 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
 - 用户提到"之前遇到过""上次说好的""别再犯"
 - 你即将执行的操作与某个已知坑同类（装软件、改 PATH、网络下载、跨工具配置）
 
-检索方式：`INDEX.md` 摘要不够用时，`grep -ri "关键词" ~/.agents/kb/`。
+检索方式：优先 `python ~/.agents/kb/kb_search.py <关键词...> [--topic 领域]`——全文检索，症状词（挂了/卡死/不生效/黑窗）直达正文；`/kb <关键词>` 底层即它。无脚本环境退回 `grep -ri "关键词" ~/.agents/kb/`。
 应用方式：命中的条目按 "How to apply" 执行；若条目与现状矛盾（环境已变），以实测为准并更新该条目。
 
 ## 何时写入（Capture）
@@ -42,18 +54,49 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
 
 ## 写入规程
 
-1. **判类**：工具链 → `tools/`，方法流程 → `workflow/`，教训反模式 → `pitfalls/`；
-   用户的**常驻偏好/纠正** → `workflow/` 且 `topic: preference`（不新增 type / 一级目录）
-2. **查重**：grep 相似主题，命中已有条目则**更新它**而非新建
-3. **新建文件**：`<目录>/<kebab-slug>.md`，按 `schema/entry.md` 格式写 frontmatter
-4. **更新 INDEX.md**：在对应分类下加一行 `- [标题](相对路径) — 一句话钩子`
-5. **写作风格**：直说怎么做，一事实一文件，条目 ≤ 30 行
-6. **校验（写入当下 · 硬门）**：落盘并更新索引后，必须跑库校验器
-   `python3 hooks/kb_validate.py`（在库根/本仓库根执行），覆盖：schema 必填字段
-   `name/description/type/source/date`、`type` 与所在目录一致、`[[双链]]` 死链、
-   索引行数与磁盘条目数一致、索引路径与磁盘路径双向一致。**任一不通即为写入失败**，
-   必须修到 `[PASS]` 才能回报；不得跳过校验、不得只凭人工目测。校验器与 `kb_core`
-   同源（同一份索引正则），因此它判「索引行」的口径与每会话注入的计数完全一致。
+1. **判类**：工具链 → `tools/`，方法流程 → `workflow/`，教训反模式 → `pitfalls/`
+2. **查重**：跑 `python ~/.agents/kb/kb_search.py --similar "<候选标题或一句话描述>"`，top5 同族候选里命中即**扩充它**而非新建（人肉读 INDEX 会漏——同族条目措辞往往互不重叠，2026-10-04 已有同族三副本的真实查重失败）
+3. **并发写保护**：多会话/多 Agent 可能同时在写库（本机实测发生过）——写入前用
+   `python -c "import sys;sys.path.insert(0,__import__('os').path.expanduser('~/.agents/kb'));from kb_lock import kb_write_lock;..."`
+   或直接在脚本里 `from kb_lock import kb_write_lock` 然后 `with kb_write_lock():` 包住「读 INDEX → 改 → 写回」整段。
+4. **新建文件**：`<目录>/<kebab-slug>.md`，frontmatter **七个必填字段一个都不能少**：
+
+   | 字段 | 填法 |
+   |---|---|
+   | `name` | 与文件名同名的 kebab-slug |
+   | `description` | 一句话摘要（检索全靠它）；只对某平台成立的结论要点名平台或加 `【作用域=X】` |
+   | `type` | `tool` / `workflow` / `pitfall`，**必须与所在目录一致** |
+   | `source` | 来源项目或事件 |
+   | `date` | 写入日期 `YYYY-MM-DD` |
+   | `verified` | 经验被实测确认的日期 `YYYY-MM-DD` |
+   | `topic` | 领域，取受控词表之一（见下） |
+
+   `topic` 受控词表（正交于 `type`；`type` 答"怎么用"，`topic` 答"属于哪个领域"）：
+   `api-gateway` `agent-orchestration` `browser` `ci` `cnb` `container` `database`
+   `sqlite` `delivery` `git` `llm` `mcp` `methodology` `office` `powershell`
+   `preference` `python` `security` `tauri` `windows` `zcode`
+
+   正文三段式：**经验**（直接说怎么做）/ **Why**（不这样做会怎样）/ **How to apply**（何时用）。
+5. **更新 INDEX.md**：在对应分类下加一行 `- [标题](相对路径) — 一句话钩子`
+6. **跑校验器（不可跳过）**：
+
+   ```bash
+   python ~/.agents/kb/kb_validate.py
+   ```
+
+   必须看到 `[PASS]` 才算写完。它查 frontmatter 七字段、`type` 与目录一致性、`topic` 是否在词表、
+   `[[双链]]` 是否指向存在的条目、索引行数与磁盘文件数是否**双向**一致。
+   报 `[FAIL]` 就按它列的行逐条修，**不要绕过、不要改校验器迁就条目**。
+7. **写作风格**：直说怎么做，一事实一文件，条目 ≤ 30 行。与「同族扩充」的冲突裁决：
+   同一事实的新证据/新反例 → 扩充现有条目（允许超行，过程性复盘移 CHANGELOG）；
+   独立可检索的新事实 → 新建条目 + [[双链]] 互指，宁可同族多条也不塞成一篇。
+
+## 合并既有条目（两条并一条时照此执行）
+
+1. **保谁**：保留内容最全/最早的那条（文件名与 `name` 不变），另一条的独有内容全部并入后删除其文件
+2. **字段并接**：`source` 追加并注明日期；`date` 取最早；`verified` 取最新实测日；`topic` 取并集（逗号多值）；`description` 重写为合并后的完整摘要
+3. **正文**：并入段标注来源日期；被并条目的 [[出链]] 一并带过来；全库 grep 被并条目名，把引用改指保留条目
+4. **收尾三件**：INDEX 删被并行、保留行钩子重写以覆盖合并后内容（检索全靠钩子行，漏改=检索降级）；CHANGELOG 记一条（谁并入谁、理由）；跑 kb_validate 见 [PASS]
 
 ## 与项目 memory 的分工
 
