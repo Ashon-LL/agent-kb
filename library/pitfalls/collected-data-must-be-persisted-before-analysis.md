@@ -29,3 +29,5 @@ topic: cnb, methodology
 **相关判据**：判"进程还在干活"不能只看 CPU（I/O 绑定型 CPU≈0 属正常，看 socket 数 + 进度行）；
 判"数据会不会丢"只看一件事——**raw 是否已经落盘并 push**。
 相关：[[log-text-is-not-spec-read-emitting-code]]、[[cnb-workspace-agent-direct-channel]]
+
+关联 [[importing-historical-runs-into-mh-agent-open]]、[[taskbook-write-the-property-not-your-guessed-mechanism]]、[[workflow-is-a-probe-not-the-goal]]、[[local-ssh-fail-is-not-cloud-task-death]]。

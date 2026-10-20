@@ -48,3 +48,5 @@ queueType=p3, serviceAvailable=false, retryAfterSeconds=30`）时，**绝不能�
 「文件更新≠代码在跑」见 [[file-change-not-code-running]]；「日志字面语义不是规格」见
 [[log-text-is-not-spec-read-emitting-code]]；「别拿单一关键词当全量」见
 [[env-claims-must-be-reverified]]。
+
+关联 [[upstream-queue-blind-wait-backfires]]。

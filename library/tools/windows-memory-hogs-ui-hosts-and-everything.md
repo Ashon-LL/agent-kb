@@ -19,3 +19,5 @@ topic: windows
 **Why**：这三个进程都常被当成"异常占用/中毒"；知道基线、趋势和安全重启方式，才不会误杀或做无效优化。
 
 **How to apply**：用户抱怨某进程占用高 → 先取 Working Set/私有内存/启动时间/CPU → 对照本条基线；TextInputHost 直接重启；Everything 用排除列表（缓存/系统组件优先：pnpm store、npm/uv 缓存、WinSxS、ProgramData\Microsoft、Temp、RecycleBin 等），别关索引本身。相关：[[windows-home-cleanup-safe-vs-traps]]、[[windows-wsl2-memory-accounting]]。
+
+关联 [[no-new-artifacts-in-c-root]]、[[nvidia-driver-update-denied-by-service-key-lock]]、[[windows-hardware-reserved-memory-attribution]]、[[rustup-update-fails-when-stale-msvc-std-component-missing]]。

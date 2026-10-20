@@ -31,3 +31,5 @@ topic: git
 重跑补丁脚本（锚点必须全中）→ 重建/部署 → e2e」；挑完单点回查自有补丁是否还在（逐文件 git status）。
 
 相关：[[oneoff-script-file-edit-rules]]、[[container-image-source-patches-need-replay-script]]、[[read-upstream-specs-before-probing]]。
+
+关联 [[vite-build-output-names-track-source-eol]]。

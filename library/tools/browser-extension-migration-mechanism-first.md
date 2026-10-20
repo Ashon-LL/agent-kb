@@ -18,3 +18,5 @@ topic: browser
 **Why**：把"试过"当成"推进"，会把用户的事做成自己的实验场，还覆盖用户数据（本例中手动改过 ego 的 Secure Preferences 与 Local State 默认 profile）。判定类问题（装没装/缺哪些）拿不到可靠证据时，正确答案是"我不知道，需要 X"而不是再猜一次。
 
 **How to apply**：任何"把 A 浏览器的 X 迁到 B 浏览器"的任务：① 先确认 B 的安装机制与数据真源（落盘文件，不是 UI）；② 按名字而不是 ID 比对；③ 用落盘状态给结论；④ 两次失败就停下来把机制讲给用户、让用户决定装还是弃。相关：[[tencent-browser-skill-setup]]、[[browser-extension-forensics-profile-leveldb]]。
+
+关联 [[zcode-iab-web-automation-capability-boundary]]。

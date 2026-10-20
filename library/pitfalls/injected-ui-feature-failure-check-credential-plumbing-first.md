@@ -18,4 +18,4 @@ verified: 2026-10-19
 3. **修法优先级**：① 首选**复用已桥接的 IPC 通道做多路复用**（把 `command:"log"/"add"/"scan"` 塞进已有入参），避免改 preload、避免扩 contextBridge 白名单；② 主进程**按 id 从配置文件取明文凭据**做兜底，比渲染层任何反查都稳；③ 兜底写配置**只追加数组字段**，不碰校验更严的子结构（zod 可能整份拒绝）；④ 先按页面凭据扫一轮，失败再用配置凭据复扫一轮（覆盖"刚改没保存"与"反查不中"两种情形）。
 4. **注入块必须自带落盘日志**（打包版渲染层 console 没有出口），每步一行：取凭据来源/第一轮/第二轮/写入。没有它，下一次还是黑洞。
 
-关联 [[defect-localization-methodology]]、[[electron-renderer-heap-oom-governance]]、[[frontend-bundle-recovery-without-sourcemap]]、[[no-assertion-without-measurement]]。
+关联 [[defect-localization-methodology]]、[[electron-renderer-heap-oom-governance]]、[[frontend-bundle-recovery-without-sourcemap]]、[[no-assertion-without-measurement]]。 [[config-load-failure-check-file-refs-and-schema]]、[[run-level-failure-text-is-not-sub-operation-failure]]、[[multi-line-log-attribution-use-baseurl-not-model]]、[[model-capability-verdict-needs-official-docs-not-probes]]。

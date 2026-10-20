@@ -48,3 +48,5 @@ verified: 2026-10-18
 
 关联 [[aggregate-report-missing-values-must-be-none-guarded]]（同一交付物的另一族健壮性问题）、
 [[account-pool-friendly-naming]]（同属"面向用户的呈现"口径）
+
+关联 [[imap-mailbox-ops-qq-folder-quirks]]。

@@ -18,4 +18,4 @@ topic: rust, toolchain
 
 **Why**：不知道根因时容易误判成"网络问题/磁盘满/新版本有 bug"，反复重试浪费十几分钟还以为是 rustup 的 bug。报错文本里的**目标三元组（msvc）与主机不符**就是指纹。
 
-**How to apply**：看到 `failure removing component` 就直接走"新工具链旁路"，别修 rustup 本身；删旧件前务必先验证新工具链 active。关联 [[windows-home-cleanup-safe-vs-traps]]。
+**How to apply**：看到 `failure removing component` 就直接走"新工具链旁路"，别修 rustup 本身；删旧件前务必先验证新工具链 active。关联 [[windows-home-cleanup-safe-vs-traps]]。 [[no-new-artifacts-in-c-root]]、[[nvidia-driver-update-denied-by-service-key-lock]]、[[windows-hardware-reserved-memory-attribution]]、[[windows-memory-hogs-ui-hosts-and-everything]]。

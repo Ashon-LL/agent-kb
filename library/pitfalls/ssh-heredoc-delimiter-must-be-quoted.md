@@ -39,4 +39,4 @@ ssh host 'bash -s' <<'REMOTE'   # 好：逐字送到远端，$SRV 由远端 shel
    ⇒ patch/校验脚本优先用**行级匹配或行号**，别用含转义的字符串锚点。
 
 关联 [[shell-init-files-are-layered-not-one]]、[[git-bash-ampersand-breaks-gh-auth-login]]、
-[[windows-unquoted-path-redirect-accidents]]（同族：本地 shell 先动了一遍文本）。
+[[windows-unquoted-path-redirect-accidents]]（同族：本地 shell 先动了一遍文本）、[[pkill-self-match-kills-own-shell]]。

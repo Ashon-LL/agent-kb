@@ -38,3 +38,5 @@ ParserError: Unexpected token '"C:\Users\...\kb_hooks.py"' in expression or stat
 - 改完 hooks.json 必然要再点一次「信任」（trusted_hash 不匹配），无感生效不存在。
 
 **相关**：[[stated-provenance-needs-evidence-and-conditions]]（「没找到记录」≠「不存在」）、[[report-what-you-did-not-what-you-meant-to-do]]
+
+关联 [[codex-hooks-are-claude-compatible]]。

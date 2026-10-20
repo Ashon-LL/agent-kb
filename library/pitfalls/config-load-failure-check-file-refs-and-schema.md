@@ -17,3 +17,5 @@ topic: verification
 **Why**：症状极具误导性——表现为"设置页改不了 / 沙盒装不上 / 某功能灰掉"，看起来像权限或功能开关问题；实际是**配置解析在更底层就失败了**，下游全是连带故障。只盯表象修会在错误层反复打转（本次前两层都"修好"了，真因在第三层）。
 
 **How to apply**：先抓一行**明确报错文本**（搜 `failed to parse` / `Invalid configuration`），再按上面三步定位；验收标准是"同一日志不再出现该行"，不是"UI 看起来恢复了"。另外第三方工具会**整份重写**配置文件：手加的段落（如 `[hooks]`）可能被冲掉，改完要复查，并确认它自己的 profile/模板是否已收进你的改动。相关：[[quantity-and-config-claim-three-errors]]、[[negative-feasibility-claims-need-a-probe]]
+
+关联 [[injected-ui-feature-failure-check-credential-plumbing-first]]、[[run-level-failure-text-is-not-sub-operation-failure]]、[[multi-line-log-attribution-use-baseurl-not-model]]、[[model-capability-verdict-needs-official-docs-not-probes]]、[[no-assertion-without-measurement]]。

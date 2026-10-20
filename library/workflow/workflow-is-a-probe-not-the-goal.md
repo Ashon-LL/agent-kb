@@ -13,3 +13,5 @@ verified: 2026-10-03
 **Why**：长工作流跑几小时，真正的产出是它暴露出来的软件缺陷。一旦某个问题已被充分取证，继续跑只是在重复烧时间（还叠加上游429重试）。把问题转成派单修掉，比把它跑通更有价值。没找出问题才算白跑。
 
 **How to apply**：反向也成立——门禁/上游修复没落地前别让工作流续跑，必然撞没修的墙=空转。"双线跟进"=两线互相把控：CNB那线的产出必须及时落到软件这线（取回→复算→合入→同步→重跑验证）；软件这线的运行决策（续跑/暂停）要受CNB那线状态约束（没修好就别硬跑）。
+
+关联 [[collected-data-must-be-persisted-before-analysis]]、[[importing-historical-runs-into-mh-agent-open]]、[[taskbook-write-the-property-not-your-guessed-mechanism]]、[[local-ssh-fail-is-not-cloud-task-death]]。

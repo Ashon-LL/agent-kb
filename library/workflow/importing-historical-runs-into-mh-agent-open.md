@@ -56,4 +56,4 @@ for skill, of in con.execute("select skill_name, output_files from workflow_step
 需 `insert into workflows(...)` + `workflow_steps(...)`（步骤从模板 JSON 展开 + 末步 `capability-refine`）。
 `current_step` 取末步 skill 名；`workspace_dir` 写**当前形态**的绝对路径。
 
-关联 [[cnb-secret-repo-imports]]（同一体系的数据落点纪律）。
+关联 [[cnb-secret-repo-imports]]（同一体系的数据落点纪律）。 [[collected-data-must-be-persisted-before-analysis]]、[[taskbook-write-the-property-not-your-guessed-mechanism]]、[[workflow-is-a-probe-not-the-goal]]、[[local-ssh-fail-is-not-cloud-task-death]]。

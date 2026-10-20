@@ -31,3 +31,5 @@ topic: api-gateway
 4. 做体检脚本时带上**对照号**（已知可用的号跑同一组模型）：对照号通过而目标号全拒 ⇒ 隔离出账号因素，同时证明"探测方法本身没问题"。
 
 **相邻**：额度口径的取值陷阱见 [[quota-field-whose-value-decides]]；存量号识别见 [[resource-pool-acquired-numbers-are-spent]]。
+
+关联 [[scope-whitelist-hardcoded-switch-auth-path]]。

@@ -20,4 +20,4 @@ topic: delivery, container
 
 （WSL 内 build 的标准做法见 docker 构建相关条目。）
 
-关联 [[same-config-key-different-semantics-per-step-type]]。
+关联 [[same-config-key-different-semantics-per-step-type]]、[[user-given-equalities-must-stay-equal]]。

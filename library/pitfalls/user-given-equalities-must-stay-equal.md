@@ -32,3 +32,5 @@ verified: 2026-10-17
 
 关联 [[account-pool-friendly-naming]]（同一天的另一条口径纠正：汇报写用户能认的名字而非内部 ID）、
 [[plan-before-acting-and-verify-before-claiming]]（先理清再动手 / 声称完成要附证据）
+
+关联 [[local-sync-means-runtime-not-just-workspace]]。

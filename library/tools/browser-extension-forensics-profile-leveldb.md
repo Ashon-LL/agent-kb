@@ -23,4 +23,4 @@ topic: browser, reverse-engineering
 - 顺带安全提示：这类存储里常躺明文账号 token（本次见到某网盘 access_token 明文）——**诊断输出里不要复述该值**，并提醒用户刷新/吊销。
 - **卸载解包扩展**：源目录删掉即失效，但 Secure Preferences 里的注册项 HMAC 受保护、不能手改（改了会被 Edge 重置），须用户在 `edge://extensions` 点"删除"；彻底一点可加策略 `ExtensionSettings` 阻断。
 
-关联 [[web-automation-call-page-functions-not-dom-clicks]]、[[browser-only-success-check-credential-first]]。
+关联 [[web-automation-call-page-functions-not-dom-clicks]]、[[browser-only-success-check-credential-first]]。 [[browser-extension-migration-mechanism-first]]、[[zcode-iab-web-automation-capability-boundary]]。

@@ -36,3 +36,5 @@ verified: 2026-10-18
 
 关联 [[aggregate-report-missing-values-must-be-none-guarded]]（同属"静默失效"家族）、
 [[email-html-alignment-must-be-inline]]（同属"本地看着对、对方看到的不对"）
+
+关联 [[pkill-self-match-kills-own-shell]]。

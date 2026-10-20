@@ -13,3 +13,5 @@ topic: zcode
 **Why**：本次 125 条错误里 glm-5.2 高频 429 占 80 条，若只看模型名会把深夜 glm-5.2 全线失败误判为本站故障，实则全是用户直连商汤官方 token plan（`token plan entitlement exhausted`），打向本站的只有 1 条（new-provider-2 glm-5.3-flash 46s 断连）。导出 txt 只保留部分字段会丢 baseURL，容易得出错误归因。
 
 **How to apply**：任何"用户 ZCode 报模型错误、判断是否与我们站点有关"的排查，先 `python -c` 解析原始 jsonl，按 `context.baseURL` 聚合 request.failed 再逐条核对 statusCode/statusMessage；导出的过滤文本只当索引，不做归因依据。同一失败会以多种 event（request.failed/network.failed/retry.delay.resolved）重复出现，统计要用 request.failed 去重。
+
+关联 [[config-load-failure-check-file-refs-and-schema]]、[[injected-ui-feature-failure-check-credential-plumbing-first]]、[[run-level-failure-text-is-not-sub-operation-failure]]、[[model-capability-verdict-needs-official-docs-not-probes]]、[[no-assertion-without-measurement]]。

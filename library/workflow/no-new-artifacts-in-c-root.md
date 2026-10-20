@@ -15,3 +15,5 @@ topic: windows
 **Why**：C 盘是全机公共面，用户的底线是"卫生不被弄乱"。两轮纠正的演进：① 在 C 盘根目录自造 `C:\Tools\` 装 Ghidra 被纠正（根目录不是杂物间）→ ② 我推断"工具放 %LOCALAPPDATA%\Programs、耗材进 temp"又被细化："工具不用放缓存临时目录——可以装在 C:\Software 或 C:\Program Files；但产物我不想给 C 盘卫生管理添乱"。要点：**工具进正位不算添乱，产物散落才算**；temp 是给耗材的，不是给工具的。
 
 **How to apply**：装工具前先看 `C:\Software` / Program Files 既有布局跟先例（拿不准再问）；写产物前先定归属——项目产物→工作区、一次性→temp+清理、绝不让它散在 C 盘。已散落两类物的补救：搬家（同卷 mv）→ 更新全部引用（env/配置/文档/记忆，逐处 grep 复核）→ 删原位（含空壳目录）；工具搬完让引用方实测一次（如 REA `binary_session` 看 Ghidra 就绪）。相关：[[persisting-files-also-requires-exempting-cleanup]]、[[cross-agent-skill-dir-semantics]]。
+
+关联 [[nvidia-driver-update-denied-by-service-key-lock]]、[[windows-hardware-reserved-memory-attribution]]、[[windows-memory-hogs-ui-hosts-and-everything]]、[[rustup-update-fails-when-stale-msvc-std-component-missing]]。

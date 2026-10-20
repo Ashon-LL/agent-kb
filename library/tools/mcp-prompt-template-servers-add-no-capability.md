@@ -26,4 +26,4 @@ topic: mcp
 - 别被小模型语境下的"结构化思考提升推理质量"说服——那条针对小模型，不适用于已有原生深度思考配额的主模型。
 - 删除落点：`~/.zcode/cli/config.json` 的 `mcp.servers`（⚠️ 该文件里只要有 server 就整体覆盖 `.agents/mcp.json`，改前先 Read）。
 
-关联 [[config-field-name-is-not-spec-read-consuming-code]]、[[log-text-is-not-spec-read-emitting-code]]、[[kb-entry-source-scope-is-the-boundary]]、[[mcp-stdio-install-smoke-test]]。
+关联 [[config-field-name-is-not-spec-read-consuming-code]]、[[log-text-is-not-spec-read-emitting-code]]、[[kb-entry-source-scope-is-the-boundary]]、[[mcp-stdio-install-smoke-test]]。 [[mcp-multikey-keypool-proxy]]。

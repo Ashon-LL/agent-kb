@@ -35,4 +35,4 @@ topic: python
 
 关联：`pitfalls/dont-handroll-spec-encoders-use-libraries-plus-fallback.md`（同一族：手写规范编码器要留交叉验证基准）。
 
-关联 [[dont-handroll-spec-encoders-use-libraries-plus-fallback]]。
+关联 [[dont-handroll-spec-encoders-use-libraries-plus-fallback]]。 [[jose-raw-sig-to-der-must-strip-leading-zero]]。

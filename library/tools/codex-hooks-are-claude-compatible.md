@@ -23,3 +23,5 @@ topic: llm
 **Why**：hooks 解析失败**只产生 warning、不会整份配置失败**（不同于 `model_catalog_json` 那类"指向文件"的键），所以配错不易察觉——表现为"hook 静默不触发"。另外第三方工具（如 Codex++）会**整份重写** `config.toml`：内联的 `[hooks]` 表会被冲掉，而 **`~/.codex/hooks.json` 它不动**——这才是优先用 hooks.json 的真实理由（比"版本差异"更关键）。
 
 **How to apply**：跨工具统一钩子行为时，把同一批脚本挂到各平台 hook 配置上，别维护多份文案副本（避免漂移）。改完先用**模拟事件入参直接跑脚本**验证 stdout 的 JSON，再让应用重读配置；若 hook 静默不触发，依次查：`hooks.json` 是否还在 → JSON 是否合法 → `[features] hooks` 是否为 true → 脚本自身是否 fail-open 吞了异常。相关：[[zcode-platform-verified-facts]]、[[negative-feasibility-claims-need-a-probe]]
+
+关联 [[codex-hook-command-must-be-valid-in-powershell]]。

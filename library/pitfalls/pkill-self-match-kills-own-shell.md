@@ -24,3 +24,5 @@ topic: safety, toolchain
 4. **破坏性动作拆成两次独立调用**：第一次「杀 + 验证（端口释放/进程消失）」，第二次「起 + 验证（health/日志）」——**不要塞进同一条链**。
 
 **判据**：这类命令发完，必须**独立验证后续步骤真的执行了**（端口已释放、新进程 health 正常），⛔ 不能以"命令返回了"当作成功。
+
+关联 [[escaping-through-patch-pipelines-needs-positive-control]]、[[ssh-heredoc-delimiter-must-be-quoted]]。

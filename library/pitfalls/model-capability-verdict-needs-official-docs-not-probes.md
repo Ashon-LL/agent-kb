@@ -42,4 +42,4 @@ topic: llm
 
 **相邻**：字段名/注释不是规格见 [[config-field-name-is-not-spec-read-consuming-code]]；
 自建端点能力默认 false 见 [[custom-llm-endpoint-capabilities-default-false]]；
-关联 [[custom-llm-endpoint-capabilities-default-false]]、[[config-field-name-is-not-spec-read-consuming-code]]。
+关联 [[custom-llm-endpoint-capabilities-default-false]]、[[config-field-name-is-not-spec-read-consuming-code]]。 [[config-load-failure-check-file-refs-and-schema]]、[[injected-ui-feature-failure-check-credential-plumbing-first]]、[[run-level-failure-text-is-not-sub-operation-failure]]、[[multi-line-log-attribution-use-baseurl-not-model]]、[[no-assertion-without-measurement]]。

@@ -21,3 +21,5 @@ topic: windows
 **How to apply**：NVIDIA 升级失败先 `Get-WinEvent -FilterHashtable @{LogName='System'; Id=20003}` 定位卡点；三步法恢复；DriverStore 清理用 `pnputil /delete-driver <oemNN.inf>`（在用包会被自动拒绝删除，属保护）。
 
 **2026-10-17 补（禁自启动实测）**：同一台机器上把这两个容器改成"手动"时，`sc config <svc> start= demand` **依旧返回拒绝访问(5)**，但**直接写注册表 `HKLM\SYSTEM\CurrentControlSet\Services\<svc>\Start = 3` 成功**，且 SCM 立即认（`sc qc` 显示 `DEMAND_START`）、3 秒后复查不回写；`sc stop <svc>` 也放行（停止服务不用退出火绒）。⇒ 火绒拦的是 **SCM 修改接口**，不是全量注册表写入；只改 Start 值的"禁自启动"操作可走注册表绕开，无需退出安全软件。注意：驱动更新/重装 NVIDIA app 会把 Start 重置回 2(Auto)，需复改。与 10-16 记录不矛盾——那次是创建/修改服务链（安装器与同值写都被拒），本次只改 Start 值可行，两种拦截粒度不同。
+
+关联 [[no-new-artifacts-in-c-root]]、[[windows-hardware-reserved-memory-attribution]]、[[windows-memory-hogs-ui-hosts-and-everything]]、[[rustup-update-fails-when-stale-msvc-std-component-missing]]。

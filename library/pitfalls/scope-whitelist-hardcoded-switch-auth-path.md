@@ -26,3 +26,5 @@ cron 端点要 `system` scope，而 `system` 不在 `ALL_OPEN_API_SCOPES` ⇒ **
 ⚠ JWT 有 TTL（本例 7 天），落凭据库时同时记 `jwt_expires_at` 与重登方法，别只存 token。凭据真值只进 `.local_secrets/`，正文只记取值位置：[[credentials-never-in-memory-or-logs]]。
 
 相关：[[redacted-get-full-put-wipes-secrets]]、[[layered-service-credentials-must-match-layer]]、[[env-claims-must-be-reverified]]。
+
+关联 [[quota-exhausted-vs-banned-distinguish]]。

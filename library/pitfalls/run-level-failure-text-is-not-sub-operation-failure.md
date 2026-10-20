@@ -25,3 +25,5 @@ topic: methodology
 ④ 重置语义（成功后是否重置、新 run 是否归零）必须单独验证——配额上限的真实含义
 常是"每次 run 的预算"而非"终身额度"，两种语义下故障面完全不同。
 相关：[[log-text-is-not-spec-read-emitting-code]]、[[stated-provenance-needs-evidence-and-conditions]]
+
+关联 [[config-load-failure-check-file-refs-and-schema]]、[[injected-ui-feature-failure-check-credential-plumbing-first]]、[[multi-line-log-attribution-use-baseurl-not-model]]、[[model-capability-verdict-needs-official-docs-not-probes]]、[[no-assertion-without-measurement]]。

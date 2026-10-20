@@ -19,3 +19,5 @@ topic: mcp
 **Why**：官方 server 单 key 无轮换是常态（源码级确认：只读 `process.env.TAVILY_API_KEY`，无任何 rotate/fallback 逻辑）；fork 上游要维护、改 npx 缓存会被重装覆盖，只有代理层是既通用又不侵入的实现点。
 
 **How to apply**：任何"MCP server 只支持单 key 而我有多个 key/多个账号配额"的场合（搜索类、API 类皆同）；产物参考 `~/.zcode/mcp-servers/tavily-key-pool/`（index.js 代理 + smoke-test.cjs + README）。相关：[[mcp-stdio-install-smoke-test]]、[[cnb-cli-needs-cmd-suffix-when-spawned-from-python]]、[[windows-scripting-terminal-gotchas]]、[[zcode-platform-verified-facts]]。
+
+关联 [[mcp-prompt-template-servers-add-no-capability]]。

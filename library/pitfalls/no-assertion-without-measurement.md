@@ -27,4 +27,4 @@ topic: verification
 
 **检索症状词**：臆测、想当然、凭记忆、我以为、应该会、肯定是、没测就说。
 
-关联 [[stated-provenance-needs-evidence-and-conditions]]、[[summary-scope-qualifiers-must-be-explicit]]、[[cross-agent-skill-dir-semantics]]、[[defect-localization-methodology]]。
+关联 [[stated-provenance-needs-evidence-and-conditions]]、[[summary-scope-qualifiers-must-be-explicit]]、[[cross-agent-skill-dir-semantics]]、[[defect-localization-methodology]]。 [[config-load-failure-check-file-refs-and-schema]]、[[injected-ui-feature-failure-check-credential-plumbing-first]]、[[run-level-failure-text-is-not-sub-operation-failure]]、[[multi-line-log-attribution-use-baseurl-not-model]]、[[model-capability-verdict-needs-official-docs-not-probes]]。
