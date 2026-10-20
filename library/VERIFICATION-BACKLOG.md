@@ -142,3 +142,59 @@
 
 > 说明：本次核对为**机械判读**（读正文+日期），未实际重跑任何环境；「待验证」=下次在该环境作业时优先实测，
 > 不是「结论已错」。实测确认后再更新对应条目的 `verified`。
+
+---
+
+## 2026-10-20 机械复审：`verified` >30 天（57 条）
+
+> 口径同前：**复审=核对不是重测**。只对绑定环境的条目做本机版本对照；通用规律不改 `verified`、不改结论。
+> 基准日 2026-10-20，覆盖 31–65 天前 verified 的全部 57 条。
+
+**本机环境快照（本次实测）**：Windows 10.0.**26300**.9457；PowerShell 5.1.**26100.9444**；pwsh **7.6.5**；
+Node **v24.19.0**；Python **3.13.15**；uv **0.12.7**；git **2.55.0**；mcp **1.26.0**；ZCode **3.15.2.8207**；
+`cnb`/`cnb.cmd`/`cnb.ps1` 三件套并存于 `~/AppData/Roaming/npm/`。
+
+### 仍成立（4 条，本次环境对照一致）
+
+| 条目 | 依据 |
+|---|---|
+| `pitfalls/powershell-start-process-argumentlist-strips-quotes.md` | 声明 PS 5.1 / Node v24.19.0，实测完全一致 |
+| `tools/mcp-stdio-install-smoke-test.md` | mcp **1.26.0** 仍满足 `<2` 约束；uvx 0.12.7 可用 |
+| `pitfalls/cnb-cli-needs-cmd-suffix-when-spawned-from-python.md` | 无扩展名 shim 与 `cnb.cmd` 同目录并存，绕法仍适用 |
+| `tools/github-china-network-workarounds.md` | 本次推送用自带脚本一次成功（4.237.22.38），动态 DoH 通路有效 |
+
+### 待验证（5 条，环境已变或现场不在）
+
+| 条目 | 原因 |
+|---|---|
+| `pitfalls/powershell-tool-stdout-empty-write-files-instead.md` | Windows build **26100→26300**、PS 5.1 微版本 9444，跨版本需复测「stdout 空但已执行」行为 |
+| `pitfalls/newapi-disable-must-sync-abilities.md` | 本机无 New API 实例（docker 无容器），rc.26 abilities 行为无法核对 |
+| `pitfalls/newapi-base-url-never-carry-v1.md` | 同上，无实例可核对 `/v1` 拼接行为 |
+| `workflow/openclaw-real-upstream-fire.md` | 本机 `openclaw` 命令已不存在，无法复核 exec/`--local` 行为 |
+| `tools/workbuddy-present-files-url-opens-sidebar-browser.md` | WorkBuddy 仍安装但版本未采到，present_files 行为需实际操作核对 |
+
+### 保持（48 条，通用规律/纪律，不涉版本，无需重测）
+
+`agent-loop-follow-progress-not-liveness`、`automation-artifacts-lie-existence-and-freshness`、
+`backlog-records-rot-verify-before-dispatch`、`bare-wait-deadlocks-on-long-lived-children`、
+`clear-resume-anchors-before-benchmark`、`credential-rotation-must-cover-all-entries`、
+`docx-pipeline-delivery-gotchas`、`env-claims-must-be-reverified`、`figure-placement-and-legend-occlusion`、
+`file-change-not-code-running`、`ledger-audit-must-be-bidirectional`、`log-text-is-not-spec-read-emitting-code`、
+`no-sycophantic-agreement-openers`、`oneoff-script-file-edit-rules`、
+`orphan-constants-and-import-warnings-are-not-blockers`、`persisting-files-also-requires-exempting-cleanup`、
+`reasoning-model-max-tokens-shares-budget`、`same-config-key-different-semantics-per-step-type`、
+`scanner-flags-its-own-archived-output`、`test-scope-must-be-pinned-by-index-not-walk`、
+`third-party-db-columns-typed-by-reading-code`、`verification-script-ua-can-fake-a-config-failure`、
+`verify-with-real-pipeline-and-readonly-probes`、`config-field-name-is-not-spec-read-consuming-code`、
+`clone-row-leaves-template-residue`、`layered-service-credentials-must-match-layer`、
+`ai-disclosure-consistency`、`cli-over-browser-automation`、`defect-localization-methodology`、
+`deliver-user-tuned-artifact`、`git-remote-ownership-check`、`log-full-read-not-just-errors`、
+`minimal-change-and-no-scope-creep`、`numeric-claims-need-baseline-and-subject`、
+`online-is-authoritative-dual-scan`、`pre-delivery-text-selfcheck`、`research-upstream-before-fixing`、
+`spec-priority-official-first`、`subagent-orchestration-lessons`、`token-and-secrets-hygiene`、
+`ooxml-layout-attributes-silently-ignored`、`mathmodel-paper-visual-baseline`、
+`llm-gateway-triage-priorities`、`cnb-issue-attachment-download`、`cnb-npc-dispatch-essentials`、
+`container-heredoc-needs-stdin-flag`、`container-image-source-patches-need-replay-script`、
+`taskbook-write-the-property-not-your-guessed-mechanism`。
+
+**汇总**：仍成立 4 / 待验证 5 / 保持 48。未改任何条目的 `verified` 或结论。
