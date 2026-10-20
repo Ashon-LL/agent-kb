@@ -53,10 +53,9 @@ topic: cnb, security
   返回 `{"sn":"cnb-xxx-...","success":true}` 即受理；随后照常用 `cnb build get-build-status --sn <sn>` 验 `npc go` stage = `start`。
   ⛔ token 从 `~/.cnb/token`（JSON，`access_token` 字段）读进变量，**不要内联进命令行**。
   附带：payload 用 `ensure_ascii=True` 落盘，可彻底规避「Git Bash argv 传中文给原生 exe」的编码风险。
-- **⛔ `npc:go` 的 `timeout` 语义（20260918 查官方文档定案，别再按"整单时长"理解）**：`timeout` 是 **Job 级**配置项（Pipeline / Stage 级**都没有** timeout 字段，语法手册配置项概览可核对）。对 `npc:go` 而言它作用于 **Agent 的每一次工具执行**（单条 bash 命令）：单次工具执行超过该值、或连续无输出达到该值 → 该条命令被中断并以失败返回给 Agent；**未声明时 = 无输出 10 分钟 + 单次最长 2 小时**。**Agent 会话本身不设整体超时，整体时长受流水线超时（20 小时）约束。**
-  ⇒ 常见误解（含旧手册口径）是"声明 timeout: 4h = 整单能跑 4 小时"，**错**。声明 6h 的真实收益 = 单条长命令（如全量 pytest）不会被 2h 砍 + 无输出容忍拉到 6h；会话本身上限是 20h。
-  ⇒ 因此 20260917「第三单 2h01m 被杀、95% 全丢」更准确的解释是**某条命令跑过 2h 被中断 → 会话终止 → 未推的 commit 蒸发**，不是"整单 2h 上限"。
-  ⇒ ⚠️ 仍 **`[未知]`**：pipeline init 日志里的 `maxPipelineRunTime: 2h` 字段语义——官方文档无此字段名、也无 pipeline 级 timeout 可配，**未验证**它是否会在 2h 终止整条流水线。实操上靠「开工即推 + 增量推送」兜底，并在接近 2h 时主动查一次存活。
+- **⛔ `npc:go` 的 `timeout` 语义**：`timeout` 是 **Job 级**配置项（Pipeline / Stage 级**都没有** timeout 字段）。对 `npc:go` 而言它作用于 **Agent 的每一次工具执行**（单条 bash 命令）：单次超时或连续无输出达到该值 → 该条命令被中断；**未声明时 = 无输出 10 分钟 + 单次最长 2 小时**；**Agent 会话本身不设整体超时**。
+  ⇒ 常见误解（含旧手册口径）是"声明 timeout: 4h = 整单能跑 4 小时"，**错**。声明 6h 的真实收益 = 单条长命令不会被 2h 砍 + 无输出容忍拉长。
+  ⇒ ⚠ 平台另有**约 2h 的流水线硬性中止**（真值 `CNB_PIPELINE_MAX_RUN_TIME=7200000`，与 timeout 声明无关，脚本 Job 同样被掐）⇒ 完整取证与档位差异见 [[cnb-pipeline-2h-hard-cap]]；实操按 ≤1.5h 分段 + 开工即推/增量推送。
 - **⛔ 别往 `env` 里塞 `role`（20260918 实测，1 秒内 error）**：OpenAPI 直投时若带 `env.role="<角色名>"`，`npc:go` 会去解析角色并**必读仓库内 `.cnb/settings.yml`**；没有该文件 → 立刻 `error: Cannot read .cnb/settings.yml`（936ms 就死，日志在 `get-build-stage` 里一眼看到）。
   ⇒ **默认不带 role**（`.cnb.yml` 里的 `role: $role` 解析为空即跳过角色解析）。只在仓库确实有 `.cnb/settings.yml` 且需要角色时才带。
   附带同一处的另两个坑：① `~/.cnb/token` 是 **JSON**（取 `access_token` 字段），直接 `Bearer <整个文件>` → `ValueError: Invalid header value`；② `branch` 字段可正常带（指定派单基线分支）。
@@ -145,63 +144,4 @@ topic: cnb, security
   - **排错信号**：派单成功(200)但 build 跑 <2s 就 error + runner log 全是 setup（没进 NPC 阶段）→ 99% 是 payload 格式缺字段，拉 build-runner-download-log 看 runner log 最后几行通常能看到明确的参数校验报错（"requires systemPrompt"/"requires userPrompt"）。
   - **排错信号**：派单成功(200)但 build 跑 5-6 秒就 error + runner log 全是 setup（没进 NPC 阶段）→ 99% 是 payload 格式错，拉 build-runner-download-log 看 runner log 最后几行通常能看到明确的参数校验报错。
 
----
-
-## 20260923 更新：配额 / 跳过 / 自托管 Windows Runner / CLI 坑
-
-### ⭐ 两种 CPU 配额独立不共享（官文档核得）
-「云原生构建」CPU **160 核时/月**（push/PR/API 触发流水线）；
-「云原生开发」CPU **1600 核时/月**（网页 IDE）。均 ¥0.125/核时超额、月底清零。
-公式 =「自然月累积 − 免费额度」；**核时 = 核数 × 小时**（官方节点默认 8 核）。
-CLI：`cnb charge get-quota / get-volume / get-repos-volume --slug <org>`。
-
-### ⭐ 省配额三招
-1. **不开 PR**（实测推非 feat 分支 `push` 事件 = 0，顶层键只有 feat；开 PR 则每次 push 都重跑全门禁 = 大头）
-2. **`[ci skip]` / `[skip ci]` in commit msg 或 `git push -o ci.skip`**
-   ⚠️ 仅对 `push` / `commit.add` / `branch.create` 生效，**对 `pull_request` 无效**
-3. 本地跑门禁（pytest + cargo check + npm run build）——不花 CNB 配额
-⛔ 省配额的代价 = 丢服务端 CI 保险 ⇒ 本地门禁**必须含 cargo check**（跨平台编译错误只有 Linux 的 rust job 抓得到）
-⛔ **不许**把 `api_trigger_npc` 搬去别的顶层键省构建：顶层键和分支名是同一件事
-
-### ⭐ 自托管 Runner（Windows/Mac 打包 + 免核时）
-根组织管理员在「组织设置 / 构建节点」接入自己的 Win/Mac/Linux 机；
-流水线用 `runner.namespace: group` + `runner.tags: [windows,...]` 调度。
-⚠️ 宿主机直跑、**默认不开启 Docker** ⇒ `pipeline.docker.image` 不生效 / `runner.cpus` 无效 /
-OverlayFS 不可用；⭐**不参与核时计费**；⚠️**仅限云原生构建**，不支持云原生开发；Linux 自托管仅 arm64。
-⇒ 「容器无 cargo / 无 Windows ⇒ 跨平台验不了」的正解。
-
-### ⛔⛔ 2h 就是硬边界（用户经多次实测裁定，⛔ 别被官方文档的 20h/12h 骗了）
-官方文档标称：流水线 **20h**、Job 声明 `timeout` 后最大 **12h**、无输出默认 **10min**。
-**但那是标称值，不是我们这个实例的注入值。**
-注入的真值：`CNB_PIPELINE_MAX_RUN_TIME=7200000`（= **2h 整**）。
-取证（可复算）：`strings <runner日志>.bin | grep -o 'CNB_PIPELINE_MAX_RUN_TIME=[0-9]*'`
-⇒ 两份不同构建的日志**独立命中同值**，且与真实被杀时刻 02:01:03 / 02:01:05 **精确吻合**。
-`timeout: 4h` / `6h` 救不了（它只管单次工具执行，不管会话整体）。
-
-⛔ **我栽过的跟头（记死）**：我曾拿"官方文档写 20h/12h"去证「2h 不是写死的」，
-把原本正确的 ledger 口径改软了，被用户直接驳回报「经多次实测，两小时就是硬边界」。
-⇒ **拿文档压实测是可耻的**；文档是标称，注入的环境变量才是真相。
-
-⇒ **实操：单任务墙钟必须设计成 < 2h**；救你的只有两件事 ——
-① 脚本绝不无限等待（禁裸 wait / 整段 timeout -k / trap 释放 /
-常驻进程**全重定向不继承 stdout**）；② **开工即推 + 增量推送**（未推即蒸发）。
-
-### CLI 新坑（全部实测）
-- **`build/start` 缺 `title` → 返回 `401 Unauthorized`（极误导，不是 token 问题）**；
-  真实原因在 400 body：`[API_BUILD_START_FAIL]Event must be 'api_trigger' or start with 'api_trigger_'`
-  ⇒ 见 401 先用只读端点（如 `/user/repos`）验 token 再怀疑别的
-- Windows 上 **Python subprocess 调 `cnb` 必须用 `cnb.cmd`**（裸名是 sh 包装，CreateProcess 不做 PATHEXT 解析 ⇒ FileNotFoundError）
-- **要「关闭但不合并」PR 用 `patch-pull --state closed`**，别用 `merge-pull`（会真合并）
-- `cnb pulls` 无 `create-pull`（用 `post-pull`）；`list-pulls` 无 `--number`；状态无 `merged`（看 `is_merged`）
-- 读构建日志：输出是 YAML-ish + ANSI 转义 + 超大 flow-list ⇒ 先剥 `\x1b\[[0-9;]*m` 再抽 `"..."`
-- 大任务书（>32KB）别走 CLI argv（Windows 截断），直投 OpenAPI + `ensure_ascii=True`
-
-### 「请了裁 ≠ 免责」（NPC 协作新纪律）
-NPC 主动指出冲突并请裁决是好事；但**裁决给了却不执行** ≠ 完成。
-派发方验收必须逐条对照裁决项 —— NPC 报告里写"我论证过应做 X"而代码里没 X，
-是最隐蔽的半成品形态。
-
-### 读官方文档技巧
-索引 `https://docs.cnb.cool/zh/llms.txt`；**每篇把 `.html` 换成 `.md` 直接 curl**，干净且省 token。
-
-关联 [[cnb-token-usage-audit]]、[[npc-iterate-by-sending-failure-text-back]]。
+**配额 / 自托管 Runner / CLI 新坑**已拆为独立条目：见 [[cnb-quota-runner-cli-notes]]。

@@ -91,7 +91,7 @@
 - [New API 多密钥 size 必须跟段数](pitfalls/newapi-multikey-size-must-track-key-count.md) — ⛔追加 key 不改 size⇒新钥当后缀；**10-08 起加钥首选原生 PUT**（GET 掩码→回填真钥→禁带 status→自动重建 size/BLOB→免重启）
 - [台账核对必须双向](pitfalls/ledger-audit-must-be-bidirectional.md) — 只跑单向会漏整类问题；库里有值≠线上在用
 - [待办台账会腐烂，开单前先复核](pitfalls/backlog-records-rot-verify-before-dispatch.md) — 未做≠还没做，按机制复核；实测 6/6 已闭环
-- [同名配置键在不同步骤类型下语义不同](pitfalls/same-config-key-different-semantics-per-step-type.md) — 脚本 Job=总时长超时，npc:go=单次执行；症状词：卡住
+- [同名配置键在不同步骤类型下语义不同](pitfalls/same-config-key-different-semantics-per-step-type.md) — 脚本 Job=总时长+无输出超时，npc:go=单次工具执行；调大总时长会静默松掉 10min 无输出保护；症状词：卡住；真上限见 [CNB 2h 硬顶](tools/cnb-pipeline-2h-hard-cap.md)
 - [守卫判据锚「写法」必被换写法绕过](pitfalls/guard-criteria-anchored-to-spelling-always-escape.md) — 四连逃逸实证；静态判结构、渲染占位交运行时几何门、变异集裁定强弱
 - [fork 同步上游会静默覆盖本仓定制](pitfalls/fork-sync-force-update-wipes-local-customizations.md) — 同步=force update（重写历史）；定制行带标记+清单，同步后逐项 grep 复核再补回；⛔ 该 fork（apigogo/x）已于 20261016 被用户删除 ⇒ 留作原理性教训（凡 fork 同步皆适用）
 - [New API 禁用渠道/改分组都要重建 abilities](pitfalls/newapi-disable-must-sync-abilities.md) — abilities 是唯一路由事实源；须手工重建+回读
@@ -151,6 +151,8 @@
 - [含空格路径不加引号的怪文件事故](pitfalls/windows-unquoted-path-redirect-accidents.md) — C:\Program 类残留=重定向在空格处被截断；三步排查（读内容→创建时间/属主→Prefetch 与应用日志对账）；处置=核对后删除，弹窗自然消失
 
 - [转义经补丁管道会变控制字符 ⇒ 校验代码会静默失效](pitfalls/escaping-through-patch-pipelines-needs-positive-control.md) — 「反斜杠 b」被写成退格后正则静默失效（表面还通过）；**凡写正则/转义必配正反对照**；用不含反斜杠的等价写法（[^A-Za-z0-9_] 代替词边界、[ ]* 代替空白、chr(10) 代替换行），写完机检控制字符
+- [success 不是「没被中止」的证据](pitfalls/success-status-is-not-no-abort-evidence.md) — 同一 exit 137 两种结局：临死前推完=success、没推完=error；判据读原始日志的 exit 137 与时长；用反例证伪假设必须挖到机制层；两次独立事件时刻相差几秒=硬边界强证据
+- [二选一的错误文案不能当单一结论](pitfalls/binary-error-text-needs-branch-evidence.md) — 「A，或 B」只是候选清单；必须用终点可观测物取证落在哪支（容器是否存在/exit 137/时刻）；文案里的数字不等于上限来源
 
 ## workflow/ 流程与协作
 
@@ -211,6 +213,8 @@
 - [细粒度 PAT 缺 PR 写权限 → 403](tools/github-fine-grained-pat-pr-write-403.md) — 能推≠能开 PR；先 GET /pulls 分辨权限 vs 不存在
 - [直连云环境里的 AI Agent（CNB 工作区）](tools/cnb-workspace-agent-direct-channel.md) — 附**可执行脚本** `tools/cnb-workspace-agent-cli.py`（reply/history/sessions/keepalive/**watch**） — SSH 进容器 + `POST :8688/api/v1/sessions/{id}/reply` 发消息（⛔ 必带 `x-codebuddy-request: 1`）；⭐20261016 新增：**CLI 打通=继承 serve 进程注入环境（含 CNB_TOKEN 本库令牌，~7 天过期）**、**保活硬门槛=「进页面」（创建后 10 分钟内未进 VS Code 页面即回收，SSH 不算）**（旧「SSH 即心跳」已更正）；附「工作区 start 不能指定模型」「Dockerfile 构建期无 git 凭据」等相邻事实；关闭取证看 backup_status/commit_count/备份自述（file_count 非未提交口径）、平台全量日志不含对话、对话关闭后不可追
 - [CNB NPC 派单要点](tools/cnb-npc-dispatch-essentials.md) — ⭐需求单开在**目标仓**（官方：流水线跑在 Issue 所属仓，不是 NPC 注册仓）；⭐2026-10-16 更新：入口改 **`@i.o/x(角色)`**（fork `apigogo/x` 已删）——跨根态B 真人首棒；评论链路无我方密钥（personal-envs 只覆盖云开发）⇒ 真凭据活走 api_trigger_npc 直派/云开发；大任务书走 argv 会截断；workMode 嵌 npc 内
+- [CNB 约 2h 流水线硬顶](tools/cnb-pipeline-2h-hard-cap.md) — 真值 `CNB_PIPELINE_MAX_RUN_TIME=7200000`，与 `.cnb.yml` timeout 无关（声明 6h 照样 137）；取证：prepare 日志 `maxPipelineRunTime: 2h` + runner 日志环境变量；api_trigger_npc 固定 2h，issue.comment@npc 档位动态（重发可回 4h）；对策=单命令有界+增量推送
+- [CNB 配额 / 自托管 Runner / CLI 坑](tools/cnb-quota-runner-cli-notes.md) — 构建 160 vs 云开发 1600 核时/月独立；省配额三招及代价；Runner 不开 Docker/不计核时/仅构建；`build/start` 缺 title 报 401、Windows 用 `cnb.cmd`、`patch-pull --state closed` 关闭不合并；「请了裁≠免责」
 - [CNB token 用量统计方法](tools/cnb-token-usage-audit.md) — 正解=逐构建 get-build-ai-audit 累加；credit 是额度≠token（免费期 0 credit 照记 token）；charge_type_token 是平台 bug；截止时刻默认北京时间
 - [CNB issue 附件下载坑](tools/cnb-issue-attachment-download.md) — asset_link 是 Cookie 鉴权路由；200 可能是假 SPA
 - [LLM 网关排障优先级](tools/llm-gateway-triage-priorities.md) — 8 条：429 切渠道致缓存全 miss、system 前缀增长作废缓存、cache_creation 恒 0 非 bug、模型别名映射、改历史=毁前缀缓存
@@ -222,7 +226,8 @@
 - [浏览器扩展取证：profile + LevelDB](tools/browser-extension-forensics-profile-leveldb.md) — 判启停/权限读 Secure Preferences（userScripts 须 granted+active 都有）；LevelDB 锁定用 FileShare.ReadWrite 读；location=4 解包扩展删源即失效但注册项须 UI 删；油猴脚本可能依赖本机 RPC 端口（PanLinker→16800 无监听＝不可用）
 - [跨浏览器迁扩展：先确认机制再动手](tools/browser-extension-migration-mechanism-first.md) — ego-lite 只认自家安装（外部塞文件/注册会被删）；Chrome 与 Edge 商店同一扩展 ID 不同，按 ID 做差集必误判；chrome://extensions 快照是异步渲染不能当证据，判装没装看 Extensions 目录 + Secure Preferences
 - [MCP 有没有用看 handler 返回什么](tools/mcp-prompt-template-servers-add-no-capability.md) — 别读 description 宣称，读 handler 返回什么
-- [CNB 密钥库导入与消费链路](tools/cnb-secret-repo-imports.md) — 密钥库拒一切令牌、只能网页编辑；`.cnb.yml` 顶层键须是分支名；**云开发环境的 env 分层（注入层=容器主进程非 ssh shell）/bootstrap 正确跑法/settings 被上传 DB 覆盖/跨套错配 401 判读**；Prepare 秒失败无日志的取证手法
+- [CNB 密钥库导入与消费链路](tools/cnb-secret-repo-imports.md) — 密钥库拒一切令牌、只能网页编辑；`.cnb.yml` 顶层键须是分支名；Prepare 秒失败无日志的取证手法；NPC 镜像无 `python` 只有 `python3`；应用不读 env 时须加翻译步骤
+- [CNB 云开发环境：注入层与 settings 快照](tools/cnb-clouddev-env-injection-snapshot.md) — 注入在主进程 env 非 ssh shell（读 `/proc/<pid>/environ` 且别 head 截断）；bootstrap 须在带注入 env 的进程跑；settings 是建环境那刻的密钥库快照（改库不回流）；跨套错配 401 不等于 key 无效；Prepare success ≠ 变量已注入
 - [OpenClaw typed hook 目录](tools/openclaw-hook-catalog.md) — 拦工具调用叫 before_tool_call
 - [present_files 传 URL 即开侧栏浏览器](tools/workbuddy-present-files-url-opens-sidebar-browser.md) — URL→侧栏浏览器、本地 .html→预览面板
 - [无 sourcemap 时复原前端 bundle 全量与 API 面](tools/frontend-bundle-recovery-without-sourcemap.md) — 入口只有 runtime 别判失败；对齐 chunk 清单
