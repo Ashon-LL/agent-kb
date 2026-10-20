@@ -11,6 +11,7 @@ topic: mcp, office
 **经验**：
 1. `put_page` 带 `imageFiles`/image 元素时可能连续 `QODER_OFFICE_OPERATION_FAILED`（即使同格式的 PNG/JPEG、同路径此前成功过）——这是图片管线整体故障，不是参数错误。正确绕法：**put_page 先放白边框 rect + 全部文字（不含 image 元素），再对每张照片调 `put_image(frame={x,y,w,h})` 插入**。put_image 走另一条管线，验证可用；图片按追加顺序在 z 序顶部，只要与文字不重叠就无副作用。
 2. Office MCP 无元素动画能力（COM 也拿不到 AnimationProperties）。页内动画要**直接往 pptx zip 注入 `<p:timing>`（mainSeq + presetClass="entr" presetID="10" fade 的 clickEffect/withEffect 分组）+ `<p:bldLst>`**，spid 按 spTree 中 sp/pic/cxnSp 的文档序取得。
+   ⚠️ **但"COM 拿不到动画"只在无本机 PowerPoint 时成立**——本机装了 Office（POWERPNT.EXE 在册）时，`win32com` 直连 PowerPoint.Application 的 `Slide.TimeLine.MainSequence` 完全可用，且**改已有动画首选 COM、不要手写 timing XML**。手写失败模式实证：把若干效果平铺成同层 `clickEffect`（或 afterEffect 同 par 平铺），PowerPoint 只认组首效果为触发点，其余退化成"单击一次出一条"——这正是 374 个效果全平铺、每页要点 20~41 次的根因。COM 正确做法：`e.Timing.TriggerType = 2/3`（2=WithPrevious 同组齐出、3=AfterPrevious 自动接续）+ `e.Timing.TriggerDelayTime`，PowerPoint 自己重写 timing 树并补上正确的中间层 `<p:par>`，结构 100% 合法。详见 [[pptx-anim-com-not-handwritten-xml]]。
 3. 外部 zip 改完后 MCP 会在下一次读取时**自动重同步磁盘**（revision+1、dirty:false），之后的 apply_ops/save_document **不会丢掉注入的 timing**（实测保存后 47 组 clickEffect 全保留）——但每次保存后仍要 `count('nodeType="clickEffect"')` 复核。
 4. 重排/替换页面（put_page）会**丢失该页已注入的动画与切页转场**：所有布局返工完成后必须重新枚举形状序号、更新分组字典、重新注入，并对全部页重发 `setTransition fade`。
 5. `apply_ops addElement kind:"textbox"` 带 stroke 生成的形状**没有 `<a:prstGeom>`**，PowerPoint 导出时完全不画边框（MCP audit 不报）。绕法：zip 直改，在 spPr 的 xfrm 后插入 `<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>`；或改用 kind:"rect" 再 setFill "none"。

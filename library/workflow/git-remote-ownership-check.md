@@ -7,6 +7,8 @@ date: 2026-09-14
 verified: 2026-09-14
 topic: git, cnb, methodology
 ---
+<!-- hook-reviewed 2026-10-20：钩子已补入本条 2026-09 的补充内容 -->
+
 
 **经验**：执行任何 git 操作（fetch/pull/push/ls-remote/建 PR/MR）前，先 `git remote -v` 核对三件事：① 该仓库在哪些平台有分身（GitHub、Gitee、CNB 可能同名不同仓）；② 本次操作的目标 remote 扮演什么角色（上游 / fork / 开发主线）；③ 本地跟踪引用（origin/main 等）可能过期——跨平台比对一律 `git ls-remote <remote> <ref>` 或平台 API 实测，不信本地缓存。
 

@@ -55,3 +55,7 @@
 - 新增 `workflow/two-agent-iteration-via-dispatch-board.md`：派活板三区 + 维护约定；「已完成」表要带维护者复算结论而非只记自报。
 
 > 2026-10-04 机制升级与合并：① 合并同族三副本（`option-write-six-step-iron-law` 并入 `redacted-get-full-put-wipes-secrets`，六步铁律成其标准流程段；知识未删减，newapi 条目补双链导航），**144 → 143**——本库首次按 SKILL.md 新增「合并既有条目」规程执行。② 补记此前漏记批次：2026-10-01 至 10-04 新增 32 条（含 fail-open-except、diff-deployed-vs-vcs、hardlink-unify 等），详见 INDEX 对应日期簇。③ 校验器补三类盲区（hooks 开关/真源损坏/入口缺失），新增 kb_search.py 检索与查重工具。
+> 2026-10-17 扩充两条（非新增条目）：`empty-config-is-not-missing-feature` 补「同一项目多条设备标识路径要分开读 + 先与上游源码 diff」（trae 聊天路径的随机轮换是上游自带，非我方补丁）；`account-pool-friendly-naming` 补渠道维度（第三次同坑：渠道号 ch176 用户认不出 ⇒ 渠道一律写源名、写清洗函数复用、交付前 grep 自检）。
+> 2026-10-17 日常沉淀：+1（`user-given-equalities-must-stay-equal`：用户给的排序里 `=` 必须落成同值、同档展示只用并列符号；实例=临期优先组 priority/weight 设计被当场纠正）。
+> 2026-10-17 日常沉淀：+1（`aggregate-report-missing-values-must-be-none-guarded`：聚合报表 None 做差/求和崩溃；实例=APIShow 日报，附「间歇性失败别据一次判死」的判据）。
+> 2026-10-18 日常沉淀：+1（`email-html-alignment-must-be-inline`：邮件 HTML 对齐必须内联；客户端剥 style 造成「部分列跑偏」）。

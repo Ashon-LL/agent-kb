@@ -8,6 +8,8 @@ verified: 2026-09-21
 topic: tauri
 
 ---
+<!-- hook-reviewed 2026-10-20：已人工确认 INDEX 钩子覆盖本条全部更新内容 -->
+
 
 # Tauri：非 tauri:// 来源的 invoke() 被 ACL 拦，不是对象缺失
 

@@ -8,6 +8,8 @@ verified: 2026-10-12
 topic: api-gateway
 
 ---
+<!-- hook-reviewed 2026-10-20：已人工确认 INDEX 钩子覆盖本条全部更新内容 -->
+
 
 # New API rc.26：渠道 CRUD 端点形状
 

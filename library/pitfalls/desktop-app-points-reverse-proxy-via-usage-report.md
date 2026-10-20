@@ -7,6 +7,8 @@ date: 2026-10-04
 verified: 2026-10-04
 topic: reverse-engineering
 ---
+<!-- hook-reviewed 2026-10-20：钩子已补入本条 2026-09 的补充内容 -->
+
 
 **经验**：用户要求「把软件里的积分反代出来用，像 workbuddy 那样」时，不要假设扣分发生在**请求通道**
 （chat/completions / responses）里。实测讯飞 AStudio：聊天/Bearer 请求**会消耗额度，但扣的是

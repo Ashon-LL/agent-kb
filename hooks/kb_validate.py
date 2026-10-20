@@ -297,12 +297,38 @@ def validate(kb_path=None):
     for bad_line in index_paths_with_spaces(kb):
         err(f"[index] 条目行路径含空格（markdown 渲染必断链）：{bad_line}")
 
+    # 5d) 库根结构：kb 只认三目录，陌生目录/散落条目会**完全脱离校验与索引**
+    #     （2026-10-20 体检发现 feedback/ 里躺着一条 memory 格式条目，校验器全程没报——
+    #      因为它只遍历 CONTENT_DIRS，这类写入等于静默消失。）
+    KNOWN_ROOT_MD = {"INDEX.md", "CHANGELOG.md", "VERIFICATION-BACKLOG.md",
+                     "TRIGGER-MINER-REPORT.md", "README.md"}
+    try:
+        children = list(kb.iterdir())
+    except Exception:
+        children = []
+    for child in children:
+        name = child.name
+        if name.startswith(".") or name == "__pycache__":
+            continue
+        if child.is_dir() and name not in CONTENT_DIRS:
+            mds = list(child.glob("*.md"))
+            if mds:
+                err(f"[structure] 库根陌生目录 {name}/（{len(mds)} 个 .md）——"
+                    f"kb 只认 {', '.join(CONTENT_DIRS)} 三目录；此处条目不会被索引也不会被校验。"
+                    f"请移到对应目录、补 frontmatter 与 INDEX 行")
+        elif child.is_file() and child.suffix == ".md" and name not in KNOWN_ROOT_MD:
+            err(f"[structure] 库根散落 .md 文件 {name}——条目必须放在三目录之一")
+
     # 5c) 钩子-正文一致性：正文有「补充/变体/新增」痕迹时提示确认钩子已同步。
     #     2026-10-16 自查发现的真实退化：把跨项目同步语义并进 hardlink 正文却漏改钩子
     #     ⇒ 检索层完全看不到新内容（校验器此前不查这一项）。
     for p, text in entries.items():
         marks = _UPDATE_MARK_RE.findall(text)
         if not marks:
+            continue
+        # 作者已人工复核钩子覆盖情况 → 显式标记跳过（字面匹配必然误报：
+        # 「2026-10-14 补」这类痕迹文字本来就不该出现在钩子里）
+        if "<!-- hook-reviewed" in text:
             continue
         hook = idx_hooks.get(p, ("", ""))[1]
         if not any(m in hook for m in marks):

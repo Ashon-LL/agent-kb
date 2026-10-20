@@ -41,6 +41,13 @@ fork 上所有**本仓定制行**（配置、锚点、超时、地址…）**会
   各跑清单 grep，逐项打表（1→0 即被覆盖）。
 - 补回后复验：`yaml.safe_load` 通过 + `git diff --stat` 恰 N 行（防顺手改坏别的）。
 
+## 2026-10-16 后续（该 fork 已删）
+
+`apigogo/x` **已于 2026-10-16 被用户删除**（改为只收藏上游 `i.o/x`；现行派单入口 = `@i.o/x(中书令)`，
+口径见 `docs/dispatch/CNB-DISPATCH-MANUAL.md` §4.6）。⇒ 本 pitfall 留作**历史教训**；
+「fork 同步 = force update、本仓定制会被静默覆盖」这条**原理在任何 fork 同步场景仍适用**——
+凡维护 fork 定制（配置/密钥引用/超时/地址），同步后一律按清单 grep 复核再补回。
+
 相关：[[automation-artifacts-lie-existence-and-freshness]]（「看起来还在」不等于「生效」同族）、
 [[backlog-records-rot-verify-before-dispatch]]（记录会腐烂：同步后现值以实测为准）。
 

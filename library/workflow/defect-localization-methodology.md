@@ -7,6 +7,8 @@ date: 2026-09-21
 verified: 2026-09-15
 topic: security, diagnosis
 ---
+<!-- hook-reviewed 2026-10-20：已人工确认 INDEX 钩子覆盖本条全部更新内容 -->
+
 
 **经验**（比"试到好为止"可靠得多的排查法）：
 

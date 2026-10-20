@@ -7,6 +7,8 @@ date: 2026-10-04
 verified: 2026-10-04
 topic: windows, git
 ---
+<!-- hook-reviewed 2026-10-20：已人工确认 INDEX 钩子覆盖本条全部更新内容 -->
+
 
 **经验**：一份脚本（hook/skill/命令）要在多个工具的目录里各放一份时，**留一个真相源、其余全部硬链接**（Python `os.link(源, 副本)`，先 `unlink` 再链；Windows 须同卷）。改一处全体生效，`stat` 看 `nlink` 数验证。动手前三步：
 
