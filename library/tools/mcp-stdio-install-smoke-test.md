@@ -19,4 +19,4 @@ topic: mcp
 
 **How to apply**：任何新装/升级 stdio MCP（ZCode/Claude/Cursor 均同）；排查"面板显示未连接"。相关：[[env-claims-must-be-reverified]]、[[github-china-network-workarounds]]、[[zcode-platform-verified-facts]]、[[windows-scripting-terminal-gotchas]]。
 
-关联 [[mcp-prompt-template-servers-add-no-capability]]。
+关联 [[mcp-prompt-template-servers-add-no-capability]]、[[external-tool-integration-criteria-and-gotchas]]。

@@ -16,3 +16,5 @@ topic: agent-orchestration
 - **禁长 sleep 阻塞**：run_in_background 起轮询脚本，等待期并行做独立工作；区分常驻服务与一次性监控，后台"运行中"≠卡死。
 - **并发有上游限流**：批量重跑会触发网关全面限流连锁失败；首跑可并行、重跑小并发串行 + 队列水位控制。
 - **验证类任务 prompt 要自包含**（API 用法、异常处置、"遇 paused 先 resume 再判断"、禁改代码只报告）；等确认"真在跑且有输出"再放开下一批。
+
+关联 [[semantic-unit-vs-execution-unit-must-be-separate]]。

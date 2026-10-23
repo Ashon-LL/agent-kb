@@ -31,3 +31,5 @@ topic: verification
 
 **关联的真实代价**：用户据此判断"有人在盯"，实际没人盯 ⇒ 故障发现被延迟。
 错误的监控声明比没有监控更糟（它让人**停止自己检查**）。
+
+关联 [[user-paths-must-be-clickable-links]]。

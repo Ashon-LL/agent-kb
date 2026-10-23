@@ -20,4 +20,4 @@ topic: delivery
 
 **How to apply**：接到交付任务先定位"是否有官方规范文档"；有则全文读一遍并产出落实记录，交付前按它逐条自查（篇幅、页序、匿名、附录、字距等）。规范与模板冲突时以规范为准。
 
-关联 [[use-jev-and-kb-deliberately]]。
+关联 [[use-jev-and-kb-deliberately]]、[[user-list-to-plan-must-diff-each-item]]。

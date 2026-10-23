@@ -147,3 +147,5 @@ topic: cnb, security
   - **排错信号**：派单成功(200)但 build 跑 5-6 秒就 error + runner log 全是 setup（没进 NPC 阶段）→ 99% 是 payload 格式错，拉 build-runner-download-log 看 runner log 最后几行通常能看到明确的参数校验报错。
 
 **配额 / 自托管 Runner / CLI 新坑**已拆为独立条目：见 [[cnb-quota-runner-cli-notes]]。
+
+关联 [[squash-merge-defeats-ancestor-check]]、[[cnb-npc-dispatch-channel-config-and-time-caps]]。

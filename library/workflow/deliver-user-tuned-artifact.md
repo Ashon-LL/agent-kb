@@ -19,4 +19,4 @@ topic: delivery
 
 **How to apply**：收到修改请求先分两类——**文字** → 给粘贴片段（不重建）；**版式** → 说明主源位置 + 重建代价。若用户明确要求重建，先备份其当前产物再动手。
 
-关联 [[pre-delivery-text-selfcheck]]。
+关联 [[pre-delivery-text-selfcheck]]、[[visual-verdict-belongs-to-executor]]。

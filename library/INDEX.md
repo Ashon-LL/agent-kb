@@ -97,7 +97,7 @@
 - [待办台账会腐烂，开单前先复核](pitfalls/backlog-records-rot-verify-before-dispatch.md) — 未做≠还没做，按机制复核；实测 6/6 已闭环
 - [kb 检索无结果≠库里没有](pitfalls/kb-search-miss-is-not-kb-empty.md) — 检索失败≠对象不存在；症状词多轮+ls 目录+读 INDEX 三步；20261023 实测漏读 6 条直接相关
 - [同名配置键在不同步骤类型下语义不同](pitfalls/same-config-key-different-semantics-per-step-type.md) — 脚本 Job=总时长+无输出超时，npc:go=单次工具执行；调大总时长会静默松掉 10min 无输出保护；症状词：卡住；真上限见 [CNB 2h 硬顶](tools/cnb-pipeline-2h-hard-cap.md)
-- [守卫判据锚「写法」必被换写法绕过](pitfalls/guard-criteria-anchored-to-spelling-always-escape.md) — 四连逃逸实证；静态判结构、渲染占位交运行时几何门、变异集裁定强弱
+- [守卫判据锚「写法」必被换写法绕过](pitfalls/guard-criteria-anchored-to-spelling-always-escape.md) — 四连逃逸实证；静态判结构、渲染占位交运行时几何门、变异集裁定强弱；同族变体：判据钉文件布局，重构即失效（搬 store 后扫不到，10 红）
 - [fork 同步上游会静默覆盖本仓定制](pitfalls/fork-sync-force-update-wipes-local-customizations.md) — 同步=force update（重写历史）；定制行带标记+清单，同步后逐项 grep 复核再补回；⛔ 20261023 更正：apigogo/x 并未删除（20261019 已重建，实测带密钥 imports+4 核 runner）⇒ 现行派单入口 = @apigogo/x(中书令)；原理仍适用
 - [New API 禁用渠道/改分组都要重建 abilities](pitfalls/newapi-disable-must-sync-abilities.md) — abilities 是唯一路由事实源；须手工重建+回读
 - [产出端与消费端状态不匹配会静默空转](pitfalls/producer-consumer-status-mismatch-silently-noops.md) — 产出写 candidate、消费只查 active ⇒ 空转
@@ -159,6 +159,14 @@
 - [success 不是「没被中止」的证据](pitfalls/success-status-is-not-no-abort-evidence.md) — 同一 exit 137 两种结局：临死前推完=success、没推完=error；判据读原始日志的 exit 137 与时长；用反例证伪假设必须挖到机制层；两次独立事件时刻相差几秒=硬边界强证据
 - [二选一的错误文案不能当单一结论](pitfalls/binary-error-text-needs-branch-evidence.md) — 「A，或 B」只是候选清单；必须用终点可观测物取证落在哪支（容器是否存在/exit 137/时刻）；文案里的数字不等于上限来源
 - [易变状态必须带时效标记与复核命令](pitfalls/volatile-state-must-carry-expiry-and-recheck.md) — 原理与状态分层；「已删除/已失效/现行=」须带实测证据+失效条件+复核命令；状态复制到多处会变「真理」；description 要覆盖状态主题；体检跑 `--audit-volatile` 逐条实测
+- [拆大组件先算依赖密度](pitfalls/split-large-component-by-dependency-density.md) — 行数×模板外部符号数；密度高＝内聚不该拆；拆完总行数不降（props/emit 管道）就是净负收益
+- [交互延迟只能用 Event Timing 量](pitfalls/interaction-latency-must-use-event-timing.md) — rAF 计时漏掉光栅化/合成、dispatchEvent 不进合成器、无头软件光栅可把 840ms 漂成 34s；体感差先质疑测法
+- [squash 合并后祖先判据恒假](pitfalls/squash-merge-defeats-ancestor-check.md) — 判「已合入」查 PR `state:closed`+`mergeable_state:merged`；`git merge-base --is-ancestor` 与 `refs/pull` 都不可用
+- [临时文件会被 git add -A 一并提交](pitfalls/temp-files-must-not-be-added-by-add-all.md) — 先删再 add 只是治标；根治是把 commit message 文件写到仓库外，add 天然碰不到
+- [正则不能跨嵌套花括号](pitfalls/regex-cannot-span-nested-braces.md) — `[^}]*` 跨层会改坏结构；按行号/解析树逐行改 + 编译复验；heredoc 反引号会被 shell 吃掉
+- [过度脱敏会删掉执行方要的上下文](pitfalls/over-redaction-removes-useful-context.md) — 公开地址/项目名/许可证默认可写；脱敏只针对凭据与本机绝对路径；拿不准写进去加边界说明
+- [用户清单转计划必须逐项 diff](pitfalls/user-list-to-plan-must-diff-each-item.md) — 清单是契约；漏项补上或显式说明「本批不含」；拍板动词不得替换（恢复≠止血）
+- [删 hook 脚本前先让配置失效](pitfalls/delete-hook-script-after-config-invalidated.md) — 旧会话内存仍挂脚本，直接删文件会让所有 Bash 调用 fail-closed 卡死；插件改动要升 version
 
 ## workflow/ 流程与协作
 
@@ -204,6 +212,11 @@
 - [关掉某个对象时优先最小作用域原生开关](workflow/prefer-narrow-native-switch-over-broad-global-or-plugin.md) — 逐对象状态机 → prompt 软约束 → 全局开关 → 自写插件，找到第一档就停；全局 allow-list 会误伤
 - [派单前先查在跑面（重复派单）](workflow/check-inflight-work-before-dispatch.md) — 派单/开 issue 前三查（开放 PR / 远端分支 / 最近构建）；命中即不派，改为收窄在跑的那支；与「台账会腐烂」互补=两个核对面
 - [批准范围不做类推扩展](workflow/approval-is-explicit-not-analogous.md) — 点名批准只做那几项；关 issue/台账前先查背后有无在跑的流程（评审/返工挂它回奏）；可逆≠可以顺手做
+- [store 管数据、页面管节拍与副作用](workflow/store-owns-data-page-owns-cadence.md) — 同一份数据两个持有者必漂移；通知类副作用留页面（需历史状态），数据与写入口归 store
+- [视觉判定权归执行者](workflow/visual-verdict-belongs-to-executor.md) — 执行者能看图就以审稿人视角判整页（图文数字一致/图注/轴刻度）；视觉角色只在无视觉能力时兜底
+- [给用户的路径必须可点击](workflow/user-paths-must-be-clickable-links.md) — 交付物/脚本/日志/配置一律 Markdown 链接 `[名](绝对路径)`，不给纯文本串
+- [大文件用硬链接不复制](workflow/user-large-files-hardlink-not-copy.md) — NTFS 硬链接引用；python 调 `cmd /c mklink /H`；解包产物留到整轮结束再清
+- [从会话库提取真实用户消息](workflow/zcode-session-db-real-user-extraction.md) — 删除/归档是软删、正文全在 db.sqlite；`origin=real_user` 且剔 `sess_dwf-*`/`sess_subagent*`
 - [批量纳号必须一号一登并逐条核对](workflow/batch-account-onboarding-one-per-login.md) — 同一浏览器登录态会把多条待授权 state 全部授权成同一账号（串号是静默的）；多号须换号/无痕 + 按返回体昵称/uid 逐条核对
 
 - [规格先读上游再实测，别盲探](workflow/read-upstream-specs-before-probing.md) — 参数规格（上下文/输出上限/档位）先读源码/`gh release view`/PR/目录元数据；实测只作验收且要有判别力；上游不可达时用 AST 断言+符号检查做证据链

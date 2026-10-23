@@ -14,4 +14,4 @@ verified: 2026-10-03
 
 **How to apply**：给边缘功能动 Dockerfile/密钥库/全局白名单之前先自问这条管线有几层。一层（运行期幂等脚本）可以接受；四层不值。执行方抗命改判据时先复算——别把自己的推断当规格。
 
-关联 [[guard-criteria-anchored-to-spelling-always-escape]]、[[prefer-narrow-native-switch-over-broad-global-or-plugin]]、[[minimal-change-and-no-scope-creep]]。
+关联 [[guard-criteria-anchored-to-spelling-always-escape]]、[[prefer-narrow-native-switch-over-broad-global-or-plugin]]、[[minimal-change-and-no-scope-creep]]、[[split-large-component-by-dependency-density]]。

@@ -49,6 +49,6 @@ topic: zcode, database, sqlite
 
 14. **按会话记账的目录其实有第 4 层：`cli/rollout/model-io-sess_<id>.jsonl`**（`v2/setting.json` 的 `modelIoFullRetentionEnabled=true` 时记全量模型 I/O）。2026-10-06 实测：单个活跃会话的该文件能涨到 GB 级（当时两个活跃会话合计以约 100 KB/s 持续增长——排查"空间莫名减少"先看这里；关掉该开关后增长立即停止，无需重启 ZCode）。**已删会话留下的同名文件属于要清的残留**（2026-10-06 用户口径"只留用量、不留其他" ⇒ 连它一起删）。
 
-关联 [[config-field-name-is-not-spec-read-consuming-code]]、[[log-text-is-not-spec-read-emitting-code]]、[[parallel-test-run-must-isolate-repo-mutators]]、[[zcode-platform-verified-facts]]。
+关联 [[config-field-name-is-not-spec-read-consuming-code]]、[[log-text-is-not-spec-read-emitting-code]]、[[parallel-test-run-must-isolate-repo-mutators]]、[[zcode-platform-verified-facts]]、[[zcode-session-db-real-user-extraction]]。
 
 关联 [[producer-consumer-status-mismatch-silently-noops]]。

@@ -24,3 +24,5 @@ related: [[classify-by-consumer-not-by-file-location]]
 - 用户纠正你时，先核对**是不是自己测错了**再解释，不要先辩解。
 
 相关：[[classify-by-consumer-not-by-file-location]]（同轮的划界错误）。
+
+关联 [[interaction-latency-must-use-event-timing]]。

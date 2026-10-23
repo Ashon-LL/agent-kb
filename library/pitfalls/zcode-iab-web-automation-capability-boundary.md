@@ -27,4 +27,4 @@ topic: browser, zcode
 
 **实例**：Elsevier 新版投稿服务（`submit.elsevier.com/<JOURNAL>`，8 步：类型→上传→元数据→作者→funder→OA→附加信息→Review）——**上传 + OA 两步必须真浏览器**，其余（选类型/元数据/作者/机构自动补全/CRediT/附加信息/声明）IAB 可全自动。
 
-关联 [[browser-extension-migration-mechanism-first]]、[[browser-extension-forensics-profile-leveldb]]。
+关联 [[browser-extension-migration-mechanism-first]]、[[browser-extension-forensics-profile-leveldb]]、[[ego-browser-form-automation-dialogs-and-cache]]。

@@ -14,4 +14,4 @@ verified: 2026-10-03
 
 **How to apply**：grep 命中只能当线索不能当证据，下结论前逐条看上下文片段。说"X 不存在"之前先问"我枚举的集合是谁定的"。有结构化判据（枚举值/错误码表）就别盲试 URL。
 
-关联 [[browser-extension-forensics-profile-leveldb]]、[[survey-before-acting-on-own-project]]。
+关联 [[browser-extension-forensics-profile-leveldb]]、[[survey-before-acting-on-own-project]]、[[regex-anchor-literal-search-false-zero-hit]]。

@@ -17,3 +17,5 @@ topic: delivery
 **How to apply**：接手"帮我跟进跑完"类任务时，先确认护栏由谁执行；监听器只挂"跃迁/终结"会漏掉中间态恶化，必须另加"最大守望时长→强制人工核查"的兜底；发现响循环先暂停止血（可逆）再归因。
 
 关联：`tools/llm-gateway-triage-priorities.md`（静默卡死家族是另一类：哑火≠响循环，诊断模板不可互抄）。
+
+关联 [[idle-reclaim-criteria-must-be-work-not-attention]]。

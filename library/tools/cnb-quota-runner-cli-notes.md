@@ -1,8 +1,8 @@
 ---
 name: cnb-quota-runner-cli-notes
-description: CNB 配额与 Runner 要点：云原生构建 160 核时/月、云原生开发 1600 核时/月独立不共享（超额 ¥0.125/核时）；省配额三招（不开 PR、ci skip、本地门禁）及丢服务端保险的代价；自托管 Runner 不开 Docker、不计核时、仅构建；CLI 新坑（start 缺 title 报 401、Windows 用 cnb.cmd、patch-pull 关闭不合并、list-pulls 无 --number）；「请了裁 ≠ 免责」
+description: CNB 配额与 Runner 要点：云原生构建 160 核时/月、云原生开发 1600 核时/月独立不共享（超额 ¥0.125/核时）；**本账号实况：派 NPC/push/合并都吃构建额度，官方免费额度数字不作数**（用户 20260930 纠正，优先于官方文档）；省配额三招及代价；自托管 Runner 不开 Docker、不计核时、仅构建；CLI 新坑（start 缺 title 报 401、Windows 用 cnb.cmd、patch-pull 关闭不合并、list-pulls 无 --number）；「请了裁 ≠ 免责」
 type: tool
-source: CNB 官方文档核对 + 2026-09-23 实测
+source: CNB 官方文档核对 + 2026-09-23 实测 + 用户 2026-09-30 账号实况纠正
 date: 2026-09-23
 verified: 2026-09-23
 topic: cnb, delivery
@@ -17,6 +17,19 @@ topic: cnb, delivery
 
 均 ¥0.125/核时超额、月底清零。公式 =「自然月累积 − 免费额度」；**核时 = 核数 × 小时**
 （官方节点默认 8 核）。CLI：`cnb charge get-quota / get-volume / get-repos-volume --slug <org>`。
+
+## 本账号实况（2026-09-30 用户亲口纠正，优先级高于官方文档）
+
+- **派 NPC 吃的是「构建额度」，不是开发额度**：`api_trigger_npc` / 评论 `@npc`、push、合并 PR、
+  任何 CI 流水线都计**云原生构建-CPU**；只有手动在网页云原生开发工作区写代码才计开发额度。
+  ⛔ 与官方 `npc.md`「NPC 归入开发场景，消耗云原生开发用量」**直接冲突**——以本账号实况为准
+  （日志里流水线运行位置在「云原生构建」标签下）。
+- **官方 pricing 的免费额度数字（160 / 1600 核时）不作数**，以账号实际账单/用量为准。
+- **推论**：「不派单」不是省额度方案（派单与推送省不掉），能省的只有 PR 触发的**额外那条**
+  `pull_request` CI。
+
+> ⏰ 时效状态（2026-09-30 记录，未复核）：以上为本账号当时实况；官方文案/账号档位变化后需重测，
+> 复核命令：`cnb charge get-quota --slug <org>` 与一次派单前后用量对比。
 
 ## 省配额三招
 

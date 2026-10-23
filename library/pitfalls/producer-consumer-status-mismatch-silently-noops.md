@@ -27,4 +27,4 @@ topic: database, diagnosis
 
 **相邻**：验证要走真实管线见 [[verify-with-real-pipeline-and-readonly-probes]]；"中间态/噪音都不能当结论"见 [[orphan-constants-and-import-warnings-are-not-blockers]]。
 
-关联 [[zcode-session-delete-is-soft-delete-two-dbs]]。
+关联 [[zcode-session-delete-is-soft-delete-two-dbs]]、[[store-owns-data-page-owns-cadence]]。

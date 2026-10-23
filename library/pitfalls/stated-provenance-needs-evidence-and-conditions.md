@@ -45,4 +45,4 @@ topic: verification
 `config-field-name-is-not-spec-read-consuming-code`（字段名不是规格）、
 `handbook-commands-must-verify-consuming-code`（手册凭记忆写 3 处错）。
 
-关联 [[handbook-commands-must-verify-consuming-code]]、[[adr-over-pr-description-and-code-history]]。
+关联 [[handbook-commands-must-verify-consuming-code]]、[[adr-over-pr-description-and-code-history]]、[[volatile-state-must-carry-expiry-and-recheck]]。

@@ -16,3 +16,5 @@ topic: change-discipline
 4. **编辑工具对含特殊字符/不可见字符（`→`、`—` 等）的区块反复 ExactMatch 失配**时别死磕——先打印目标行 repr（或按行号定位）看真实字符，然后换 Python 按行/字节替换（`lines[i]` 定位、`.replace(old.encode(), new.encode())`）。
 
 **Why**：真实事故——按段重写脚本漏写未改动段的段头，把双端配置全吞；二次重跑又把已坏文件覆盖了唯一完好备份，差点无法恢复。
+
+关联 [[temp-files-must-not-be-added-by-add-all]]。
