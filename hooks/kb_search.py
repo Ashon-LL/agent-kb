@@ -3,6 +3,8 @@
 """kb 检索器：关键词+topic+症状词检索，兼作写入前查重——库内此前零检索工具。
 
 为什么存在（2026-10-04 缺陷分析结论）：
+  0) 关键词匹配已归一（NFKC 全角转半角 + ASCII 大小写不敏感）；多词命中任一即保留，
+     排序先看命中数；无直接命中时自动给 2-gram 近似候选。
   1) 症状词只在正文里：用户搜「挂了/卡死/不生效/黑窗」时，INDEX 钩子全是
      「结论词/修法词」，索引层 0 命中（实测），而规程只让人扫 INDEX——
      本工具默认全文检索，症状词直达正文。
@@ -12,7 +14,7 @@
      「option 写操作六步铁律」），写新条目前跑 --similar 给出同族候选。
 
 用法：
-    python kb_search.py <关键词...> [--topic t1,t2] [--dir pitfalls] [--limit 10]
+    python kb_search.py <关键词...> [--topic t1,t2] [--dir pitfalls] [--limit 20]
     python kb_search.py --similar "候选标题或一句话描述" [--limit 5]
 
 退出码：0 = 有结果或查重完成；1 = 无结果；2 = 用法/环境错误。
@@ -22,6 +24,7 @@ import argparse
 import math
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -46,6 +49,11 @@ def _tokens(text):
             out.extend(run[i:i + 2] for i in range(len(run) - 1))
     out.extend(w.lower() for w in _WORD_RE.findall(text))
     return out
+
+
+def _norm(text):
+    """归一：NFKC（全角→半角）+ casefold（ASCII 大小写不敏感）。"""
+    return unicodedata.normalize("NFKC", str(text)).casefold()
 
 
 def _load_index_hooks(kb):
@@ -91,41 +99,49 @@ def _load_entries(kb, only_dir=None, only_topics=None):
 
 
 def _score_entry(keywords, title, hook, fm, body):
-    """返回 (总分, 命中行摘录列表)。权重：INDEX 钩子×3 > description×2 > 正文×1。
+    """返回 (总分, 命中关键词数, 命中行摘录)。
 
-    每个关键词独立计分求和；命中 0 个关键词的条目不入结果。
+    权重：INDEX 钩子×3 > description×2 > 正文×1；关键词已归一（NFKC+casefold）。
+    多关键词不再对缺词扣分：命中任一即保留，排序先看命中数再看权重。
     """
     desc = str(fm.get("description", ""))
+    n_title, n_hook, n_desc, n_body = _norm(title), _norm(hook), _norm(desc), _norm(body)
     total = 0.0
+    matched = 0
     excerpts = []
     for kw in keywords:
         s = 0.0
-        if kw in title:
+        if kw in n_title:
             s += 3.0
-        if kw in hook:
+        if kw in n_hook:
             s += 3.0
-        if kw in desc:
+        if kw in n_desc:
             s += 2.0
-        if kw in body:
+        if kw in n_body:
             s += 1.0
             for line in body.splitlines():
-                if kw in line and len(excerpts) < 3:
+                if kw in _norm(line) and len(excerpts) < 3:
                     excerpts.append(line.strip()[:100])
+        if s:
+            matched += 1
         total += s
-        if s == 0:
-            total -= 0.5  # 缺一个关键词降权（软 AND），但不直接出局
-    return total, excerpts
+    return total, matched, excerpts
 
 
 def cmd_search(kb, keywords, only_dir=None, only_topics=None, limit=10):
     entries = _load_entries(kb, only_dir, only_topics)
+    nks = [_norm(k) for k in keywords if str(k).strip()]
+    if not nks:
+        return []
     scored = []
     for rel, title, hook, fm, body in entries:
-        total, excerpts = _score_entry(keywords, title, hook, fm, body)
-        if total > 0:
-            scored.append((total, rel, title, hook, excerpts))
-    scored.sort(key=lambda x: -x[0])
-    return scored[:limit]
+        total, matched, excerpts = _score_entry(nks, title, hook, fm, body)
+        if matched:
+            scored.append((total, matched, rel, title, hook, excerpts))
+    # 命中关键词数优先，其次权重和
+    scored.sort(key=lambda x: (-x[1], -x[0]))
+    return [(total, rel, title, hook, excerpts)
+            for total, _matched, rel, title, hook, excerpts in scored[:limit]]
 
 
 def cmd_similar(kb, query, limit=5):
@@ -183,9 +199,16 @@ def main(argv=None):
 
     if not args.keywords:
         ap.error("需要至少一个关键词，或用 --similar 查重")
-    results = cmd_search(kb, args.keywords, args.dir, topics, args.limit or 10)
+    results = cmd_search(kb, args.keywords, args.dir, topics, args.limit or 20)
     if not results:
-        print("[无结果] 换个说法或去掉 --topic/--dir 再试；症状词（挂了/卡死/不生效）请直接当关键词用")
+        fb = cmd_similar(kb, " ".join(args.keywords), 5)
+        if fb:
+            print("[无结果] 关键词未直接命中；以下为 2-gram 近似候选（换说法或读全文）：")
+            for cos, rel, title, shared in fb:
+                print(f"  {cos:.3f}  {rel} — {title}  ｜共享词：{shared}")
+            return 1
+        print("[无结果] 关键词未直接命中，2-gram 也无重合；换个说法或去掉 --topic/--dir 再试"
+              "（症状词：挂了/卡死/不生效 可直接当关键词）")
         return 1
     print(f"[检索] {len(results)} 条（关键词：{' '.join(args.keywords)}）：")
     for total, rel, title, hook, excerpts in results:

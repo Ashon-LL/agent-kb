@@ -4,6 +4,8 @@
 运行：python -m unittest tests.test_kb_search -v
 Windows 与 CI 容器均可跑（tempfile + Path，无 POSIX 假设）。
 """
+import contextlib
+import io
 import sys
 import tempfile
 import unittest
@@ -36,6 +38,14 @@ def make_kb(tmp: Path):
         name="dual-scan", typ="workflow", topic="methodology",
         desc="线上与文档双扫描",
         body="**经验**：先扫线上再扫文档。\n"), encoding="utf-8")
+    (tmp / "pitfalls" / "multi-term-body.md").write_text(FM.format(
+        name="multi-term-body", typ="pitfall", topic="methodology",
+        desc="两个词都只在正文出现",
+        body="**经验**：阿尔法与贝塔要一起看。\n"), encoding="utf-8")
+    (tmp / "pitfalls" / "alpha-title.md").write_text(FM.format(
+        name="alpha-title", typ="pitfall", topic="methodology",
+        desc="阿尔法出现在所有字段",
+        body="**经验**：阿尔法单独使用时的注意事项。\n"), encoding="utf-8")
     (tmp / "INDEX.md").write_text(
         "- [黑窗风暴](pitfalls/console-window-storm.md) — 后台弹黑窗用 NO_WINDOW\n"
         "- [全量 PUT 清空](pitfalls/full-put-wipes.md) — 读改写覆盖配置\n"
@@ -81,6 +91,37 @@ class TestSearch(KbSearchCase):
         results = kb_search.cmd_search(self.kb, ["黑窗", "NO_WINDOW"])
         self.assertEqual(results[0][1], "pitfalls/console-window-storm.md")
         self.assertEqual(len(results), 1)
+
+
+class TestSearchNormalization(KbSearchCase):
+    def test_ascii_case_insensitive(self):
+        # 条目里是 NO_WINDOW，查询用小写也要命中
+        results = kb_search.cmd_search(self.kb, ["no_window"])
+        self.assertEqual(results[0][1], "pitfalls/console-window-storm.md")
+
+    def test_fullwidth_normalized(self):
+        # 全角字母/下划线经 NFKC 归一后等价
+        results = kb_search.cmd_search(self.kb, ["ＮＯ＿ＷＩＮＤＯＷ"])
+        self.assertEqual(results[0][1], "pitfalls/console-window-storm.md")
+
+    def test_partial_keyword_match_not_dropped(self):
+        # 三个词只命中一个：旧算法 1-0.5-0.5=0 会整条出局
+        results = kb_search.cmd_search(self.kb, ["黑窗", "量子", "香菜"])
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0][1], "pitfalls/console-window-storm.md")
+
+    def test_match_count_outranks_weight(self):
+        # 命中 2 个词（仅正文，低权重）应排在只命中 1 个词（高权重）之前
+        results = kb_search.cmd_search(self.kb, ["阿尔法", "贝塔"])
+        self.assertEqual(results[0][1], "pitfalls/multi-term-body.md")
+
+    def test_no_result_falls_back_to_bigram(self):
+        # 「全量回传」不是原样子串，但 2-gram 与「全量 PUT 回传」重合
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = kb_search.main(["--kb", str(self.kb), "全量回传"])
+        self.assertEqual(rc, 1)
+        self.assertIn("近似候选", buf.getvalue())
 
 
 class TestSimilar(KbSearchCase):

@@ -59,3 +59,4 @@
 > 2026-10-17 日常沉淀：+1（`user-given-equalities-must-stay-equal`：用户给的排序里 `=` 必须落成同值、同档展示只用并列符号；实例=临期优先组 priority/weight 设计被当场纠正）。
 > 2026-10-17 日常沉淀：+1（`aggregate-report-missing-values-must-be-none-guarded`：聚合报表 None 做差/求和崩溃；实例=APIShow 日报，附「间歇性失败别据一次判死」的判据）。
 > 2026-10-18 日常沉淀：+1（`email-html-alignment-must-be-inline`：邮件 HTML 对齐必须内联；客户端剥 style 造成「部分列跑偏」）。
+> 2026-10-23 检索器修正（kb_search）：关键词匹配归一（NFKC 全角转半角 + ASCII 大小写不敏感）；多词从「缺词扣分」改为「命中任一即保留、按命中数排序」；默认返回条数 10→20；无直接命中时自动降级为 2-gram 近似候选。复现并修复四类「存在却搜不到」：`oauth` vs `OAuth`、全角写法、三词只命中一词、词序不同。新增 5 条单测。
