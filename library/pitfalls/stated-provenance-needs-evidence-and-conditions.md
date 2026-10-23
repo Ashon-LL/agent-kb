@@ -41,7 +41,7 @@ topic: verification
 - 复核动作：对「统一/全部/一律/都」类词做**逐项列表对照**；对数字做**样本量 sanity check**
   （要 P90 就先看有没有 ≥10 个样本）。
 
-**同族条目**：`runtime-anomalies-may-be-operator-actions`（把「与预期不符」当故障）、
+**同族条目**：`volatile-state-must-carry-expiry-and-recheck`（易变状态要带时效与复核命令）、`runtime-anomalies-may-be-operator-actions`（把「与预期不符」当故障）、
 `config-field-name-is-not-spec-read-consuming-code`（字段名不是规格）、
 `handbook-commands-must-verify-consuming-code`（手册凭记忆写 3 处错）。
 

@@ -193,6 +193,44 @@ def index_paths_with_spaces(kb):
     return bad
 
 
+# --- 时效状态（易变事实）审计 -------------------------------------------
+# 2026-10-23 事故：条目写「apigogo/x 已被删除、现行入口=@i.o/x」（未实测的否定结论），
+# 两天后仓库被重建，记录过期却仍在手册与 kb 两处传播，导致照旧记录派单失败。
+# 规则：状态句必须带 ⏰ 标记与复核命令；本检查只提示「可复核而未标」，不判断真伪。
+_VOLATILE_NARROW_RE = re.compile(
+    r"(?:仓|fork|入口|地址|域名|站点|服务|渠道|模型)[^\n]{0,24}"
+    r"(?:已删除|已失效|已下线|已重建|已被删|已不在)"
+    r"|(?:已删除|已失效|已下线|已重建|已被删|已不在)[^\n]{0,24}"
+    r"(?:仓|fork|入口|地址|域名|站点|服务|渠道|模型)"
+    r"|现行入口|现行\s?="
+)
+_VOLATILE_BROAD_RE = re.compile(
+    r"已删除|已删|已失效|已下线|已重建|现行入口|现行\s?=|已不在|已被删|已经不存在")
+
+def _volatile_notes(entries):
+    notes = []
+    for p, text in entries.items():
+        if not _VOLATILE_NARROW_RE.search(text):
+            continue
+        if "⏰" in text or "复核" in text:
+            continue
+        notes.append(
+            f"[volatile] {p}: 含时效状态句但无 ⏰ 标记/复核命令——状态会腐烂；"
+            f"补 `> ⏰ 时效状态（日期，未复核）：…` + `⚠️ 用前必须实测：<命令>`，"
+            f"或改写为不带时效的原理表述")
+    return notes
+
+def audit_volatile(kb_path=None):
+    """列出所有含时效状态词的条目（供定期体检逐条实测）；返回 [(path, matches)]。"""
+    kb = resolve_kb_path(kb_path)
+    out = []
+    for p, text in collect_entries(kb).items():
+        hits = sorted(set(_VOLATILE_BROAD_RE.findall(text)))
+        if hits:
+            out.append((p, hits))
+    return out
+
+
 def validate(kb_path=None):
     """返回问题列表；空列表 = 通过。"""
     kb = resolve_kb_path(kb_path)
@@ -335,6 +373,8 @@ def validate(kb_path=None):
             notes_hook.append(
                 f"[hook] {p}: 正文含更新痕迹 {sorted(set(marks))}，但 INDEX 钩子未体现"
                 f"——确认钩子覆盖新增内容（检索全靠钩子行，漏改=检索降级）")
+
+    notes_hook.extend(_volatile_notes(entries))
 
     global _HOOK_NOTES
     _HOOK_NOTES = notes_hook
@@ -569,9 +609,18 @@ def main(argv=None):
     ap.add_argument("--kb", default=None, help="库路径，默认 $AGENT_KB_PATH 或 ~/.agents/kb")
     ap.add_argument("--check-triggers", action="store_true",
                     help="只校验沉淀触发词副本是否与唯一真相源一致")
+    ap.add_argument("--audit-volatile", action="store_true",
+                    help="列出所有含时效状态词的条目，供定期体检逐条实测（只报告，不判真伪）")
     args = ap.parse_args(argv)
 
     kb = resolve_kb_path(args.kb)
+
+    if args.audit_volatile:
+        rows = audit_volatile(args.kb)
+        print(f"[info] 含时效状态词的条目 {len(rows)} 条（逐条核实现行状态；带 ⏰ 的表示已标复核）")
+        for p, hits in rows:
+            print(f"  - {p}: {', '.join(hits)}")
+        return 0
 
     if args.check_triggers:
         t_problems, t_notes = check_triggers()
@@ -598,7 +647,7 @@ def main(argv=None):
     for h in _HOOK_NOTES:
         print(f"[warn] {h}")
     if _HOOK_NOTES:
-        print(f"[PASS] kb 校验通过（{len(_HOOK_NOTES)} 条钩子待确认，见上）—— 库：{kb}")
+        print(f"[PASS] kb 校验通过（{len(_HOOK_NOTES)} 条提示待确认，见上）—— 库：{kb}")
     else:
         print(f"[PASS] kb 校验通过 —— 库：{kb}")
     return 0

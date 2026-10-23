@@ -95,11 +95,23 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
    | `topic` | 领域，取受控词表之一（见下） |
 
    `topic` 受控词表（正交于 `type`；`type` 答"怎么用"，`topic` 答"属于哪个领域"）：
-   `api-gateway` `agent-orchestration` `browser` `ci` `cnb` `container` `database`
-   `sqlite` `delivery` `git` `llm` `mcp` `methodology` `office` `powershell`
-   `preference` `python` `security` `tauri` `windows` `zcode`
+   `agent-orchestration` `api-gateway` `browser` `change-discipline` `ci` `cnb` `container`
+   `database` `sqlite` `delivery` `diagnosis` `git` `llm` `mcp` `methodology` `office`
+   `powershell` `preference` `python` `registry` `reporting` `reverse-engineering`
+   `rust` `safety` `security` `tauri` `toolchain` `verification` `windows` `zcode`
 
    正文三段式：**经验**（直接说怎么做）/ **Why**（不这样做会怎样）/ **How to apply**（何时用）。
+
+   **时效状态单独写**：原理与状态分层。凡写「某仓/某地址/某服务/某版本此刻是否存在」
+   （「已删除/已失效/现行=」等），必须用状态块并给复核命令：
+
+   ```
+   > ⏰ 时效状态（YYYY-MM-DD 记录，**未复核**）：…
+   > ⚠️ 用前必须实测：<复核命令>
+   ```
+
+   否定结论必须带实测证据（命令+输出+时间点）；没有证据的「不存在」不许入库。
+   状态若被复制到手册/其他库，同步注明记录日期与未复核标记。
 5. **更新 INDEX.md**：在对应分类下加一行 `- [标题](相对路径) — 一句话钩子`
 6. **跑校验器（不可跳过）**：
 
@@ -108,9 +120,14 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
    ```
 
    必须看到 `[PASS]` 才算写完。它查 frontmatter 七字段、`type` 与目录一致性、`topic` 是否在词表、
-   `[[双链]]` 是否指向存在的条目、索引行数与磁盘文件数是否**双向**一致。
+   `[[双链]]` 是否指向存在的条目、索引行数与磁盘文件数是否**双向**一致；
+   并对「含时效状态句但无 ⏰/复核命令」的条目给 `[volatile]` 提示。
+   定期体检另跑 `python ~/.agents/kb/kb_validate.py --audit-volatile`，
+   列出所有含状态词的条目并逐条实测。
    报 `[FAIL]` 就按它列的行逐条修，**不要绕过、不要改校验器迁就条目**。
-7. **写作风格**：直说怎么做，一事实一文件，条目 ≤ 30 行。与「同族扩充」的冲突裁决：
+7. **写作风格**：直说怎么做，一事实一文件；单条聚焦一个教训。
+   条目超过约 100 行通常说明混了多个主题——按主题拆成独立条目并 [[双链]] 互指
+   （2026-10-20 已把 3 条 200+ 行条目按此拆分）。与「同族扩充」的冲突裁决：
    同一事实的新证据/新反例 → 扩充现有条目（允许超行，过程性复盘移 CHANGELOG）；
    独立可检索的新事实 → 新建条目 + [[双链]] 互指，宁可同族多条也不塞成一篇。
 

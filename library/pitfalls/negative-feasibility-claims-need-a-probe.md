@@ -2,9 +2,9 @@
 name: negative-feasibility-claims-need-a-probe
 description: 说"做不到/不可行"之前必须先做最小实测探针；从机制推断出的否定结论最容易错，代价也最大（用户会放弃整条正确路径）
 type: pitfall
-source: default 会话 2026-10-13（一天内两次"不可行"判断被 5 分钟实验推翻）
+source: default 会话 2026-10-13（一天内两次"不可行"判断被 5 分钟实验推翻）；2026-10-21 停服手游离线化实测
 date: 2026-10-13
-verified: 2026-10-13
+verified: 2026-10-21
 topic: verification
 ---
 
@@ -13,6 +13,7 @@ topic: verification
 - 探针要**摘掉混淆变量**：判"链路通不通"就用 **IP + SNI** 直连目标，把 DNS 排除在外；判"客户端到底发了什么"就起一个**只记录请求内容的假服务**，拿日志当证据。
 - 同一天两次实测反例：①据"代理模式不代理 DNS"断言方案不可行，用户提出"先用能通的状态拿到正确解析、再拿来用"——照做后**四个域名全部通过完整证书校验**，方案其实成立；②据源码主干里某字段是 `Option` 推断"不该必填"，而该 build 实测必填（用户猜"我的是 beta 版"方向正确）。
 - 反面代价：错误的否定让用户**白走一整轮**（甚至放弃正确方案），远贵于"多花 10 分钟做探针"。
+- 2026-10-21 停服手游"离线版"实测（《全民暴击僵尸》/Zombie Corps，`com.bwgame.fxjscn.uc`）——"做不成"是探针结论而非推断：① curl 配置域名（`120.131.3.150`、`dev.bwgame.com.cn`）均超时；② 解包比对资源清单 `assets/flist.xml`（1522 项）与包内文件，缺失 0，**排除**"缺资源"；③ apktool 反编译定位强制更新检查，把 `mForce` 一个 boolean 改 false 即绕过弹窗、成功进入游戏自带加载页；④ 之后卡"下载失败"，再推进则由 UC SDK（`cn.uc.gamesdk`）抛 `StringIndexOutOfBoundsException` 崩溃，且客户端 lua 全加密（密钥在 `libcocos2dlua.so`）。可复用探针清单：**配置域名存活 / 资源清单是否全在包内 / 启动链路有无第三方 SDK 登录依赖**。
 
 **Why**：机制推断天然漏项（配置层叠、版本差异、协议语义、缓存），而否定结论**没有下游纠错机会**——用户不会去试一个被告知"不可行"的方案；同族条目 [[subagent-absence-and-security-claims-need-selfcheck]] 讲的正是这类"缺席/否定断言要抽查"。
 

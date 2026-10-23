@@ -41,12 +41,15 @@ fork 上所有**本仓定制行**（配置、锚点、超时、地址…）**会
   各跑清单 grep，逐项打表（1→0 即被覆盖）。
 - 补回后复验：`yaml.safe_load` 通过 + `git diff --stat` 恰 N 行（防顺手改坏别的）。
 
-## 2026-10-16 后续（该 fork 已删）
+## 2026-10-16 后续（**2026-10-23 更正：那条「已删除」是误记**）
 
-`apigogo/x` **已于 2026-10-16 被用户删除**（改为只收藏上游 `i.o/x`；现行派单入口 = `@i.o/x(中书令)`，
-口径见 `docs/dispatch/CNB-DISPATCH-MANUAL.md` §4.6）。⇒ 本 pitfall 留作**历史教训**；
-「fork 同步 = force update、本仓定制会被静默覆盖」这条**原理在任何 fork 同步场景仍适用**——
-凡维护 fork 定制（配置/密钥引用/超时/地址），同步后一律按清单 grep 复核再补回。
+⛔ **原文写「`apigogo/x` 已于 2026-10-16 被用户删除、现行入口 = `@i.o/x(中书令)`」——该记录有误**（当时的判断，未实测仓库是否存在）。2026-10-23 用户明确「回归 apigogo/x 那个中书令的模式」并纠正，实测证据：
+
+- `cnb repositories get-by-id --repo apigogo/x` ⇒ **存在**，`flags=NPC`，2026-10-19 重建、10-21 仍在更新；
+- `git clone https://cnb.cool/apigogo/x.git` ⇒ `.cnb.yml` 的 `.npc` 锚点带 `imports: apigogo/secret/envs.yml`（我方密钥库）、`.runner-dispatch = cpus 4`；
+- **现行派单入口 = `@apigogo/x(中书令)`**（口径见 `docs/dispatch/CNB-DISPATCH-MANUAL.md` §4.6，派单前必须 `get-by-id` 实测入口仓存在）。
+
+⇒ 本 pitfall 的**原理仍完全成立**（fork 同步 = force update、本仓定制会被静默覆盖；凡维护 fork 定制，同步后一律按清单 grep 复核再补回）——2026-10-19 重建后的 apigogo/x 正是带着密钥 imports + 4 核 runner 这些定制回来的。
 
 相关：[[automation-artifacts-lie-existence-and-freshness]]（「看起来还在」不等于「生效」同族）、
 [[backlog-records-rot-verify-before-dispatch]]（记录会腐烂：同步后现值以实测为准）。

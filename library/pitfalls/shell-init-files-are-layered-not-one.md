@@ -49,7 +49,7 @@ Dockerfile 里的 `ENV PATH=...` 只对**后续 RUN 与容器默认 env** 有效
 6. **从 github release 下载要 `-L --fail --retry 3`**：会 302 到对象存储，
    不带 `-L` 会把 302 响应体当归档解；不带 `--fail` 则 404 也返回"成功"。
 
-**相邻**：断言"改到了吗"要自证，见（消融自证那条已不在库中，链接暂缺）；
+**相邻**：断言"改到了吗"要自证，见 [[ablation-must-self-verify-change-applied]]；
 配置字段名/注释不是规格，见 [[config-field-name-is-not-spec-read-consuming-code]]。
 
 **2026-10-10 补充实测（反向失败：非登录壳正常、登录壳丢）**

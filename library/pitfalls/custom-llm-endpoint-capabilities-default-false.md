@@ -50,6 +50,6 @@ looks like a tool call, but no structured tool invocation was emitted`、回合�
 
 **相邻**：字段名/注释不是规格见 [[config-field-name-is-not-spec-read-consuming-code]]；
 日志文案同样不是规格见 [[log-text-is-not-spec-read-emitting-code]]；
-自定义 provider 的配置生成逻辑见（该条目已不在库中，链接暂缺）。
+自定义 provider 的配置生成逻辑以消费代码为准，见 [[handbook-commands-must-verify-consuming-code]]。
 
 关联 [[disguised-client-gate-needs-placeholder-tools-merged-not-replaced]]、[[empty-config-is-not-missing-feature]]。

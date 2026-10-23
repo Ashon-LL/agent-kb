@@ -4,6 +4,10 @@
 > 目录：`tools/` 工具链 · `workflow/` 流程协作 · `pitfalls/` 失败教训
 
 ## pitfalls/ 教训与反模式
+- [「空闲回收」判据必须是「有没有事在做」不是「有没有人在看」](pitfalls/idle-reclaim-criteria-must-be-work-not-attention.md) — 无人值守/自动化场景下 UI 状态判据**结构上失效**（实测订阅事件 0 条 vs 正常时段 3 条/次）；先枚举进程所有「活着」的形态再定判据，优先用对端主动推的心跳/通知（与谁在场无关）；挂点选记录构造处 + try/catch + 宽限窗口；★阈值和判据是两件事，修误杀只改判据、不顺手拉长用户阈值
+- [成品包补丁锚点要内容寻址，别写死文件名/变量名](pitfalls/patch-pipeline-content-addressing-beats-filename-anchors.md) — 压缩名每代全换（实测三代文件名/类名/函数名整体漂移）；内容寻址的收益可量化：新版 27,995 条目只 1 针失配、其余零适配直接出包；★配套要求＝桩测试动态解析绑定名，否则版本改名后测试静默失真（17 个假 FAIL 而产品完全正确）；引用原名用正则取回不复制；任何测试失败先怀疑桩
+- [图件必须做渲染前几何自检（并按图元类型分级判据）](pitfalls/matplotlib-figure-geometry-selfcheck.md) — 图例压柱/注释压柱/出画布只有 bbox 几何量可靠；三层根因：避让写在 continue 之后、漏 `ax.patches`、`Annotation.get_window_extent` 含箭头 ⇒ 取 `Text` 基类 bbox；内边距按 `borderaxespad×fontsize×dpi/72`、抬 ylim 造留白须设增幅上限、柱内数值标签豁免要含水平居中、布局守卫后要再避让一次；门禁须临时副本+随附工具库，正例 0 违规且负例必须能拦住
+- [CNB NPC 派单：@地址/配置源/timeout 不是会话上限](pitfalls/cnb-npc-dispatch-channel-config-and-time-caps.md) — 裸 `@角色` 不产生事件（必须 `@<NPC仓>(<角色>)`+`--work-mode`，CLI 评论 2 秒建 pipeline）；评论事件配置源在 **NPC 仓** `.cnb.yml`（改机型/轮次要改 fork）；`timeout` 只管单次工具执行、实测 2h01m 被 SIGKILL（声明 6h 无效）；`strings 日志 grep =7200000` 会命中自己注释文本、真实值 `<masked>`；长任务靠增量推送兜底
 - [注入式 UI 增强失效先查「取凭据/取上下文」段](pitfalls/injected-ui-feature-failure-check-credential-plumbing-first.md) — 引擎/锚点/桥全在也可能是 gate 前那几行把 Key 拿不到就静默 return；判据＝桩 DOM 跑真块 A/B（调用次数）；打包应用主 chunk grep testid 0 命中是正常（lazy chunk + 常量压缩）；修法＝复用已桥接通道多路复用 + 主进程按 id 读明文配置兜底
 - [JOSE 定长 r‖s 转 DER 必须剥前导零](pitfalls/jose-raw-sig-to-der-must-strip-leading-zero.md) — DER 要求最小编码；首字节为 0 时被 OpenSSL/cryptography 拒签，伪装成「签名器 10% 随机失败」；先统计失败样本特征再怀疑 nonce
 - [错误日志归因按 baseURL 判线，模型名会重名](pitfalls/multi-line-log-attribution-use-baseurl-not-model.md) — ZCode model.* 事件归属字段在 context.baseURL；导出 txt 丢 baseURL，须回原始 jsonl 聚合
@@ -91,9 +95,10 @@
 - [New API 多密钥 size 必须跟段数](pitfalls/newapi-multikey-size-must-track-key-count.md) — ⛔追加 key 不改 size⇒新钥当后缀；**10-08 起加钥首选原生 PUT**（GET 掩码→回填真钥→禁带 status→自动重建 size/BLOB→免重启）
 - [台账核对必须双向](pitfalls/ledger-audit-must-be-bidirectional.md) — 只跑单向会漏整类问题；库里有值≠线上在用
 - [待办台账会腐烂，开单前先复核](pitfalls/backlog-records-rot-verify-before-dispatch.md) — 未做≠还没做，按机制复核；实测 6/6 已闭环
+- [kb 检索无结果≠库里没有](pitfalls/kb-search-miss-is-not-kb-empty.md) — 检索失败≠对象不存在；症状词多轮+ls 目录+读 INDEX 三步；20261023 实测漏读 6 条直接相关
 - [同名配置键在不同步骤类型下语义不同](pitfalls/same-config-key-different-semantics-per-step-type.md) — 脚本 Job=总时长+无输出超时，npc:go=单次工具执行；调大总时长会静默松掉 10min 无输出保护；症状词：卡住；真上限见 [CNB 2h 硬顶](tools/cnb-pipeline-2h-hard-cap.md)
 - [守卫判据锚「写法」必被换写法绕过](pitfalls/guard-criteria-anchored-to-spelling-always-escape.md) — 四连逃逸实证；静态判结构、渲染占位交运行时几何门、变异集裁定强弱
-- [fork 同步上游会静默覆盖本仓定制](pitfalls/fork-sync-force-update-wipes-local-customizations.md) — 同步=force update（重写历史）；定制行带标记+清单，同步后逐项 grep 复核再补回；⛔ 该 fork（apigogo/x）已于 20261016 被用户删除 ⇒ 留作原理性教训（凡 fork 同步皆适用）
+- [fork 同步上游会静默覆盖本仓定制](pitfalls/fork-sync-force-update-wipes-local-customizations.md) — 同步=force update（重写历史）；定制行带标记+清单，同步后逐项 grep 复核再补回；⛔ 20261023 更正：apigogo/x 并未删除（20261019 已重建，实测带密钥 imports+4 核 runner）⇒ 现行派单入口 = @apigogo/x(中书令)；原理仍适用
 - [New API 禁用渠道/改分组都要重建 abilities](pitfalls/newapi-disable-must-sync-abilities.md) — abilities 是唯一路由事实源；须手工重建+回读
 - [产出端与消费端状态不匹配会静默空转](pitfalls/producer-consumer-status-mismatch-silently-noops.md) — 产出写 candidate、消费只查 active ⇒ 空转
 - [容器镜像内源码补丁必须配重放脚本](pitfalls/container-image-source-patches-need-replay-script.md) — 扛 restart 不扛 rm/升级；须配幂等重放脚本
@@ -145,7 +150,7 @@
 - [外层失败文案 ≠ 子操作失败](pitfalls/run-level-failure-text-is-not-sub-operation-failure.md) — 「Auto-compaction failed」是 run 级聚合文案，同日志 3 次压缩其实全部 succeeded；判"机制失效"要按层核对 attempt 级结算，配额墙真因常在溢出次数而非单次大小
 
 - [整份配置加载失败先查"指向文件"的键](pitfalls/config-load-failure-check-file-refs-and-schema.md) — 文件存在≠合法，还要合该 build 的 schema；第三方工具先写引用后落盘会竞态；表现为设置页改不了/沙盒装不上
-- ["不可行"必须先做探针](pitfalls/negative-feasibility-claims-need-a-probe.md) — 机制推断出的否定结论最容易错、代价最大；探针要摘掉混淆变量（IP+SNI 直连 / 假服务记录请求）
+- ["不可行"必须先做探针](pitfalls/negative-feasibility-claims-need-a-probe.md) — 机制推断出的否定结论最容易错、代价最大；探针要摘掉混淆变量（IP+SNI 直连 / 假服务记录请求）；停服游戏"离线版"三类探针：配置域名存活 / 资源清单是否全在包内 / 有无第三方 SDK 登录依赖
 - [上游升级的行尾噪声与锚点补丁](pitfalls/upstream-merge-crlf-noise-and-anchor-patches.md) — 整文件级 diff 多为 CRLF 噪声（`--ignore-cr-at-eol` 判真伪）；合并后归一 LF 再跑锚点补丁；补丁脚本写盘须 `newline=\"\n\"`；落后 fork 按 SHA 挑单点
 - [Windows 硬件保留内存归因：核显 UMA 切分与独显直连无关](pitfalls/windows-hardware-reserved-memory-attribution.md) — 大头=BIOS 划给核显的固定显存；**首选解法=AMD Software→内存优化器→产能档**（实测 4.255→0.755GiB）；**512MB=终局地板（四轮互证：用户态白名单/驱动掩码{1,2}/固件无选项表/AmdSetup 字段级直写实测不生效——16G 极端值+安全模式双刀判决；256 不可达）**；游戏档=4GB 非 2G；总量=SMBIOS 求和−可见量，dxdiag/qwMemorySize 定位；独显直连只管输出路径不释放它；**跨机型固件字段表用前必做同构性校验**
 - [含空格路径不加引号的怪文件事故](pitfalls/windows-unquoted-path-redirect-accidents.md) — C:\Program 类残留=重定向在空格处被截断；三步排查（读内容→创建时间/属主→Prefetch 与应用日志对账）；处置=核对后删除，弹窗自然消失
@@ -153,6 +158,7 @@
 - [转义经补丁管道会变控制字符 ⇒ 校验代码会静默失效](pitfalls/escaping-through-patch-pipelines-needs-positive-control.md) — 「反斜杠 b」被写成退格后正则静默失效（表面还通过）；**凡写正则/转义必配正反对照**；用不含反斜杠的等价写法（[^A-Za-z0-9_] 代替词边界、[ ]* 代替空白、chr(10) 代替换行），写完机检控制字符
 - [success 不是「没被中止」的证据](pitfalls/success-status-is-not-no-abort-evidence.md) — 同一 exit 137 两种结局：临死前推完=success、没推完=error；判据读原始日志的 exit 137 与时长；用反例证伪假设必须挖到机制层；两次独立事件时刻相差几秒=硬边界强证据
 - [二选一的错误文案不能当单一结论](pitfalls/binary-error-text-needs-branch-evidence.md) — 「A，或 B」只是候选清单；必须用终点可观测物取证落在哪支（容器是否存在/exit 137/时刻）；文案里的数字不等于上限来源
+- [易变状态必须带时效标记与复核命令](pitfalls/volatile-state-must-carry-expiry-and-recheck.md) — 原理与状态分层；「已删除/已失效/现行=」须带实测证据+失效条件+复核命令；状态复制到多处会变「真理」；description 要覆盖状态主题；体检跑 `--audit-volatile` 逐条实测
 
 ## workflow/ 流程与协作
 
@@ -212,7 +218,7 @@
 - [git 传输死时走 Git Data API 构造提交](tools/github-git-data-api-push-without-git-transport.md) — 零 git 二进制建分支推提交；须本地 SHA1 预验证
 - [细粒度 PAT 缺 PR 写权限 → 403](tools/github-fine-grained-pat-pr-write-403.md) — 能推≠能开 PR；先 GET /pulls 分辨权限 vs 不存在
 - [直连云环境里的 AI Agent（CNB 工作区）](tools/cnb-workspace-agent-direct-channel.md) — 附**可执行脚本** `tools/cnb-workspace-agent-cli.py`（reply/history/sessions/keepalive/**watch**） — SSH 进容器 + `POST :8688/api/v1/sessions/{id}/reply` 发消息（⛔ 必带 `x-codebuddy-request: 1`）；⭐20261016 新增：**CLI 打通=继承 serve 进程注入环境（含 CNB_TOKEN 本库令牌，~7 天过期）**、**保活硬门槛=「进页面」（创建后 10 分钟内未进 VS Code 页面即回收，SSH 不算）**（旧「SSH 即心跳」已更正）；附「工作区 start 不能指定模型」「Dockerfile 构建期无 git 凭据」等相邻事实；关闭取证看 backup_status/commit_count/备份自述（file_count 非未提交口径）、平台全量日志不含对话、对话关闭后不可追
-- [CNB NPC 派单要点](tools/cnb-npc-dispatch-essentials.md) — ⭐需求单开在**目标仓**（官方：流水线跑在 Issue 所属仓，不是 NPC 注册仓）；⭐2026-10-16 更新：入口改 **`@i.o/x(角色)`**（fork `apigogo/x` 已删）——跨根态B 真人首棒；评论链路无我方密钥（personal-envs 只覆盖云开发）⇒ 真凭据活走 api_trigger_npc 直派/云开发；大任务书走 argv 会截断；workMode 嵌 npc 内
+- [CNB NPC 派单要点](tools/cnb-npc-dispatch-essentials.md) — ⭐需求单开在**目标仓**（官方：流水线跑在 Issue 所属仓，不是 NPC 注册仓）；⏰入口=**`@apigogo/x(中书令)`**（2026-10-23 实测；10-16『已删』系误记，用前 `get-by-id` 复核）——跨根态B 真人首棒；评论链路无我方密钥（personal-envs 只覆盖云开发）⇒ 真凭据活走 api_trigger_npc 直派/云开发；大任务书走 argv 会截断；workMode 嵌 npc 内
 - [CNB 约 2h 流水线硬顶](tools/cnb-pipeline-2h-hard-cap.md) — 真值 `CNB_PIPELINE_MAX_RUN_TIME=7200000`，与 `.cnb.yml` timeout 无关（声明 6h 照样 137）；取证：prepare 日志 `maxPipelineRunTime: 2h` + runner 日志环境变量；api_trigger_npc 固定 2h，issue.comment@npc 档位动态（重发可回 4h）；对策=单命令有界+增量推送
 - [CNB 配额 / 自托管 Runner / CLI 坑](tools/cnb-quota-runner-cli-notes.md) — 构建 160 vs 云开发 1600 核时/月独立；省配额三招及代价；Runner 不开 Docker/不计核时/仅构建；`build/start` 缺 title 报 401、Windows 用 `cnb.cmd`、`patch-pull --state closed` 关闭不合并；「请了裁≠免责」
 - [CNB token 用量统计方法](tools/cnb-token-usage-audit.md) — 正解=逐构建 get-build-ai-audit 累加；credit 是额度≠token（免费期 0 credit 照记 token）；charge_type_token 是平台 bug；截止时刻默认北京时间
@@ -225,6 +231,7 @@
 - [MCP 多密钥池化代理](tools/mcp-multikey-keypool-proxy.md) — 单 key 官方 server 的多密钥正解=逐 key 子进程+stdio 代理（故障转移+冷却自愈）；含 npx 缓存残缺（zod v3/v4 缺失→秒退且零日志）取证法
 - [浏览器扩展取证：profile + LevelDB](tools/browser-extension-forensics-profile-leveldb.md) — 判启停/权限读 Secure Preferences（userScripts 须 granted+active 都有）；LevelDB 锁定用 FileShare.ReadWrite 读；location=4 解包扩展删源即失效但注册项须 UI 删；油猴脚本可能依赖本机 RPC 端口（PanLinker→16800 无监听＝不可用）
 - [跨浏览器迁扩展：先确认机制再动手](tools/browser-extension-migration-mechanism-first.md) — ego-lite 只认自家安装（外部塞文件/注册会被删）；Chrome 与 Edge 商店同一扩展 ID 不同，按 ID 做差集必误判；chrome://extensions 快照是异步渲染不能当证据，判装没装看 Extensions 目录 + Secure Preferences
+- [ego-browser 表单站自动化：弹窗与产物取证](tools/ego-browser-form-automation-dialogs-and-cache.md) — `Input.dispatchMouseEvent` 超时但 `mouse.move`/`evaluate` 正常 ⇒ 是浏览器级权限气泡挡的，改走 DOM `.click()`；DOM 点击"没反应"先列出所有可见 `.ui-dialog` 的按钮文案（EM 确认键=Proceed / Proceed without ORCID iD，只点 Close 等于没做）；EM 上传拒重名须先删后传；`fileDownload.asp` 不带 `authVer=true` 返回旧版成品；`pdftotext -layout` 会把表格封面错读成字段错位，必须渲染成图
 - [MCP 有没有用看 handler 返回什么](tools/mcp-prompt-template-servers-add-no-capability.md) — 别读 description 宣称，读 handler 返回什么
 - [CNB 密钥库导入与消费链路](tools/cnb-secret-repo-imports.md) — 密钥库拒一切令牌、只能网页编辑；`.cnb.yml` 顶层键须是分支名；Prepare 秒失败无日志的取证手法；NPC 镜像无 `python` 只有 `python3`；应用不读 env 时须加翻译步骤
 - [CNB 云开发环境：注入层与 settings 快照](tools/cnb-clouddev-env-injection-snapshot.md) — 注入在主进程 env 非 ssh shell（读 `/proc/<pid>/environ` 且别 head 截断）；bootstrap 须在带注入 env 的进程跑；settings 是建环境那刻的密钥库快照（改库不回流）；跨套错配 401 不等于 key 无效；Prepare success ≠ 变量已注入
@@ -270,3 +277,8 @@ topic: 受控词表之一（见 kb 技能）
 - [上游排队类错误先查社区实现再发明等待机制](pitfalls/upstream-queue-blind-wait-backfires.md) — 排队≠时间窗，盲等把快速失败变超长挂起；同类项目早有 queue-poll/串行化/不惩罚账号的答案
 - [Web自动化优先调页面函数与服务端接口](pitfalls/web-automation-call-page-functions-not-dom-clicks.md) — element.click()/UI模拟时灵时不灵；从onclick属性和源码reverse出页面函数与完成接口直接调用是确定性方案；iframe递归遍历/字体混淆用截图读/SPA切换后reload/验证看服务器快照
 - [Codex hook 命令必须是合法 PowerShell](pitfalls/codex-hook-command-must-be-valid-in-powershell.md) — Windows 上 hook 走 pwsh，「"a.exe" "b.py"」双引号串写法 ParserError 且发生在进程创建前（日志无痕，易误判成没调度）；改用无空格 .cmd 桥或加 & 调用符；~/.agents 不是 hook 配置源
+- [「同步到最新」要打到用户拿到东西的那一层](pitfalls/local-sync-must-reach-user-visible-layer.md) — 启动器每次 pull 会覆盖本地镜像，改本地等于没改；gitignore 的旧 dist 把「源码编译不过」藏了一整天；验证要回拉制品库 digest + 走用户入口
+- [接外部工具集：判据是「模型自己做不到」](tools/external-tool-integration-criteria-and-gotchas.md) — 工具数是反向指标（1894 个多是 convert_*/calculate_* 微函数）；握手超时先怀疑客户端（curl 0.47s vs CLI 60s）；URL 里可能要 ASCII slug
+- [「阶段」与「执行单元」必须分开](pitfalls/semantic-unit-vs-execution-unit-must-be-separate.md) — 两者压成一个概念会逼出变体爆炸（写作技能 10 个=笛卡尔积）与身份撞车（skill_name 当主键）；修法是加语义层不动执行层 + 零语义漂移（一次性回填/只在多单元阶段渲染/只在声明时序列化）；最易漏的是创建路径（老数据正常、新建全丢）
+- [派单前核三方等值 + 载荷先入仓 + 产物落项目内](pitfalls/dispatch-requires-three-way-equality-and-artifact-hygiene.md) — 「我上次核过」在派单语境一律无效（执行者 87 秒就能推进目标仓 ⇒ 三方分叉）；执行者要用的载荷必须先入仓（签名 URL 是旁路）；产物唯一落点 = 项目内 `_tmp/`（先确认 gitignore）
+- [含正则元字符的检索词作证据必须加 -F](pitfalls/regex-anchor-literal-search-false-zero-hit.md) — `rg '$FORMAT'` 里 `$` 是行尾锚点⇒恒零命中，会被当成「全仓无消费点」写进审计结论；凡把命中数（尤其 0）当证据，pattern 含 `$ ( ) [ ] . *` 即切 `-F` 并在证据行注明模式
