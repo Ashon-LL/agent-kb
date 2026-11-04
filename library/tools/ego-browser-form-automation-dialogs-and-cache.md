@@ -4,7 +4,7 @@ description: ego-browser 自动化老式表单站（以 Editorial Manager 稿件
 type: tool
 source: 2026-10-21 本机 Neurocomputing 稿件（NEUCOM-D-26-23431）被退回作者后的修正版重交全程
 date: 2026-10-21
-verified: 2026-10-21
+verified: 2026-11-02
 topic: browser
 ---
 
@@ -23,6 +23,8 @@ topic: browser
 6. **ego-browser 的 popup 会被拦**。`window.open` 出来的窗口在无用户手势时不产生 `waitForEvent("popup")`；EM 的 View Letter 之所以能开，是因为它走 `<a href="javascript:...">.click()`。别再试图用 `page.click` 去点（Input 被挡），直接读该 link 指向的 JS 函数源码拿真实 URL（`String(w.viewPDF)`），再用 `page.fetch(url, {saveAs})` 借页面会话把文件取回来验。
 
 7. **EM 的时间是站点时区**。列表里的 `Status Date Oct 20 1:30PM` 实际是北京时间 2026-10-21 01:30（EM 侧按美东记）。对时间线时先换算，别把"今天的动作"读成"昨天的旧状态"。
+
+8. **窗口最小化时截图与窗口级 CDP 会失效，但 DOM 操作仍可用**：`page.screenshot()` 报 `Cannot capture a screenshot while the window is minimized`，`Browser.getWindowForTarget` 报 `No web contents in the target`；此时 `page.evaluate()`、`setInputFiles()`、DOM `.click()` 仍正常。能恢复窗口就恢复；不能则跳过截图，用 `evaluate` 读 DOM 状态继续。
 
 **Why**：老式表单站（EM/投稿系统/政企后台）的失败面几乎都在"浏览器层的弹窗 + 站点的委托事件 + 服务端多版本产物"这三处，而不是选择器写错。把这三处分开取证，每一步都能给出"到底是哪一层没生效"的确定答案；混在一起就会陷入"重试→报告有进展→其实没动"的循环。
 

@@ -1,10 +1,10 @@
 ---
 name: zcode-session-delete-is-soft-delete-two-dbs
-description: ZCode 的"删除会话"是纯软删——UI 状态在 v2/tasks-index.sqlite 的 tasks 表（archived/deleted/pinned），正文全在 cli/db/db.sqlite 且该库**没有任何删除标记**，所以删完 585MB 仍占着；session.time_archived 是死列别信；定位存储时 grep -rlc 会假阴性
+description: ZCode 的"删除会话"是纯软删——UI 状态在 v2/tasks-index.sqlite 的 tasks 表（archived/deleted/cli_deleted/pinned），正文全在 cli/db/db.sqlite 且**不随删除释放**，删完仍占空间；2026-10-27 复测：session 表已新增并写入 time_deleted（不再是"无任何删除标记"）；session.time_archived 仍是死列别信；定位存储时 grep -rlc 会假阴性
 type: tool
-source: 2026-09-30 用户问「已归档且已删除/已删除的会话为什么仍然存在」，只读排查 ZCode 3.11 会话存储
+source: 2026-09-30 用户问「已归档且已删除/已删除的会话为什么仍然存在」，只读排查 ZCode 3.11 会话存储；2026-10-27 复测并实跑清理
 date: 2026-09-30
-verified: 2026-09-30
+verified: 2026-10-27
 topic: zcode, database, sqlite
 ---
 
@@ -48,6 +48,15 @@ topic: zcode, database, sqlite
 13. **连坐删除不可逆，动手前必须告知用户并确认**：外键为零、DELETE 页在 VACUUM + wal_checkpoint 后即物理释放、SQLite 自身不进回收站，**无自愈路径**。唯一救法是 VSS 卷影副本（`vssadmin list shadows`，需管理员权限）拿删前整库快照。2026-10-04 二清连坐删了 usage 后用户想恢复用量——无快照、无备份，数据没了 ⇒ 规程定型：**默认保留账本，连坐必先问**。
 
 14. **按会话记账的目录其实有第 4 层：`cli/rollout/model-io-sess_<id>.jsonl`**（`v2/setting.json` 的 `modelIoFullRetentionEnabled=true` 时记全量模型 I/O）。2026-10-06 实测：单个活跃会话的该文件能涨到 GB 级（当时两个活跃会话合计以约 100 KB/s 持续增长——排查"空间莫名减少"先看这里；关掉该开关后增长立即停止，无需重启 ZCode）。**已删会话留下的同名文件属于要清的残留**（2026-10-06 用户口径"只留用量、不留其他" ⇒ 连它一起删）。
+
+15. **2026-10-27 复测（新版 ZCode）推翻了旧结论的三处，脚本必须按新事实写**：
+   - `session` 表**新增 `time_deleted` 列且真实写入**：4 个已删会话全部有值，与 tasks 的 `deleted=1` 完全一致。旧条目"正文库没有任何删除标记"只对老版本成立；但**删除仍然只是翻标记、不回收页**，清理逻辑不变。
+   - `tasks` 表新增 `cli_deleted`，与 `deleted` 恒等（4/4 一致），判断已删建议用 `deleted=1 OR cli_deleted=1`。
+   - **会话 id 有两种格式**：老的是 `sess_<uuid>`，新的顶层/CLI 会话是 `session_<32位hex>`（如 `session_712c6714…`）。任何"必须是 sess_ 开头"的正则会漏掉新会话。
+   - ⚠️ **目录归属不能一律剥前缀**：新版子代理会话 id 本身就是 `sess_subagent_agent_<uuid>`，目录名与 id 字面相同。**先按字面查 session 表，查不到再试剥前缀**——否则会把"已删会话的子代理目录"误判成孤儿（本次 42 个 artifacts + 13 个 exec 目录全是这种，剥前缀会全判错）。
+   - 本次实跑结果（Windows Python 3.13 / SQLite 3.50.4 / ZCode 运行中）：4 个已删会话展开 52 个子会话，删 part 61,518 + message 16,199 + session_entry 1,754 + session_input 751 + todo 193 + input_history 11；保留 session 行与三张 usage 表。目录层 DEL 58 个（81.5 MB）+ 上轮遗留孤儿 26 个（0.4 MB），rollout 1 个（4.8 MB）。`VACUUM` 10.2s 成功，`page_count` 267,851→203,469、`freelist` 59,557→0、**1,096.8 MB→833.4 MB**，`wal_checkpoint(TRUNCATE)` 归零，`integrity_check=ok`。合计回收约 350 MB。
+   - **定向备份比整库备份划算得多**：只 dump 待删的 8 万行正文到 gzip JSONL，55.9 MB 就够留恢复路径，不必复制 1.1 GB 整库。
+   - **删 session 行对省空间几乎无用**：2026-10-27 按「只留用量」口径补删 52 条 session 行 + VACUUM，只回收约 0.5 MB（1,096.8→832.9 MB 的大头全在正文与目录层）。三张 usage 表行数删前删后完全不变（model 10,284 / turn 693 / tool 11,758），账本确实不依赖 session 行。**只想省空间就别删 session 行；删它只是为了"不留痕迹"**。tasks-index 的 deleted 墓碑可保留（UI 侧标记，几乎不占空间），不影响已删列表。
 
 关联 [[config-field-name-is-not-spec-read-consuming-code]]、[[log-text-is-not-spec-read-emitting-code]]、[[parallel-test-run-must-isolate-repo-mutators]]、[[zcode-platform-verified-facts]]、[[zcode-session-db-real-user-extraction]]。
 

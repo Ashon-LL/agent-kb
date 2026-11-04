@@ -4,7 +4,7 @@ description: 【作用域=Windows + Cloudflare WARP 消费版】"外网走隧道
 type: tool
 source: default 会话 2026-10-13（为修 Codex 浏览器功能而配的分流）
 date: 2026-10-13
-verified: 2026-10-14
+verified: 2026-11-01
 topic: windows, security
 ---
 
@@ -18,7 +18,10 @@ topic: windows, security
 
 - **"境外但应该直连"的目标必须手工补 IP 级排除**（2026-10-14 实测）：某服务域名解析到 `170.106.100.129`，而那台**正是用户自己的境外生产机**。它在大陆列表里必然不命中 ⇒ 走隧道 ⇒ **出口 IP 变成 Cloudflare 数据中心** ⇒ 被服务器白名单/风控/fail2ban 判为陌生来源而断连。现象是"一开隧道就连不上自己的服务"，**与国内外无关**。⛔ **此类目标要逐个手工补**（自己的服务器、有来源 IP 白名单的服务、要求固定出口 IP 的后台），地理网段分流**识别不了**它们。
 - ⛔ **域名级排除在"DNS 走远端"的模式下可能不生效**：该域一直在 `excluded_hosts` 里却照样断连——因为解析由远端完成、域名排除发生在解析之后。要可靠就加 **IP 级排除**（路由层判定，一定生效）。
+- ⛔ **排查时先分清“谁改的”**（2026-11-01 更正）：本次 `always_on=false` 是关闭 GUI 后的既有行为，而服务 `DEMAND_START` 是**用户手动改的**（长时间不用），不是 GUI 关闭导致。SCM 事件 7040 只能证明“启动类型被改”，不能证明“谁改的”。两者叠加的现场是：GUI 进程在跑、daemon 不起、`warp-cli status` 报 `os error 2`。修复：`sc config CloudflareWARP start= auto` + 把 `settings.json` 的 `always_on` 改回 `true` + `sc start`，再用 `warp-cli status` / `warp-cli settings` 复核 Connected 与 Always On。
 - ⛔ **别用"关掉客户端"当收尾**：实测会把 `always_on` 置成 False（日志 `Disconnected(SettingsChanged{always_on:false})`），"重启后自动重连"随之失效，下次表现为"很难启动"。要恢复就改回 `true`。
+
+- ⚠️ **应用 7k+ 排除列表后不会立刻 Connected**（2026-11-01 实测）：先出现 `Configuring split tunnel firewall rules`，随后可能 `Disconnected(Manual Disconnection)` 并重试，期间直连也会短暂中断；停服务恢复直连后再 `sc start`，约 30s 连上。排查先看 `warp-cli status` 的 Reason 与服务日志，别急着回退 `settings.json.bak`。
 
 **Why**：①`mode proxy` 只开一个 SOCKS 口、**不代理 DNS**，域名会被本机被污染的 DNS 解析到错 IP（实测拿到过 `*.facebook.com` 的证书）——而"外网"恰恰全是被污染的域名，所以 proxy 模式在污染网络里必败；②不做排除时全量模式连国内也接管，就是用户抱怨的"妨碍访问国内东西"。**DNS 必须在隧道里解析**，这是全量模式唯一不可替代的理由。
 

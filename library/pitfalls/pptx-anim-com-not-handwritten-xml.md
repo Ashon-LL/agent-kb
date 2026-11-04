@@ -27,6 +27,12 @@ topic: office, windows
 10. **演示类动画（遍历/流程逐步）用 Pulse(32) 逐个落点，不要用变色**：变色要设 `EffectParameters.FillColor`，COM 下极易卡住甚至弹模态框；Pulse 视觉已足够（用户确认"能看出来"）。写法：每段 `AddEffect(shape, 32, 0, 0.45)`，段首 `TriggerType=1`、其余 `3` + `TriggerDelayTime=0.05`，结论卡片挂本段最后一个脉冲之后（`3` + 0.15s）。
 11. **AddEffect 的分组由添加顺序决定，事后改 TriggerType 改不了**：必须按"骨架 → [脉冲 → 卡片] × N → 收尾"的顺序加。若先把四段的脉冲全加完再加卡片，PowerPoint 会把末段脉冲和全部卡片捆成一组，一次点击全放完。加之前先 `while seq.Count>0: seq.Item(1).Delete()` 清空该页，否则新旧重复、且 COM 会把该页已有 cond 全重置为 onclick。
 12. **保存对话框卡死流程的真因**：`DisplayAlerts=0` 对**关闭时的保存提示无效**。可写模式打开 + `Saved=False` → 关闭时弹"是否保存"。解法：①校验/截图/探测脚本一律 `Open(path, WithWindow=0, ReadOnly=1)`，根本不会问；②必须写的脚本在 finally 里 `pres.Saved = 1` 再 Close/Quit，且 Close/Quit 各自 try 包裹。**探测脚本最容易忘**——探完不 save 也不设 Saved，必然弹窗。
+13. **动画分组必须在建板时显式声明，绝不能事后按坐标猜**。用 y 阈值聚类分组的实测结果：14 页坏 4 页——目录页 24 个元素被切成 8 段逐条冒（行距 52pt，锚点累计后超阈值）、五卡页后半段同时蹦出（`k*GAP` 撞上限截断）、封面先闪一帧亮图（图与遮罩被分成两组）、互动页整页没动画（改代码时漏掉）。正解：建板脚本里 `begin(auto=)/end()` 包裹语义块（不动缩进，比 `with` 好插入），导出 `plan.json`，动画脚本照单执行。**判据**：一份 14 页课件合理的点击数是每页 1-2 次，超过 4 次说明组被切碎了。
+14. **组内错峰要分批，不要线性递增**：`(k // 6) * 0.05`，不是 `k * 0.06`。线性递增在元素多时撞上 delay 上限，表现为"后半段元素同时出现"——这是"动画不对劲"最隐蔽的一种。
+15. **满幅背景图与遮罩必须同一组**，否则图先淡入、遮罩后到，中间闪一帧无遮罩的亮图。
+16. **`Shapes(x)` 只接受名称或 1-based 位置索引，不接受 `Shape.Id`**。用 Id 索引会命中错误形状或抛错，表现为"每页总有 1 个形状加不上动画"。必须 `by_id = {sh.Id: sh for sh in s.Shapes}`。
+17. **`AddEffect(Shape, EffectId, Level, Trigger)` 第 4 参是 Trigger 不是时长**。误传时长（`AddEffect(sh, 10, 0, 0.32)`）会让部分形状抛 `-2147352567`，报错完全不提参数问题。时长一律事后 `eff.Timing.Duration = 0.35`。
+18. **配图检索的免费判定**：Unsplash URL 里 `images.unsplash.com/photo-xxx` 免费可用，`plus.unsplash.com/premium_photo-xxx` 是付费图库不能用。搜图后必须**逐张目视**——标题写"classroom"的可能是欧美青少年，与中文课件场景违和；换成 `Chinese students classroom` 才拿到中国教室。图片按目标比例用 PIL `cover_crop` 预裁（`add_picture` 给 w/h 会直接拉伸变形），输出 2x 像素。
 **Why**：一次 18 页课件动画优化，前期用脚本手写 `<p:timing>` 注入，结构"看起来对"（每个 par 都合法）但 PowerPoint 放映时退化成每页几十次点击——正是本项目 v5 方案文档早已实证过、却又被新脚本重复引入的坑。改走 COM 后一次成型，且 `<p:timing>` 由 PowerPoint 自己生成，无需再验结构。
 
 **How to apply**：需要增删改 pptx 动画/字号时，先 `tasklist | grep -i powerpnt` 确认有 PowerPoint 可用 → 写 COM 脚本（spid 方案先干跑校验）→ finally 里 Close/Quit 都 try → 保存后用 COM 回读 TriggerType 分布 + python-pptx 数字号分布双重校验 → LibreOffice 渲染目视。只有在完全没有 Office 的机器上才退回 zip 注 XML（那时按 [[qoder-office-pptx-image-and-animation-workarounds]] 第 2/11 条的结构写，且必须让链式步骤各占独立中间层 par、delay 为累计时刻）。
