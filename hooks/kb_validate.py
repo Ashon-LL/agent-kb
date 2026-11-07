@@ -401,8 +401,8 @@ _KB_CORE_COPIES = (
     # 不部署脚本副本，故不列。
     Path.home() / ".qoder" / "hooks" / "kb_core.py",
     Path.home() / ".trae-cn" / "hooks" / "agent-kb" / "kb_core.py",
-    Path.home() / "Downloads" / "Project" / "trae" / "trae_huanjing"
-    / "agent-kb" / "hooks" / "kb_core.py",
+    # 仓库内副本按脚本自身位置推导，避免硬编码本机路径（换克隆目录仍成立）。
+    Path(__file__).resolve().parent / "kb_core.py",
 )
 # 触发词定义可能是**多行拼接**（2026-10-12 扩词后 TRIGGER_PATTERN 由多段字符串相加）：
 #   TRIGGER_PATTERN = re.compile(

@@ -2,7 +2,7 @@
 name: delete-hook-script-after-config-invalidated
 description: 删除任何 hook 脚本前，必须先让 hook 配置失效并新开会话——旧会话内存里仍挂着该脚本，直接删文件会让所有 Bash 调用 fail-closed 卡死；同理改插件源码后必须同步升 plugin.json 的 version，否则界面不提示更新
 type: pitfall
-source: trae_huanjing 工作区 AGENTS.md（本机 hook/插件运维契约）
+source: trae 工作区 AGENTS.md（本机 hook/插件运维契约）
 date: 2026-10-23
 verified: 2026-10-23
 topic: toolchain, zcode

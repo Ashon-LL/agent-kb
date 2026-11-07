@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """kb_jev（kb 自带的 Jev 客户端）单元测试——只测不联网的逻辑。
 
@@ -32,13 +33,14 @@ class TestProviders(unittest.TestCase):
     def test_default_order_main_first(self):
         names = [p["name"] for p in kb_jev._providers()]
         self.assertEqual(names[0], "tokenrhythm")   # 主用在最前
-        self.assertIn("apigogo", names)
-        self.assertIn("zen", names)
+        self.assertIn("intern", names)
+        self.assertNotIn("apigogo", names)
+        self.assertNotIn("zen", names)
 
     def test_providers_env_overrides_subset(self):
-        os.environ["KB_JEV_PROVIDERS"] = "apigogo"
+        os.environ["KB_JEV_PROVIDERS"] = "intern"
         names = [p["name"] for p in kb_jev._providers()]
-        self.assertEqual(names, ["apigogo"])
+        self.assertEqual(names, ["intern"])
 
     def test_endpoint_env_makes_single_provider(self):
         os.environ["KB_JEV_ENDPOINT"] = "https://example.test/v1/systemone"
@@ -54,7 +56,7 @@ class TestProviders(unittest.TestCase):
 
     def test_no_key_detected(self):
         # 不设环境变量且屏蔽文件查找（用不存在的路径）
-        os.environ["KB_JEV_PROVIDERS"] = "zen"
+        os.environ["KB_JEV_PROVIDERS"] = "intern"
         provs = kb_jev._providers()
         provs[0]["key_files"] = ["~/.agents/kb/definitely-not-exist.key"]
         self.assertFalse(kb_jev.has_key())
@@ -84,12 +86,6 @@ class TestParsing(unittest.TestCase):
     def test_error_out_gives_empty(self):
         self.assertEqual(kb_jev.probabilities({"error": "x"}, "q"), {})
         self.assertIsNone(kb_jev.probability({"error": "x"}, "q"))
-
-    def test_opencode_session_shape(self):
-        import re
-        s = kb_jev._opencode_session("t")
-        self.assertTrue(re.match(r"^ses_[0-9a-f]{12}[0-9A-Za-z]{14}$", s), s)
-        self.assertTrue(re.match(r"^[0-9a-f]{9}f[c-f][0-9a-f]$", s[4:16]), s)
 
 
 if __name__ == "__main__":

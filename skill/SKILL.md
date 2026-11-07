@@ -47,8 +47,9 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
 该能力由 `kb_jev.py` **内联**提供——**只装 agent-kb 即可用**，不需要额外安装其他技能。
 
 配置（按优先级）：环境变量 `KB_JEV_KEY`（+ 可选 `KB_JEV_ENDPOINT`/`KB_JEV_MODEL`），
-或密钥文件 `~/.agents/kb/jev.key`（单行密钥；兼容读 `~/.jev/{tokenrhythm,apigogo,zen}.key`）。
-默认多端点冗余：tokenrhythm → apigogo → opencode zen，前一个失败自动切下一个。
+或密钥文件 `~/.agents/kb/jev.key`（单行密钥；兼容读 `~/.jev/{tokenrhythm,intern}.key`）。
+默认多端点冗余：tokenrhythm → intern，前一个失败自动切下一个；供应商表与 agent-jev 保持一致。
+`noul` 问题必须带 `criteria: {"true": "...", "false": "..."}`（书生端点强制）。
 自检：`python ~/.agents/kb/kb_jev.py`（打印各端点可用性，**不打印密钥**）。
 
 ⛔ 密钥绝不入库（`.gitignore` 已排除 `*.key` / `jev.key`）。

@@ -13,12 +13,13 @@ kb 的部分工具（触发词挖掘器等）需要「高频小判断」能力�
 1. 环境变量 `KB_JEV_KEY`（+ 可选 `KB_JEV_ENDPOINT`、`KB_JEV_MODEL`）——单端点模式
 2. 密钥文件（先命中先用）：
    - `~/.agents/kb/jev.key`  （kb 自己的位置，单行密钥）
-   - `~/.jev/tokenrhythm.key` / `apigogo.key` / `zen.key`（与 agent-jev 共存时的位置，兼容）
+   - `~/.jev/tokenrhythm.key` / `~/.jev/intern.key`（与 agent-jev 共存时的位置，兼容）
 
 ## 多端点冗余
 
-默认按 PROVIDERS 顺序尝试（tokenrhythm → apigogo → zen），**前一个失败才切下一个**（故障转移，
-非负载均衡）。`KB_JEV_PROVIDERS` 可覆盖顺序/子集（逗号分隔名字）。
+默认按 PROVIDERS 顺序尝试（tokenrhythm → intern），**前一个失败才切下一个**（故障转移，
+非负载均衡）。供应商表与 `agent-jev/skills/agent-jev/jev.py` 保持一致。
+`KB_JEV_PROVIDERS` 可覆盖顺序/子集（逗号分隔名字）。
 
 ## 用法
 
@@ -45,18 +46,16 @@ PROVIDERS = [
         "key_files": ["~/.agents/kb/jev.key", "~/.jev/tokenrhythm.key"],
     },
     {
-        "name": "apigogo",
-        "endpoint": "https://api.apigogo.cyou/v1/systemone",
-        "model": "jev-1.13-free",
-        "key_files": ["~/.agents/kb/jev.key", "~/.jev/apigogo.key"],
-    },
-    {
-        # 直连 opencode 需官方客户端指纹（见 _opencode_headers）；部分源 IP 受限
-        "name": "zen",
-        "endpoint": "https://opencode.ai/zen/v1/systemone",
-        "model": "jev-1.13-free",
-        "key_files": ["~/.agents/kb/jev.key", "~/.jev/zen.key"],
-        "opencode_client": True,
+        # 书生 Intern-AI：契约与 Jev 一致，只支持 /v1/systemone；
+        # noul 问题必须带 criteria {"true","false"}，否则 400。
+        "name": "intern",
+        "endpoint": "https://discovery-api.intern-ai.org.cn/v1/systemone",
+        "model": "intern-decision-4b",
+        "key_files": [
+            "~/.agents/kb/jev.key",
+            "~/.jev/intern.key",
+            "<script_dir>/intern.key",
+        ],
     },
 ]
 
@@ -64,9 +63,6 @@ RETRYABLE = {429, 500, 502, 503, 529}
 DEFAULT_TIMEOUT = 8
 DEFAULT_RETRIES = 2
 DEFAULT_DEADLINE = 15
-
-_B62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-_OC_UA = "opencode/1.18.31 (linux amd64; go1.23.4)"
 
 
 def _providers():
@@ -91,8 +87,9 @@ def _key_for(p):
     env = os.environ.get("KB_JEV_KEY", "").strip()
     if env:
         return env
+    here = os.path.dirname(os.path.abspath(__file__))
     for raw in p.get("key_files", []):
-        path = os.path.expanduser(raw)
+        path = os.path.expanduser(raw.replace("<script_dir>", here))
         try:
             if os.path.exists(path):
                 k = open(path, encoding="utf-8").read().strip()
@@ -108,26 +105,8 @@ def has_key():
     return any(_key_for(p) for p in _providers())
 
 
-def _opencode_session(seed="kb"):
-    """opencode 客户端会话指纹：ses_<12位倒序时间戳hex><14位base62>。"""
-    import hashlib
-    h = hashlib.sha256(b"ses\x00" + str(seed).encode()).digest()
-    n = int(h[6:16].hex(), 16)
-    tail = "".join(_B62[(n // (62 ** i)) % 62] for i in range(13, -1, -1))
-    desc = (~(int(time.time() * 1000) * 0x1000 + 1)) & 0xFFFFFFFFFFFF
-    return "ses_%012x%s" % (desc, tail)
-
-
-def _headers(p, key):
-    if p.get("opencode_client"):
-        s = _opencode_session()
-        return {"content-type": "application/json",
-                "accept": "application/json, text/event-stream",
-                "user-agent": _OC_UA, "x-opencode-client": "cli",
-                "x-opencode-session": s, "x-session-affinity": s, "X-Session-Id": s,
-                "x-opencode-request": "req_" + os.urandom(16).hex(),
-                "x-opencode-project": "prj_" + os.urandom(6).hex(),
-                "authorization": "Bearer " + key}
+def _headers(key):
+    """统一请求头。网关 WAF 会 403 掉裸 urllib 的 UA，必须伪装。"""
     return {"Authorization": "Bearer " + key, "Content-Type": "application/json",
             "User-Agent": "curl/8.9.1"}
 
@@ -142,7 +121,7 @@ def _call_one(p, req, retries, timeout):
     last = None
     for i in range(max(1, retries)):
         try:
-            r = urllib.request.Request(p["endpoint"], data=data, headers=_headers(p, key))
+            r = urllib.request.Request(p["endpoint"], data=data, headers=_headers(key))
             with urllib.request.urlopen(r, timeout=timeout) as resp:
                 return json.loads(resp.read().decode("utf-8"))
         except urllib.error.HTTPError as e:
@@ -217,9 +196,12 @@ def _selftest():
         if not k:
             print(f"  {p['name']:12} {mark}（跳过）")
             continue
-        r = _call_one(p, {"state": "1+1=2",
-                          "questions": {"q": {"type": "noul", "instructions": "Is 1+1=2?"}}},
-                      retries=1, timeout=10)
+        r = _call_one(p, {
+            "state": "1+1=2",
+            "questions": {"q": {"type": "noul", "instructions": "Is 1+1=2?",
+                                "criteria": {"true": "1+1 等于 2",
+                                             "false": "1+1 不等于 2"}}},
+        }, retries=1, timeout=10)
         if "answers" in r:
             print(f"  {p['name']:12} {mark} ✅ 可用（{r.get('model')}）")
             ok = True

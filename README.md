@@ -3,7 +3,7 @@
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/downloads/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](#)
 [![License](https://img.shields.io/badge/license-MIT-yellow)](#)
-[![Tests](https://img.shields.io/badge/tests-19%20passing-brightgreen)](#)
+[![Tests](https://img.shields.io/badge/tests-unittest%20suite-brightgreen)](#)
 [![Adapters](https://img.shields.io/badge/adapters-10%20platforms-orange)](#)
 [![Hooks](https://img.shields.io/badge/hook-non--blocking%20exit%200-critical)](#)
 [![Format](https://img.shields.io/badge/storage-markdown-blueviolet)](#)
@@ -39,10 +39,12 @@
 ### TL;DR
 
 ```bash
-pip install agent-kb       # 装
-kb add "xxx 坑" --tags x   # 写
-kb search xxx              # 查
+# 装（仓库自带安装器，无 pip 包）
+.\scripts\install.ps1 -Platform trae      # Windows
+./scripts/install.sh -p trae              # macOS / Linux
 ```
+
+装好后用斜杠命令：`/kb <关键词>` 检索，`/kb add <一条经验>` 写入。
 
 - 📄 存的是 **纯 Markdown** —— 人类 `cat` 就能读
 - 🪝 Hook **非阻塞** —— 任何异常 `exit 0`，绝不拖慢你的 Agent
@@ -68,7 +70,7 @@ Agent 记忆这块，方案不少。差别不在「记不记得住」，而在 *
 | **跨项目共享** | ✅ ~/.agents/kb | ❌ 单租户 | ❌ | ❌ | ❌ |
 | **跨平台 Agent** | ✅ 10+ 平台 | ❌ 绑定框架 | ❌ 绑定平台 | ❌ 绑定平台 | ❌ 绑定框架 |
 | **零阻塞** | ✅ exit 0 | ⚠️ 可能超时 | ⚠️ | ⚠️ | ⚠️ |
-| **需要部署** | ❌ pip 装完就跑 | ✅ 向量数据库 | ❌ | ❌ | ✅ |
+| **需要部署** | ❌ 安装器装完就跑 | ✅ 向量数据库 | ❌ | ❌ | ✅ |
 | **能进 Git** | ✅ 就是 md 文件 | ❌ | ❌ | ❌ | ❌ |
 
 其他方案是让 Agent「记住」，agent-kb 是让 Agent **学会**。记住会忘，学会不会。
@@ -224,16 +226,17 @@ cd agent-kb
 ### 测试
 
 ```bash
-python3 -m unittest discover tests      # 58 项：适配器契约 + 安装器 + kb_core
+# Linux / CI（python:3.11-slim）
+python3 -m unittest discover tests/
+
+# Windows 本机：先开 UTF-8 模式，避免 subprocess 用 GBK 解码中文输出
+set PYTHONUTF8=1 && python -m unittest discover tests/
 ```
 
 ### 手动安装
 
 见 `scripts/install.ps1` 的 3 个步骤：Skill → Hooks → 库模板。
-
-### macOS / Linux
-
-`scripts/install.sh` （WIP，结构同 PowerShell 版），或直接按 PowerShell 脚本里的步骤手动操作。
+`scripts/install.sh` 与 PowerShell 版功能对称，参数见上节。
 
 ---
 
@@ -286,7 +289,8 @@ date: YYYY-MM-DD
 agent-kb/
 ├── skill/SKILL.md               # 核心 Skill（唯一权威）
 ├── hooks/
-│   ├── kb_core.py               # 平台无关逻辑
+│   ├── kb_core.py               # 平台无关逻辑（文案与触发词唯一真相源）
+│   ├── adapter_base.py          # 适配器公共契约（stdin/stdout、路径解析、事件归一）
 │   ├── trae_zcode_adapter.py    # Trae / ZCode 适配器
 │   ├── codex_adapter.py         # Codex CLI 适配器
 │   ├── claude_adapter.py        # Claude Desktop 适配器
@@ -296,38 +300,31 @@ agent-kb/
 │   ├── opencode_adapter.py      # OpenCode 适配器（TS 插件桥）
 │   ├── openclaw_adapter.py      # OpenClaw 适配器（TS 插件桥）
 │   ├── workbuddy_adapter.py     # WorkBuddy / CodeBuddy 适配器
-│   └── kimi_adapter.py          # Kimi Code 适配器
-├── commands/                    # ZCode 风格命令（Trae 由 Skill description 触发）
+│   ├── kimi_adapter.py          # Kimi Code 适配器
+│   ├── kb_hooks.py              # ZCode 钩子适配器（只做协议转换）
+│   ├── kb_jev.py                # kb 自带 Jev 客户端（多端点冗余）
+│   ├── kb_search.py             # 全文检索
+│   ├── kb_validate.py           # 库校验（含触发词副本一致性）
+│   ├── kb_lock.py               # 跨平台写入锁
+│   ├── kb_trigger_miner.py      # 触发词挖掘器
+│   └── kb_validate_selftest.py  # 校验器自测
+├── commands/                    # 斜杠命令（Trae 由 Skill description 触发）
 │   ├── kb.md
 │   └── kb-harvest.md
 ├── library-template/            # 空库模板 + 3 条示例
-│   ├── INDEX.md
-│   ├── pitfalls/
-│   ├── workflow/
-│   └── tools/
+├── library/                     # 仓库内镜像库（当前 298 条）
 ├── schema/
 │   ├── entry.md                 # 条目格式模板
 │   └── INDEX-template.md
-├── templates/                   # 各平台 hooks 模板（含占位符）
-│   ├── trae-hooks.json
-│   ├── zcode-hooks.json
-│   ├── codex-hooks.json
-│   ├── claude-hooks.json
-│   ├── qoder-hooks.json
-│   ├── hermes-hooks.json
-│   ├── pi-hooks.json
-│   ├── opencode-hooks.json
-│   ├── openclaw-hooks.json
-│   ├── workbuddy-hooks.json
-│   └── kimi-hooks.json          # Kimi 为 TOML 占位，见文件内 _toml_template
+├── templates/                   # 各平台 hooks 模板（11 份，含占位符）
 ├── scripts/
-│   ├── install.ps1              # 一键安装
-│   └── smoke_test.py            # 冒烟测试：真跑适配器校验 hook 输出契约
-├── tests/
-│   ├── test_kb_core.py          # 核心逻辑单测（触发词 / INDEX 统计 / 路径求值）
-│   └── test_trae_zcode_adapter.py  # 适配器端到端 stdin/stdout 契约测试
-└── docs/
-    └── architecture.md          # 架构详文（WIP）
+│   ├── install.ps1              # Windows 一键安装
+│   ├── install.sh               # macOS / Linux 一键安装
+│   ├── smoke_test.py            # 冒烟测试
+│   └── push_with_ip_retry.py    # GitHub mirror 推送（本机未跟踪）
+├── tests/                       # unittest 套件（9 个文件）
+├── docs/                        # 本地视频素材（不入库）
+└── .cnb.yml                     # CI + NPC 派单 + 云开发环境
 ```
 
 ---
@@ -337,13 +334,14 @@ agent-kb/
 零第三方依赖，Python 自带 `unittest` 即可跑：
 
 ```bash
-# 全部单测（28 项）
-python -m unittest discover tests/
-# 或
-python -m pytest tests/
+# 全部单测（以命令实测输出为准）
+python3 -m unittest discover tests/
+
+# Windows 本机：先开 UTF-8 模式，避免 subprocess 用 GBK 解码中文输出
+set PYTHONUTF8=1 && python -m unittest discover tests/
 
 # 冒烟测试：起 subprocess 真喂 stdin 给适配器，校验 stdout 契约
-python scripts/smoke_test.py
+python3 scripts/smoke_test.py
 # [PASS] 3/3
 ```
 
@@ -357,25 +355,6 @@ CI 已在 `.cnb.yml` 注册 push / PR 门禁（`unit tests` + `smoke test`），
 
 ---
 
-## 环境变量
-
-所有适配器统一生效（解析逻辑收在 `hooks/adapter_base.py`）：
-
-| 变量 | 取值 | 语义 |
-|---|---|---|
-| `AGENT_KB_PATH` | 目录路径 | 覆盖默认库路径。**优先级最高**，高于 `sys.argv[1]` |
-| `AGENT_KB_DEBUG` | `1` 开启 | 向 **stderr** 输出 `[agent-kb debug] ...` 诊断行（不污染注入内容） |
-| `AGENT_KB_TRIGGER` | 分号分隔的正则片段 | 追加自定义触发词，与内置触发词取并集。例：`归档;复盘` |
-
-`AGENT_KB_TRIGGER` 示例：
-
-```bash
-export AGENT_KB_TRIGGER="归档;复盘;[Ss]ave.thi"
-```
-
-非法正则片段会被忽略并回退到内置触发词 —— 环境变量写坏不会把 hook 拖挂。
-
----
 
 ## 适配新平台
 

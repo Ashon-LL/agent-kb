@@ -48,7 +48,10 @@ HEURISTIC = re.compile(
 JEV_Q = ("is_precipitate",
          {"type": "noul",
           "instructions": "这条用户消息是否在要求：记录/沉淀经验教训、记住某条规则或偏好、"
-                          "纠正此前记错的内容？只回答是不是（普通任务指令、闲聊、提问事实都不算）。"})
+                          "纠正此前记错的内容？只回答是不是（普通任务指令、闲聊、提问事实都不算）。",
+          # 书生 intern-decision-4b 强制 noul 带 criteria，缺了直接 400。
+          "criteria": {"true": "用户在要求记录、沉淀、记住或纠正经验/规则/偏好",
+                       "false": "普通任务指令、闲聊、事实提问，或没有任何沉淀/纠错意图"}})
 
 
 def load_since():
