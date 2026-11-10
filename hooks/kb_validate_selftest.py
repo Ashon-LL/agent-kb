@@ -6,7 +6,7 @@
 若直接 str() 比较，全库索引行会被误报为 220 项不一致（Linux 天然一致，测不出）。
 本自测用 PureWindowsPath / PurePosixPath 构造输入，无需 Windows 环境即可验收。
 
-运行：python3 hooks/kb_validate_selftest.py
+运行：python hooks/kb_validate_selftest.py
 """
 import sys
 import tempfile

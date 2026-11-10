@@ -18,7 +18,7 @@ INSTALL_PS1 = REPO_ROOT / "scripts" / "install.ps1"
 
 PLATFORMS = [
     "trae", "zcode", "codex", "claude", "hermes", "pi",
-    "opencode", "openclaw", "workbuddy", "kimi", "qoder",
+    "opencode", "openclaw", "workbuddy", "codebuddy", "kimi", "qoder",
 ]
 
 # 平台 -> 期望的 (hooks 目录相对 $HOME, 配置相对 $HOME)
@@ -26,11 +26,12 @@ PLATFORMS = [
 # 不装钩子、不生成配置（2026-10-04 用户纠错后修正）。
 EXPECTED = {
     "trae":      (".trae-cn/hooks/agent-kb",      ".trae-cn/hooks.json"),
-    "zcode":     (".zcode/hooks/agent-kb",        ".zcode/hooks.json"),
+    "zcode":     (".zcode/cli/hooks/agent-kb",    ".zcode/cli/config.json"),
     "codex":     (".codex/hooks/agent-kb",        ".codex/hooks.json"),
     "claude":    (".claude/hooks/agent-kb",       ".claude/settings.json"),
     "qoder":     (".qoder/hooks/agent-kb",        ".qoder/settings.json"),
     "workbuddy": (".workbuddy/skills/kb",         None),
+    "codebuddy": (".codebuddy/hooks/agent-kb",   ".codebuddy/settings.json"),
     "hermes":    (".hermes/hooks/agent-kb",       ".hermes/hooks.json"),
     "pi":        (".pi/hooks/agent-kb",           ".pi/hooks.json"),
     "kimi":      (".kimi-code/hooks/agent-kb",    None),
@@ -39,9 +40,10 @@ EXPECTED = {
 }
 
 ADAPTER_FILE = {
-    "trae": "trae_zcode_adapter.py", "zcode": "trae_zcode_adapter.py",
+    "trae": "trae_zcode_adapter.py", "zcode": "kb_hooks.py",
     "codex": "codex_adapter.py", "claude": "claude_adapter.py",
     "qoder": "qoder_adapter.py", "workbuddy": None,
+    "codebuddy": "workbuddy_adapter.py",
     "hermes": "hermes_adapter.py", "pi": "pi_adapter.py",
     "kimi": "kimi_adapter.py", "opencode": "opencode_adapter.py",
     "openclaw": "openclaw_adapter.py",
@@ -132,7 +134,8 @@ class InstallerTestBase:
                                     f"{platform}: 核心文件缺失")
                     if ADAPTER_FILE[platform]:
                         # 2026-10-04 起安装清单补齐校验器与检索器（SKILL.md 规程依赖它们）
-                        for extra in ("adapter_base.py", "kb_validate.py", "kb_search.py", "kb_lock.py"):
+                        for extra in ("adapter_base.py", "kb_validate.py", "kb_search.py", "kb_lock.py",
+                              "kb_harvest.py", "kb_audit.py"):
                             self.assertTrue((hooks_path / extra).is_file(),
                                             f"{platform}: missing {extra}")
                         self.assertTrue((hooks_path / ADAPTER_FILE[platform]).is_file())
@@ -153,11 +156,32 @@ class InstallerTestBase:
                     self.assertNotIn("_comment", text)
                     data = json.loads(text)
                     self.assertIn("hooks", data)
-                    self.assertIn("SessionStart", data["hooks"])
-                    self.assertIn("UserPromptSubmit", data["hooks"])
+                    hooks = data["hooks"]
+                    events = hooks["events"] if isinstance(hooks, dict) and "events" in hooks else hooks
+                    self.assertIn("SessionStart", events)
+                    self.assertIn("UserPromptSubmit", events)
+
+    def test_zcode_merges_events_preserves_other_keys(self):
+        """ZCode 新版：合并进 cli/config.json 的 hooks.events，保留其他键与事件。"""
+        with tempfile.TemporaryDirectory() as home:
+            cfg = Path(home) / ".zcode/cli/config.json"
+            cfg.parent.mkdir(parents=True, exist_ok=True)
+            cfg.write_text(json.dumps({
+                "theme": "dark",
+                "hooks": {"enabled": True, "events": {"Custom": [{"hooks": []}]}},
+            }), encoding="utf-8")
+            r = self._run("zcode", home, self.force_flag)
+            self.assertEqual(r.returncode, 0)
+            data = json.loads(cfg.read_text(encoding="utf-8"))
+            self.assertEqual(data.get("theme"), "dark")
+            events = data["hooks"]["events"]
+            self.assertIn("Custom", events)
+            for ev in ("SessionStart", "UserPromptSubmit", "Stop"):
+                self.assertIn(ev, events)
+            self.assertTrue((Path(home) / ".zcode/cli/config.json.bak").is_file())
 
     def test_merge_preserves_unrelated_settings(self):
-        for platform in ("claude", "qoder"):
+        for platform in ("claude", "qoder", "codebuddy"):
             with self.subTest(platform=platform):
                 with tempfile.TemporaryDirectory() as home:
                     cfg_rel = EXPECTED[platform][1]

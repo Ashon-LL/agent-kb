@@ -98,27 +98,44 @@ def _load_entries(kb, only_dir=None, only_topics=None):
     return entries
 
 
-def _score_entry(keywords, title, hook, fm, body):
+def _document_frequency(entries, keywords):
+    """计算关键词的 IDF：稀有词权重高，避免“配置/更新”这类高频词淹没精确条目。
+
+    df = 含该词的条目数；idf = ln(1 + (N - df + 0.5) / (df + 0.5))
+    """
+    n = len(entries) or 1
+    df = {kw: 0 for kw in keywords}
+    for _rel, title, hook, fm, body in entries:
+        hay = _norm(f"{title} {hook} {fm.get('description', '')} {body}")
+        for kw in keywords:
+            if kw in hay:
+                df[kw] += 1
+    return {kw: math.log(1 + (n - c + 0.5) / (c + 0.5)) for kw, c in df.items()}
+
+
+def _score_entry(keywords, title, hook, fm, body, idf=None):
     """返回 (总分, 命中关键词数, 命中行摘录)。
 
-    权重：INDEX 钩子×3 > description×2 > 正文×1；关键词已归一（NFKC+casefold）。
+    权重：INDEX 钩子×3 > description×2 > 正文×1；再乘 IDF。
     多关键词不再对缺词扣分：命中任一即保留，排序先看命中数再看权重。
     """
+    idf = idf or {}
     desc = str(fm.get("description", ""))
     n_title, n_hook, n_desc, n_body = _norm(title), _norm(hook), _norm(desc), _norm(body)
     total = 0.0
     matched = 0
     excerpts = []
     for kw in keywords:
+        w = idf.get(kw, 1.0)
         s = 0.0
         if kw in n_title:
-            s += 3.0
+            s += 3.0 * w
         if kw in n_hook:
-            s += 3.0
+            s += 3.0 * w
         if kw in n_desc:
-            s += 2.0
+            s += 2.0 * w
         if kw in n_body:
-            s += 1.0
+            s += 1.0 * w
             for line in body.splitlines():
                 if kw in _norm(line) and len(excerpts) < 3:
                     excerpts.append(line.strip()[:100])
@@ -133,9 +150,10 @@ def cmd_search(kb, keywords, only_dir=None, only_topics=None, limit=10):
     nks = [_norm(k) for k in keywords if str(k).strip()]
     if not nks:
         return []
+    idf = _document_frequency(entries, nks)
     scored = []
     for rel, title, hook, fm, body in entries:
-        total, matched, excerpts = _score_entry(nks, title, hook, fm, body)
+        total, matched, excerpts = _score_entry(nks, title, hook, fm, body, idf)
         if matched:
             scored.append((total, matched, rel, title, hook, excerpts))
     # 命中关键词数优先，其次权重和

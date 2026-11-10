@@ -1,27 +1,50 @@
 {
-  "version": 1,
+  "_comment": "ZCode 新版配置：合并进 ~/.zcode/cli/config.json 的 hooks.events；不要单独写 hooks.json。",
   "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "& 'PYTHON_EXECUTABLE' 'HOOKS_DIR/trae_zcode_adapter.py'",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "& 'PYTHON_EXECUTABLE' 'HOOKS_DIR/trae_zcode_adapter.py'",
-            "timeout": 10
-          }
-        ]
-      }
-    ]
+    "enabled": true,
+    "events": {
+      "SessionStart": [
+        {
+          "hooks": [
+            {
+              "type": "process",
+              "command": "PYTHON_EXECUTABLE",
+              "enabled": true,
+              "statusMessage": "kb 开工提醒",
+              "args": ["HOOKS_DIR/kb_hooks.py"],
+              "timeoutMs": 3000
+            }
+          ]
+        }
+      ],
+      "UserPromptSubmit": [
+        {
+          "hooks": [
+            {
+              "type": "process",
+              "command": "PYTHON_EXECUTABLE",
+              "enabled": true,
+              "statusMessage": "kb 沉淀规程注入",
+              "args": ["HOOKS_DIR/kb_hooks.py"],
+              "timeoutMs": 3000
+            }
+          ]
+        }
+      ],
+      "Stop": [
+        {
+          "hooks": [
+            {
+              "type": "process",
+              "command": "PYTHON_EXECUTABLE",
+              "enabled": true,
+              "statusMessage": "kb 收尾提醒",
+              "args": ["HOOKS_DIR/kb_hooks.py"],
+              "timeoutMs": 60000
+            }
+          ]
+        }
+      ]
+    }
   }
 }

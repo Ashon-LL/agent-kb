@@ -124,6 +124,19 @@ class TestSearchNormalization(KbSearchCase):
         self.assertIn("近似候选", buf.getvalue())
 
 
+class TestIDF(KbSearchCase):
+    def test_rare_term_has_higher_idf(self):
+        # “经验”出现在所有条目正文，“黑窗”只出现在一条 → 稀有词权重必须更高
+        entries = kb_search._load_entries(self.kb)
+        idf = kb_search._document_frequency(entries, ["经验", "黑窗"])
+        self.assertGreater(idf["黑窗"], idf["经验"])
+
+    def test_search_still_prefers_more_matched_terms(self):
+        # IDF 不应破坏“命中词数优先”：黑窗 + NO_WINDOW 两词全命中仍排第一
+        results = kb_search.cmd_search(self.kb, ["黑窗", "NO_WINDOW"])
+        self.assertEqual(results[0][1], "pitfalls/console-window-storm.md")
+
+
 class TestSimilar(KbSearchCase):
     def test_same_family_ranks_first(self):
         # 措辞不同但共享事故名词的同族条目应浮上来（人肉查重漏掉的那类）

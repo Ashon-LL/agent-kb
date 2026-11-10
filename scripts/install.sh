@@ -7,7 +7,7 @@
 #
 #   -p <platform>  平台名，默认 trae。支持：
 #                  trae | zcode | codex | claude | hermes | pi | opencode |
-#                  openclaw | workbuddy | kimi | qoder
+#                  openclaw | workbuddy | codebuddy | kimi | qoder
 #   -k <dir>       经验库目录，默认 $HOME/.agents/kb
 #   -f             覆盖已存在的配置（merge 型平台会保留其他键，先备份 .bak）
 #   -l             只列出支持的平台与安装目标，不做任何改动
@@ -50,7 +50,7 @@ KB_PATH=""
 FORCE=0
 LIST_ONLY=0
 
-PLATFORMS_ALL="trae zcode codex claude hermes pi opencode openclaw workbuddy kimi qoder"
+PLATFORMS_ALL="trae zcode codex claude hermes pi opencode openclaw workbuddy codebuddy kimi qoder"
 
 # ------------------------------------------------------------------ 帮助
 usage() {
@@ -89,9 +89,10 @@ set_platform() {
       CONFIG_FILE="$HOME_DIR/.trae-cn/hooks.json"
       ;;
     zcode)
-      ADAPTER="trae_zcode_adapter.py"; TEMPLATE="zcode-hooks.json"
-      HOOKS_DST="$HOME_DIR/.zcode/hooks/agent-kb"
-      CONFIG_FILE="$HOME_DIR/.zcode/hooks.json"
+      ADAPTER="kb_hooks.py"; TEMPLATE="zcode-hooks.json"
+      HOOKS_DST="$HOME_DIR/.zcode/cli/hooks/agent-kb"
+      CONFIG_FILE="$HOME_DIR/.zcode/cli/config.json"
+      MERGE=1
       ;;
     codex)
       ADAPTER="codex_adapter.py"; TEMPLATE="codex-hooks.json"
@@ -120,6 +121,14 @@ set_platform() {
       CONFIG_FILE=""
       MANUAL=0; MERGE=0
       SKILL_ONLY=1
+      ;;
+    codebuddy)
+      # CodeBuddy CLI（腾讯）是独立产品，与 WorkBuddy 不同：有 hooks，
+      # 配置文件在 ~/.codebuddy/settings.json；Windows 下走 Git Bash，命令用 POSIX python3。
+      ADAPTER="workbuddy_adapter.py"; TEMPLATE="workbuddy-hooks.json"
+      HOOKS_DST="$HOME_DIR/.codebuddy/hooks/agent-kb"
+      CONFIG_FILE="$HOME_DIR/.codebuddy/settings.json"
+      MERGE=1
       ;;
     hermes)
       ADAPTER="hermes_adapter.py"; TEMPLATE="hermes-hooks.json"
@@ -213,7 +222,7 @@ if [ "$SKILL_ONLY" -eq 1 ]; then
   fi
 else
 mkdir -p "$HOOKS_DST"
-for f in kb_core.py adapter_base.py kb_validate.py kb_search.py kb_lock.py kb_trigger_miner.py kb_jev.py "$ADAPTER"; do
+for f in kb_core.py adapter_base.py kb_validate.py kb_search.py kb_lock.py kb_trigger_miner.py kb_harvest.py kb_audit.py kb_jev.py "$ADAPTER"; do
   if [ ! -f "$HOOKS_SRC/$f" ]; then
     echo "[ERROR] 缺少 $HOOKS_SRC/$f" >&2
     exit 2
@@ -286,13 +295,24 @@ try:
         cur = json.load(fh)
 except Exception:
     cur = {}
-cur["hooks"] = tpl.get("hooks", {})
+tpl_hooks = tpl.get("hooks", {})
+if isinstance(tpl_hooks, dict) and "events" in tpl_hooks:
+    cur_hooks = cur.setdefault("hooks", {})
+    cur_hooks["enabled"] = tpl_hooks.get("enabled", True)
+    events = cur_hooks.setdefault("events", {})
+    events.update(tpl_hooks.get("events", {}))
+else:
+    cur["hooks"] = tpl_hooks
 with open(path, "w", encoding="utf-8") as fh:
     json.dump(cur, fh, ensure_ascii=False, indent=2)
 ' "$CONFIG_FILE" 2>/dev/null; then
           printf '[OK] hooks 已合并进 -> %s\n' "$CONFIG_FILE_NATIVE"
           printf '     （保留了原有 settings.json 其他配置，备份 %s.bak）\n' "$CONFIG_FILE_NATIVE"
         else
+          if [ "$PLATFORM" = "zcode" ]; then
+            printf '[ERROR] ZCode 配置合并失败，未写入；原文件已备份 .bak\n' >&2
+            exit 2
+          fi
           printf '[WARN] 合并失败，改为整文件写入（原文件已备份 .bak）\n'
           printf '%s\n' "$body" > "$CONFIG_FILE"
         fi

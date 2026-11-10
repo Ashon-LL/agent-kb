@@ -4,7 +4,7 @@
 #   .\install.ps1 [-Platform <name>] [-KbPath <dir>] [-Force] [-List]
 #
 #   -Platform  trae | zcode | codex | claude | hermes | pi | opencode |
-#               openclaw | workbuddy | kimi | qoder        （默认 trae）
+#               openclaw | workbuddy | codebuddy | kimi | qoder        （默认 trae）
 #   -KbPath    经验库目录，默认 %USERPROFILE%\.agents\kb
 #   -Force     覆盖已存在的 hooks 配置 / 文件
 #   -List      只列出支持的平台与安装目标，不做任何改动
@@ -13,7 +13,7 @@
 
 param(
     [ValidateSet("trae", "zcode", "codex", "claude", "hermes", "pi", "opencode",
-                 "openclaw", "workbuddy", "kimi", "qoder")]
+                 "openclaw", "workbuddy", "codebuddy", "kimi", "qoder")]
     [string]$Platform = "trae",
 
     [string]$KbPath = "",       # 留空则默认 ~/.agents/kb
@@ -48,10 +48,10 @@ $Platforms = @{
         Merge = $false; Manual = $false
     }
     "zcode" = @{
-        Adapter = "trae_zcode_adapter.py"; Template = "zcode-hooks.json"
-        HooksDir = Join-Path $HomeDir ".zcode/hooks/agent-kb"
-        ConfigFile = Join-Path $HomeDir ".zcode/hooks.json"
-        Merge = $false; Manual = $false
+        Adapter = "kb_hooks.py"; Template = "zcode-hooks.json"
+        HooksDir = Join-Path $HomeDir ".zcode/cli/hooks/agent-kb"
+        ConfigFile = Join-Path $HomeDir ".zcode/cli/config.json"
+        Merge = $true; Manual = $false
     }
     "codex" = @{
         Adapter = "codex_adapter.py"; Template = "codex-hooks.json"
@@ -79,6 +79,14 @@ $Platforms = @{
         HooksDir = Join-Path $HomeDir ".workbuddy/skills/kb"
         ConfigFile = $null
         Merge = $false; Manual = $false; SkillOnly = $true
+    }
+    "codebuddy" = @{
+        # CodeBuddy CLI（腾讯）是独立产品，与 WorkBuddy 不同：有 hooks，配置文件在
+        # ~/.codebuddy/settings.json；Windows 下走 Git Bash，命令用 POSIX python3。
+        Adapter = "workbuddy_adapter.py"; Template = "workbuddy-hooks.json"
+        HooksDir = Join-Path $HomeDir ".codebuddy/hooks/agent-kb"
+        ConfigFile = Join-Path $HomeDir ".codebuddy/settings.json"
+        Merge = $true; Manual = $false
     }
     "hermes" = @{
         Adapter = "hermes_adapter.py"; Template = "hermes-hooks.json"
@@ -113,7 +121,7 @@ if ($List) {
     Write-Host "agent-kb 支持的平台：" -ForegroundColor Cyan
     # 与 install.sh 保持同样的展示顺序（不要 Sort-Object，否则两边列表不一致）
     $Order = @("trae", "zcode", "codex", "claude", "hermes", "pi",
-               "opencode", "openclaw", "workbuddy", "kimi", "qoder")
+               "opencode", "openclaw", "workbuddy", "codebuddy", "kimi", "qoder")
     foreach ($k in $Order) {
         $p = $Platforms[$k]
         $suffix = if ($p.Manual) { "（需手工注册 hook）" } else { "" }
@@ -174,7 +182,7 @@ if (-not (Test-Path $HooksDst)) {
     New-Item -ItemType Directory -Path $HooksDst -Force | Out-Null
 }
 
-foreach ($f in @("kb_core.py", "adapter_base.py", "kb_validate.py", "kb_search.py", "kb_lock.py", "kb_trigger_miner.py", "kb_jev.py", $cfg.Adapter)) {
+foreach ($f in @("kb_core.py", "adapter_base.py", "kb_validate.py", "kb_search.py", "kb_lock.py", "kb_trigger_miner.py", "kb_harvest.py", "kb_audit.py", "kb_jev.py", $cfg.Adapter)) {
     Copy-Item (Join-Path $HooksSrc $f) (Join-Path $HooksDst $f) -Force
 }
 Write-Host "[OK] Hooks 已安装 -> $HooksDst" -ForegroundColor Green
@@ -252,22 +260,50 @@ else {
             # （\P 是无效转义，2026-10-04 实测 install.ps1 生成 trae 配置即坏）。
             # 下面统一走对象 → ConvertTo-Json，转义由序列化器保证。
             $templateObj = $body | ConvertFrom-Json
+            if ($templateObj.PSObject.Properties.Name -contains "_comment") {
+                $templateObj.PSObject.Properties.Remove("_comment")
+            }
             if ($cfg.Merge -and $exists -and $Force) {
-                # merge 型：解析已有 settings.json，只替换 hooks 子树，保留其他键
+                # merge 型：保留已有配置，只合并 hooks（ZCode 为 hooks.events 事件级合并）
                 try {
                     $existing = Get-Content $ConfigFile -Raw | ConvertFrom-Json
                     Copy-Item $ConfigFile "$ConfigFile.bak" -Force
-                    $existing | Add-Member -NotePropertyName "hooks" `
-                                          -NotePropertyValue $templateObj.hooks -Force
-                    $merged = $existing | ConvertTo-Json -Depth 20
+                    $tplHooks = $templateObj.hooks
+                    if ($Platform -eq "zcode" -and ($tplHooks.PSObject.Properties.Name -contains "events")) {
+                        if (-not ($existing.PSObject.Properties.Name -contains "hooks")) {
+                            $existing | Add-Member -NotePropertyName "hooks" `
+                                -NotePropertyValue ([pscustomobject]@{}) -Force
+                        }
+                        if (-not ($existing.hooks.PSObject.Properties.Name -contains "enabled")) {
+                            $existing.hooks | Add-Member -NotePropertyName "enabled" `
+                                -NotePropertyValue $true -Force
+                        }
+                        if (-not ($existing.hooks.PSObject.Properties.Name -contains "events")) {
+                            $existing.hooks | Add-Member -NotePropertyName "events" `
+                                -NotePropertyValue ([pscustomobject]@{}) -Force
+                        }
+                        foreach ($evt in $tplHooks.events.PSObject.Properties.Name) {
+                            $existing.hooks.events | Add-Member -NotePropertyName $evt `
+                                -NotePropertyValue $tplHooks.events.$evt -Force
+                        }
+                    }
+                    else {
+                        $existing | Add-Member -NotePropertyName "hooks" `
+                                              -NotePropertyValue $tplHooks -Force
+                    }
+                    $merged = $existing | ConvertTo-Json -Depth 30
                     Set-Content -Path $ConfigFile -Value $merged -Encoding UTF8
                     Write-Host "[OK] hooks 已合并进 -> $ConfigFile" -ForegroundColor Green
-                    Write-Host "     （保留了原有 settings.json 其他配置，备份 .bak）" -ForegroundColor DarkGray
+                    Write-Host "     （保留了原有配置其他键，备份 .bak）" -ForegroundColor DarkGray
                 }
                 catch {
+                    if ($Platform -eq "zcode") {
+                        Write-Host "[ERROR] ZCode 配置合并失败，未写入；原文件已备份 $ConfigFile.bak" -ForegroundColor Red
+                        exit 2
+                    }
                     Write-Host "[WARN] 合并失败，改为整文件写入（原文件已备份 .bak）" -ForegroundColor Yellow
                     Copy-Item $ConfigFile "$ConfigFile.bak" -Force
-                    $templateObj | ConvertTo-Json -Depth 20 | Set-Content -Path $ConfigFile -Encoding UTF8
+                    $templateObj | ConvertTo-Json -Depth 30 | Set-Content -Path $ConfigFile -Encoding UTF8
                 }
             }
             else {

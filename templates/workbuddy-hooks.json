@@ -1,12 +1,12 @@
 {
-  "_comment": "⚠️ 已废弃（2026-10-04）：WorkBuddy 与 CodeBuddy 不是一个产品——WorkBuddy 只有技能机制（junction ~/.workbuddy/skills/kb -> ~/.agents/skills/kb 即可），没有 hooks 系统，此模板不再被安装器引用。保留仅作历史。原服务对象 CodeBuddy CLI 已卸载。",
+  "_comment": "CodeBuddy CLI（腾讯）hook 模板。⚠️ WorkBuddy 不是本模板对象：WorkBuddy 只有 skills（~/.workbuddy/skills），没有 hooks。Windows 下 CodeBuddy 走 Git Bash，命令用 POSIX 风格 python3。",
   "hooks": {
     "SessionStart": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "PYTHON_EXECUTABLE HOOKS_DIR/workbuddy_adapter.py",
+            "command": "python3 'HOOKS_DIR/workbuddy_adapter.py'",
             "timeout": 10
           }
         ]
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "PYTHON_EXECUTABLE HOOKS_DIR/workbuddy_adapter.py",
+            "command": "python3 'HOOKS_DIR/workbuddy_adapter.py'",
             "timeout": 10
           }
         ]

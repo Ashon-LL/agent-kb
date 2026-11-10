@@ -65,12 +65,21 @@ def save_since(ts):
     STATE.write_text(json.dumps({"since_ts": ts}, ensure_ascii=False), encoding="utf-8")
 
 
-def extract_user_msgs(since_ts=0):
-    """只读提取 real_user 顶层会话消息。"""
-    con = sqlite3.connect(f"file:{DB.as_posix()}?mode=ro", uri=True)
+def extract_user_msgs(since_ts=0, db_path=None):
+    """只读提取 real_user 顶层会话消息。
+
+    db_path 可覆盖默认 ZCode 会话库（测试/其他平台用）。
+    先用 message.time_created 做增量过滤（与 data.time.created 同单位，实测毫秒），
+    再按 message_id 分批取 part——避免每次全表扫 70k 消息 / 246k part。
+    """
+    db = Path(db_path) if db_path else DB
+    con = sqlite3.connect(f"file:{db.as_posix()}?mode=ro", uri=True)
     cur = con.cursor()
     keep = {}
-    for mid, sid, data in cur.execute("SELECT id, session_id, data FROM message"):
+    for mid, sid, data in cur.execute(
+            "SELECT id, session_id, data FROM message "
+            "WHERE time_created > ? AND session_id LIKE 'sess_%' "
+            "ORDER BY time_created", (since_ts,)):
         if not re.match(r"^sess_[0-9a-f]{8}-", sid or ""):
             continue
         try:
@@ -84,15 +93,17 @@ def extract_user_msgs(since_ts=0):
             continue
         keep[mid] = ts
     out = []
-    for mid, data in cur.execute("SELECT message_id, data FROM part"):
-        if mid not in keep:
-            continue
-        try:
-            pd = json.loads(data)
-        except Exception:
-            continue
-        if pd.get("type") == "text" and pd.get("text"):
-            out.append((keep[mid], pd["text"]))
+    ids = list(keep)
+    for i in range(0, len(ids), 400):
+        batch = ids[i:i + 400]
+        q = "SELECT message_id, data FROM part WHERE message_id IN (%s)" % ",".join("?" * len(batch))
+        for mid, data in cur.execute(q, batch):
+            try:
+                pd = json.loads(data)
+            except Exception:
+                continue
+            if pd.get("type") == "text" and pd.get("text"):
+                out.append((keep[mid], pd["text"]))
     con.close()
     # 去重（用户常重复发同一句）
     seen, uniq = set(), []
@@ -133,7 +144,7 @@ def main():
 
     if not kb_jev.has_key():
         print("× 未找到 Jev 密钥——配置 KB_JEV_KEY 环境变量，或放 ~/.agents/kb/jev.key。", file=sys.stderr)
-        print("  （端点默认 tokenrhythm→apigogo→zen，详见 kb_jev.py 文档头）", file=sys.stderr)
+        print("  （端点默认 tokenrhythm→intern，详见 kb_jev.py 文档头）", file=sys.stderr)
         return 2
 
     since = 0 if args.all else load_since()
@@ -193,9 +204,13 @@ def main():
     out.write_text("\n".join(report), encoding="utf-8")
     print(f"报告 -> {out}")
 
-    if rows:
+    # 只推进到本次实际处理到的位置：--limit 截断时不能把未判消息一起跳过。
+    if cand:
+        save_since(cand[-1][0])
+        print("状态已更新（下次从本次最后一条之后继续）")
+    elif rows:
         save_since(max(ts for ts, _ in rows))
-        print(f"状态已更新（下次从此时间戳继续）")
+        print("状态已更新（本次无可送判消息）")
 
 
 if __name__ == "__main__":
