@@ -184,6 +184,7 @@ Agent 记忆这块，方案不少。差别不在「记不记得住」，而在 *
 |---|---|---|
 | `AGENT_KB_PATH` | 目录路径 | 覆盖默认 `~/.agents/kb`。**优先级最高**，高于 `sys.argv[1]` |
 | `AGENT_KB_DEBUG` | `1` 开启 | 向 **stderr** 输出 `[agent-kb debug] 事件=xxx prompt_len=xx kb_path=...` |
+| `AGENT_KB_REPO` | 目录路径 | `/kb add --push` / `/kb-harvest --push` 的 agent-kb 仓库根；未设置时只写本地、不推送 |
 
 kb 路径解析优先级（高 → 低）：`AGENT_KB_PATH` → `sys.argv[1]` → `~/.agents/kb`（运行时求值）。
 
@@ -262,18 +263,31 @@ set PYTHONUTF8=1 && python -m unittest discover tests/
 
 三种沉淀入口，共用同一份 SKILL 规程与校验器：
 
-| 入口 | 触发 | 是否写库 |
-|---|---|---|
-| `/kb add` | 用户明确要求沉淀 | 是：按规程写入并跑 `kb_validate` |
-| `/kb-harvest` | 定期/手动批量收割 | 先出候选，用户确认后写 |
-| kb hooks | SessionStart / UserPromptSubmit / Stop | 否：只注入提醒与规程 |
+| 入口 | 触发 | 是否写库 | 是否推送 |
+|---|---|---|---|
+| `/kb add` | 用户明确要求沉淀 | 是：按规程写入并跑 `kb_validate` | 仅显式 `--push` |
+| `/kb-harvest` | 定期/手动批量收割 | 先出候选，用户确认后写 | 仅显式 `--push` |
+| kb hooks | SessionStart / UserPromptSubmit / Stop | 否：只注入提醒与规程 | 否 |
 
 | 操作 | 命令 | 示例 |
 |---|---|---|
 | 检索 | `/kb <关键词>` | `/kb CNB` |
-| 写入 | `/kb add <内容>` | `/kb add 从 Python spawn npm CLI 必须用 .cmd` |
-| 收割 | `/kb-harvest [路径]` | `/kb-harvest`（ZCode 会话库 + 当前工作区；项目 memory 可选） |
+| 写入 | `/kb add <内容> [--push]` | `/kb add 从 Python spawn npm CLI 必须用 .cmd` |
+| 收割 | `/kb-harvest [路径] [--push]` | `/kb-harvest`（ZCode 会话库 + 当前工作区；项目 memory 可选） |
 | 审计 | 直接运行脚本 | `python ~/.agents/kb/kb_audit.py`（只读报告） |
+| 发布 | 直接运行脚本 | `python ~/.agents/kb/kb_publish.py --repo <agent-kb> --from-live --push` |
+
+### 显式发布（默认不推送）
+
+`kb_publish.py` 只在显式 `--push` 时推送：
+
+1. 可选 `--from-live`：把运行时库新增/变更条目与 INDEX 同步到仓库 `library/`。
+2. 把本机绝对路径替换为 `%USERPROFILE%` / `$HOME`。
+3. 跑 `kb_validate [PASS]`；只允许 `library/` 下条目、INDEX、CHANGELOG 变更。
+4. 精确 `git add` + 本地提交；`--push` 才推 `origin`，`--mirror` 才再推 GitHub mirror。
+5. 推送失败保留本地提交，不 force push；`--dry-run` 只预览。
+
+`/kb add --push` / `/kb-harvest --push` 需要 `AGENT_KB_REPO` 指向仓库根；未设置时只写本地、不推送。
 
 **非命令时**：Skill 的 description 里写明了"开始非平凡任务前先检索、踩坑闭环后沉淀"，Agent 会在合适的时机主动触发。
 
@@ -336,6 +350,7 @@ agent-kb/
 │   ├── kb_trigger_miner.py      # 触发词挖掘器
 │   ├── kb_harvest.py            # 只读收割候选生成器
 │   ├── kb_audit.py              # 只读库审计（重复/零入链/过期）
+│   ├── kb_publish.py            # 显式发布（默认不推送）
 │   └── kb_validate_selftest.py  # 校验器自测
 ├── commands/                    # 斜杠命令（Trae 由 Skill description 触发）
 │   ├── kb.md
