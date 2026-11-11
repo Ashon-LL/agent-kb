@@ -20,11 +20,14 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
 
 ## 三条入口
 
-| 入口 | 触发 | 是否写库 |
-|---|---|---|
-| `/kb add` | 用户明确要求沉淀 | 是：按本文件写入规程落盘并跑校验器 |
-| `/kb-harvest` | 定期/手动批量收割 | 先出候选，用户确认后写 |
-| kb hooks | SessionStart / UserPromptSubmit / Stop | 否：只注入提醒与规程 |
+| 入口 | 触发 | 是否写库 | 是否推送 |
+|---|---|---|---|
+| `/kb add` | 用户明确要求沉淀 | 是：按本文件写入规程落盘并跑校验器 | 仅显式 `--push` |
+| `/kb-harvest` | 定期/手动批量收割 | 先出候选，用户确认后写 | 仅显式 `--push` |
+| kb hooks | SessionStart / UserPromptSubmit / Stop | 否：只注入提醒与规程 | 否 |
+
+**发布边界**：默认不推送。只有显式 `--push` 才由 `kb_publish.py` 同步运行时库、脱敏本机路径、
+跑 `kb_validate [PASS]`、精确提交并推送；不 force push，`mirror` 需额外 `--mirror`。
 
 ## 库位置
 

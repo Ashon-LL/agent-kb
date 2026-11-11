@@ -39,5 +39,6 @@ argument-hint: "[可选：指定扫描的项目路径或时间范围]"
    - 本机运行时：`python ~/.agents/kb/kb_validate.py`
    - 仓库内开发：`python hooks/kb_validate.py`（cwd = `agent-kb`）
    - Windows 先 `set PYTHONUTF8=1`；必须看到 `[PASS]` 才算完。
-6. 汇报最终写入的条目路径、索引总行数、校验器输出。
-7. ⛔ 不读密钥/凭据；不写会话库；不自动删除原项目 memory。
+6. 若参数含 `--push` 且用户已逐条确认：全部写入 + 校验 PASS 后，按 `commands/kb.md` 的显式发布流程运行 `kb_publish.py`；没有 `--push` 一律不推送。
+7. 汇报最终写入的条目路径、索引总行数、校验器输出、是否本地提交/推送。
+8. ⛔ 不读密钥/凭据；不写会话库；不自动删除原项目 memory；不自动推送。
