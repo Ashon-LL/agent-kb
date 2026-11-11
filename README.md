@@ -341,7 +341,7 @@ agent-kb/
 │   ├── kb.md
 │   └── kb-harvest.md
 ├── library-template/            # 空库模板 + 3 条示例
-├── library/                     # 仓库内镜像库（当前 298 条）
+├── library/                     # 仓库内镜像库（当前 362 条）
 ├── schema/
 │   ├── entry.md                 # 条目格式模板
 │   └── INDEX-template.md
