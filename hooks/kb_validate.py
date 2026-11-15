@@ -396,12 +396,15 @@ _ZCODE_CONFIG = Path.home() / ".zcode" / "cli" / "config.json"
 # 同日 Kimi Code 卸载，其副本随 ~/.kimi-code 一并移除，不再列）。
 # git checkout / reset 会重写文件从而断链，静默回到多版本漂移 —— 本检查按内容兜底。
 _KB_CORE_COPIES = (
-    # CodeBuddy 已卸载、~/.codebuddy 已删（2026-10-04），不再列；
+    # 只列**本机现存**部署；已卸载平台一律移除，否则每次校验都刷「副本不存在」噪音：
+    #   CodeBuddy —— 已卸载、~/.codebuddy 已删（2026-10-04）
+    #   Qoder     —— 已卸载、~/.qoder 已删（2026-11-16）
+    #   Trae      —— ~/.trae-cn 已删（2026-11-16）；ZCode 现直接跑库根
+    #                ~/.agents/kb/kb_hooks.py（见 ~/.zcode/cli/config.json），
+    #                其 import 的 kb_core 就是库根这一份，无独立副本。
     # WorkBuddy 技能经 junction 共享 ~/.agents/skills/kb（symlink auto-discover），
     # 不部署脚本副本，故不列。
-    Path.home() / ".qoder" / "hooks" / "kb_core.py",
-    Path.home() / ".trae-cn" / "hooks" / "agent-kb" / "kb_core.py",
-    # 仓库内副本按脚本自身位置推导，避免硬编码本机路径（换克隆目录仍成立）。
+    # 仓库/库根副本按脚本自身位置推导，避免硬编码本机路径（换克隆目录仍成立）。
     Path(__file__).resolve().parent / "kb_core.py",
 )
 # 触发词定义可能是**多行拼接**（2026-10-12 扩词后 TRIGGER_PATTERN 由多段字符串相加）：
