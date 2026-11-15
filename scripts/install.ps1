@@ -1,4 +1,4 @@
-# agent-kb 安装脚本（PowerShell，Windows）
+﻿# agent-kb 安装脚本（PowerShell，Windows）
 #
 # 用法：
 #   .\install.ps1 [-Platform <name>] [-KbPath <dir>] [-Force] [-List]
