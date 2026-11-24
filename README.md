@@ -158,7 +158,7 @@ Agent 记忆这块，方案不少。差别不在「记不记得住」，而在 *
 | WorkBuddy | **Skill only** | `SKILL.md` → `~/.workbuddy/skills/kb` | — | 平台自动发现 `~/.workbuddy/skills` | ✅ |
 | CodeBuddy | Hook（legacy） | workbuddy_adapter.py · SessionStart / UserPromptSubmit | `hook_event_name` | `hookSpecificOutput.additionalContext` | ⚠️ 已卸载，无活跃消费者 |
 | OpenClaw | **Plugin bridge** | openclaw_adapter.py · `session_start` / `before_prompt_build` | `hook_event_name` | 插件 `api.on(...)` | ✅ |
-| OpenCode | **Plugin bridge** | opencode_adapter.py · `session.created` / `tui.prompt.append` | 嵌套 `event.type` + `event.properties` | 插件桥 | ✅ |
+| OpenCode | **V2 plugin** | `plugins/opencode/index.js` · `prompt` / `context` → `opencode_adapter.py` | 插件 API 回调 | 插件注入 `system` 段 | ✅ |
 | Hermes | Hook（未核实） | hermes_adapter.py · 占位 | `hook_event_name` | `hookSpecificOutput.additionalContext` | ⚠️ 未找到官方文档 |
 | PI (Perplexity) | Hook（未核实） | pi_adapter.py · 占位 | `hook_event_name` | `hookSpecificOutput.additionalContext` | ⚠️ 未找到官方文档 |
 
@@ -241,6 +241,10 @@ cd agent-kb
 `claude` / `qoder` / `codebuddy` 为 **merge 型**：只替换 `settings.json` 的 `hooks` 子树，
 其余键原样保留，并留 `.bak` 备份。`workbuddy` 是 **skill-only**：只装
 `~/.workbuddy/skills/kb/SKILL.md`，不生成 hook 配置。
+`opencode` 为 **V2 插件**：安装器会复制桥接脚本到
+`~/.config/opencode/hook-bridge/agent-kb/`，并把插件复制到
+`~/.config/opencode/plugins/agent-kb/`；还需在 `~/.config/opencode/opencode.jsonc`
+的 `plugins` 数组加入 `"./plugins/agent-kb"`（安装器会打印提示）。
 
 ### 测试
 
@@ -355,6 +359,7 @@ agent-kb/
 ├── commands/                    # 斜杠命令（Trae 由 Skill description 触发）
 │   ├── kb.md
 │   └── kb-harvest.md
+├── plugins/opencode/            # OpenCode V2 插件（prompt/context hook）
 ├── library-template/            # 空库模板 + 3 条示例
 ├── library/                     # 仓库内镜像库（当前 362 条）
 ├── schema/

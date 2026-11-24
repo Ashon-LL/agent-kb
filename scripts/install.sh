@@ -232,6 +232,19 @@ done
 printf '[OK] Hooks 已安装 -> %s\n' "$HOOKS_DST"
 printf '     adapter: %s  (+ kb_core.py, adapter_base.py, kb_validate.py, kb_search.py)\n' "$ADAPTER"
 
+# OpenCode V2：除桥接脚本外，再装一个本地插件（OpenCode 没有 stdin/stdout hook）
+if [ "$PLATFORM" = "opencode" ]; then
+  PLUGIN_SRC="$REPO_ROOT/plugins/opencode"
+  PLUGIN_DST="$HOME_DIR/.config/opencode/plugins/agent-kb"
+  if [ -d "$PLUGIN_SRC" ]; then
+    mkdir -p "$PLUGIN_DST"
+    cp -R "$PLUGIN_SRC"/. "$PLUGIN_DST"/
+    printf '[OK] OpenCode V2 插件已安装 -> %s\n' "$PLUGIN_DST"
+  else
+    printf '[WARN] 未找到 %s，跳过 OpenCode V2 插件\n' "$PLUGIN_SRC"
+  fi
+fi
+
 # ------------------------------------------------------------------ 3. 配置（技能型平台不走此分支：在 else 内已整体跳过）
 if [ "$MANUAL" -eq 1 ]; then
   printf '\n[NEXT] %s 需手工注册 hook，模板见：%s\n' "$PLATFORM" "templates/$TEMPLATE"
@@ -241,8 +254,9 @@ if [ "$MANUAL" -eq 1 ]; then
       printf '       command = "%s %s/kimi_adapter.py"\n' "$PYTHON_NATIVE" "$HOOKS_DST_NATIVE"
       ;;
     opencode)
-      printf '       写法：JS 插件 shell 调起桥接脚本\n'
-      printf '       shell: "%s" "%s/opencode_adapter.py"\n' "$PYTHON_NATIVE" "$HOOKS_DST_NATIVE"
+      printf '       写法：OpenCode V2 插件（已装到 ~/.config/opencode/plugins/agent-kb）\n'
+      printf '       配置：在 ~/.config/opencode/opencode.jsonc 的 plugins 数组加入 "./plugins/agent-kb"\n'
+      printf '       桥接："%s" "%s/opencode_adapter.py"\n' "$PYTHON_NATIVE" "$HOOKS_DST_NATIVE"
       ;;
     openclaw)
       printf '       写法：TS 插件（definePluginEntry）注册 session_start / before_prompt_build\n'

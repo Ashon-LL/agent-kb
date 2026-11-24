@@ -188,6 +188,19 @@ foreach ($f in @("kb_core.py", "adapter_base.py", "kb_validate.py", "kb_search.p
 Write-Host "[OK] Hooks 已安装 -> $HooksDst" -ForegroundColor Green
 Write-Host "     adapter: $($cfg.Adapter)  (+ kb_core.py, adapter_base.py, kb_validate.py, kb_search.py, kb_lock.py)" -ForegroundColor DarkGray
 
+# OpenCode V2：除桥接脚本外，再装一个本地插件（OpenCode 没有 stdin/stdout hook）
+if ($Platform -eq "opencode") {
+    $PluginSrc = Join-Path $RepoRoot "plugins/opencode"
+    $PluginDst = Join-Path $HomeDir ".config/opencode/plugins/agent-kb"
+    if (Test-Path $PluginSrc) {
+        New-Item -ItemType Directory -Path $PluginDst -Force | Out-Null
+        Copy-Item (Join-Path $PluginSrc "*") $PluginDst -Recurse -Force
+        Write-Host "[OK] OpenCode V2 插件已安装 -> $PluginDst" -ForegroundColor Green
+    } else {
+        Write-Host "[WARN] 未找到 $PluginSrc，跳过 OpenCode V2 插件" -ForegroundColor Yellow
+    }
+}
+
 # 找 python
 $Python = (Get-Command python -ErrorAction SilentlyContinue).Source
 if (-not $Python) {
@@ -213,8 +226,9 @@ elseif ($cfg.Manual) {
             Write-Host "       command = `"$Python $HooksDst/kimi_adapter.py`"" -ForegroundColor Yellow
         }
         "opencode" {
-            Write-Host "       写法：JS 插件（loadable）shell 调起桥接脚本" -ForegroundColor Yellow
-            Write-Host "       shell: `"$Python`" `"$HooksDst/opencode_adapter.py`"" -ForegroundColor Yellow
+            Write-Host "       写法：OpenCode V2 插件（已装到 ~/.config/opencode/plugins/agent-kb）" -ForegroundColor Yellow
+            Write-Host "       配置：在 ~/.config/opencode/opencode.jsonc 的 plugins 数组加入 `"./plugins/agent-kb`"" -ForegroundColor Yellow
+            Write-Host "       桥接：`"$Python`" `"$HooksDst/opencode_adapter.py`"" -ForegroundColor Yellow
         }
         "openclaw" {
             Write-Host "       写法：TS 插件（definePluginEntry）注册 session_start / before_prompt_build" -ForegroundColor Yellow

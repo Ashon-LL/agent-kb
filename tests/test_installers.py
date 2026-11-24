@@ -139,6 +139,13 @@ class InstallerTestBase:
                             self.assertTrue((hooks_path / extra).is_file(),
                                             f"{platform}: missing {extra}")
                         self.assertTrue((hooks_path / ADAPTER_FILE[platform]).is_file())
+                        if platform == "opencode":
+                            # V2 插件与桥接脚本一起装；桥接脚本本身不能直接作为 OpenCode hook
+                            plugin_path = Path(home) / ".config/opencode/plugins/agent-kb"
+                            self.assertTrue((plugin_path / "index.js").is_file(),
+                                            f"{platform}: missing V2 plugin index.js")
+                            self.assertTrue((plugin_path / "package.json").is_file(),
+                                            f"{platform}: missing V2 plugin package.json")
 
     def test_generated_config_is_valid_json_without_placeholders(self):
         for platform in PLATFORMS:

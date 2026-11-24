@@ -1,5 +1,5 @@
 {
-  "_comment": "OpenCode：原生扩展点是 JS/TS 插件（~/.config/opencode/plugins/ 或 .opencode/plugins/），无 stdin/stdout JSON hook。本文件描述「JS 插件 shell 调用 opencode_adapter.py」的桥接约定，HOOKS_DIR 换成实际 hooks/ 目录。官方文档 https://opencode.ai/docs/plugins/",
+  "_comment": "OpenCode V2：原生扩展点是 JS/TS 插件（~/.config/opencode/plugins/ 或 plugins 配置），无 stdin/stdout JSON hook。本文件只描述「V2 插件 shell 调用 opencode_adapter.py」的桥接约定；实际插件见 plugins/opencode/index.js。官方文档 https://opencode.ai/docs/build/plugins",
   "hooks": {
     "SessionStart": [
       {
