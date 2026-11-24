@@ -8,6 +8,8 @@ verified: 2026-11-02
 topic: browser
 ---
 
+<!-- hook-reviewed 2026-11-16：已核对 INDEX 钩子覆盖本条 2026-11-08 新增的窗口最小化行为 -->
+
 **经验**：
 
 1. **交互被"卡住"时先分清是哪一层**。ego-browser 里出现 `CdpRequestTimeoutError: Input.dispatchMouseEvent` 而 `page.mouse.move()` 正常、`page.evaluate()` 正常，说明**渲染器活着、输入分发被浏览器级 UI 挡住**（本例是站点触发的「下载多个文件」权限气泡）。此时不要重试同一 click：改用 DOM 级点击 `el.click()`（走页面 JS，不经过 Input），导航/提交都能过。ego 的 CDP 白名单**不含** `Browser.grantPermissions` / `Browser.setPermission`，别指望用它预授权。
@@ -31,3 +33,5 @@ topic: browser
 **How to apply**：① 输入超时先测 `mouse.move` / `evaluate` 分辨"渲染器死"还是"输入被浏览器 UI 挡"；② 换 DOM 点击并把**所有可见 `.ui-dialog` 的按钮文案打出来**再选；③ 上传/删除后**必须回读列表**核对条目类型与文件名，不认"点过了"；④ 判产物新旧用**构建时间 + 内容特征串计数**（如某段落 grep 计数），并对可疑端点试权威版参数；⑤ 判 PDF 版式类问题时渲染成图，不信 `-layout` 文本。
 
 ⛔ **落点纪律（本技能自带的最大陷阱）**：本技能文档示例把工作目录写成 `C:/Users/<name>/ego/<goal>-YYYYMMDD-HHMM/`，**那只是示例**。团队纪律是工作产物放**项目目录本身**（本次被用户当场纠正两次：不该在用户主目录另开 `C:\Users\<user>\<task>\`，也不是 `~/.zcode/workspace/<项目>/`）。照抄示例路径会制造仓库外的孤儿目录。相关：[[tencent-browser-skill-setup]]、[[browser-extension-migration-mechanism-first]]。
+
+**2026-11-08 补充（窗口最小化）**：窗口最小化时 `page.screenshot()` 报 minimized、`page.mouse.click()` 落不下去（但 `page.evaluate()`/DOM click/`page.keyboard` 仍可用，`mouse.move` 也不报错——极易误判点击生效）。需要 trusted click（如开 file chooser）时先恢复窗口：`const w = await page.cdp('Browser.getWindowForTarget',{}); await page.cdp('Browser.setWindowBounds',{windowId:w.windowId,bounds:{windowState:'maximized'}})`。本轮 B 站投稿封面 file chooser 一直超时，恢复窗口后才正常。

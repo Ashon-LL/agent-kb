@@ -43,3 +43,17 @@ forceSnapshot 每 10s 触发但状态不变。原因：forceSnapshot 重新订�
 **副作用**：周期性 `connect({forceSnapshot:true})` 会重订阅会话流，导致会话视图（左侧滚动概览竖条）周期性重排跳位——已移除该自动重订阅，目标完成态 solely 由 DB 轮询判定。
 
 **检索症状词**：forceSnapshot 无效、快照仍旧、投影滞后、session_target、DB 权威态、滚动概览跳位、界面周期性抖动、minimap 跳。
+
+## 更正（2026-11-16 晚）：Todo 全完成 ≠ verifier pass，首帧无 DB 会造成“假完成勾”
+
+新证据（本会话实机 + 官方源码）：
+- 官方 `apps/zcode-cli/docs/design/v2/session-target.md` 明写：plan / todo / checklist 完成、elapsed effort、plausible final response **都不是完成证据**；只有 verifier `{"passed":true}` 才把 `session_target.status` 置 `complete`。`nextAction` 是 runtime projection data，不是业务完成态。
+- 本会话最新 `target_completion_verification`：`status="completed"`（验证请求跑完）、`verification.passed=false`、`nextAction="向用户确认并记录这 4 个决定…"`；DB `session_target.status="paused"`。所以目标**没有完成**，UI 显示“4/4”是 Todo 项计数，不是目标完成。
+- 我方 `patch_goal_panel.py` 的 `__done` 启发式把 `((a.status===active||paused) && __latest.completed && iteration<=latest.iteration)` 当作完成，其中 `__latest.completed` 是 Todo 项全完成，不是 verifier pass。首帧 `__tb=null`（DB 轮询 500ms 还没回）时 `__dbActive=false`，该启发式会把 paused + 旧投影 Todo 全完成误判成 `__done=true` → 显示绿勾；500ms 后 DB `paused` 到了 → `__done=false` → 变成继续按钮。这就是“跳变”的可证路径。
+- 同类产品佐证：Kimi goal 状态机 `active/paused/blocked/complete`，`complete` 瞬时且完成后清除；DSH 官方 `ui-goal` 对 loading/absent/completed/cleared 一律不渲染，激活未知时暂停按钮 disable；DSH 看板禁止只信 agent 自述，验收必须结构化证据。
+
+**How to apply（追加）**：
+1. 完成态只认 DB `session_target.status=complete/verified`（或主进程显式返回 verifier `passed=true`）；首帧无 DB 数据时 `__done=false`，宁可空着也不要显示完成勾。
+2. 绝不用 Todo/iteration `completed` 代替 verifier pass；这是官方明令禁止的 proxy signal。
+3. `status="completed"` 是验证请求生命周期，不是目标完成；必须读 `verification.passed`。
+4. 暂停/继续按钮的显示要以 DB 权威态为准；未拿到 DB 前按钮 disable，避免“假完成→继续”的跳变。

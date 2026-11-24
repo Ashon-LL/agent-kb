@@ -4,7 +4,7 @@ description: ZCode 平台实测事实合集——扩展资源落点语义（skil
 type: tool
 source: ailika + default（2026-08~09 本机 Windows 实证）；2026-09-15 合并 hooks 与资源落点两条
 date: 2026-09-15
-verified: 2026-10-16
+verified: 2026-11-04
 topic: mcp, zcode
 ---
 
@@ -13,6 +13,7 @@ topic: mcp, zcode
 ## 一、扩展资源落点语义
 
 - **skill 目录语义**：`~/.zcode/cli/skills`（或 `~/zcode/...`）= **仅 ZCode 可见**；`~/.agents/skills` = **跨工具共享**。要"只有 ZCode 认"放前者，要"别的工具也认"放后者。
+- **`~/.zcode/skills/*` 是指向 `~/.agents/skills/*` 的目录符号链接**（2026-11-04 实测，非硬链接）：某技能要两边都删时，先 `[System.IO.Directory]::Delete($link,$false)` 删 .zcode 侧链接（**勿用 `Remove-Item -Recurse`，会穿透删到 .agents 实体**），再 `Remove-Item` 删 .agents 真实目录；删链接不影响目标。
 - **自动记忆按项目隔离**：`~/.zcode/cli/memories/projects/<项目>/memory/`，**没有全局层**——全局通道只有 `~/.zcode/AGENTS.md` + `~/.agents/skills`（外加 `~/.agents/kb` 这个人工经验库）。
 - **MCP 权威位置是 `~/.zcode/cli/config.json` 的 `mcp.servers`**；`~/.agents/mcp.json` 只是同作用域回退，**config.json 里一旦有 server 段，整个回退文件被忽略**——改 mcp.json 不生效。
 - **AGENTS.md 可能是符号链接**：如 `cloudflare_temp_email/AGENTS.md → CLAUDE.md`，Edit/Write 拒写"穿 symlink"，须改真实目标文件。

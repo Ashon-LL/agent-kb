@@ -1,6 +1,6 @@
 ---
 name: winget-powershell7-msix-userscope
-description: winget install Microsoft.PowerShell 默认装 MSIX 用户级包——pwsh 落在 WindowsApps 别名(符号链接到 C:\Program Files\WindowsApps\Microsoft.PowerShell_*\pwsh.exe)，不在 C:\Program Files\PowerShell\7；验证用 pwsh --version + Get-AppxPackage，别找 Program Files\PowerShell\7；powershell 仍是 5.1、pwsh 才是 7（并排不替换）；Windows Terminal 的 PS7 默认 profile GUID={574e775e-4f2a-5b96-ac1e-a2962a402336}、source=Windows.Terminal.PowershellCore
+description: winget install Microsoft.PowerShell 默认装 MSIX 用户级包——pwsh 落在 WindowsApps 别名(符号链接到 C:\Program Files\WindowsApps\Microsoft.PowerShell_*\pwsh.exe)，不在 C:\Program Files\PowerShell\7；验证用 pwsh --version + Get-AppxPackage，别找 Program Files\PowerShell\7；powershell 仍是 5.1、pwsh 才是 7（并排不替换）；Windows Terminal 的 PS7 默认 profile GUID={574e775e-4f2a-5b96-ac1e-a2962a402336}、source=Windows.Terminal.PowershellCore；2026-11-23 更正：7.7 起无 MSI，本机已卸 MSIX 改用官方 ZIP 装到 C:\Program Files\PowerShell\7（见 powershell7-zip-install-github-blocked）
 type: tool
 source: default 会话（2026-11-04 本机 Windows 11 26H2 实测，winget v1.29.380）
 date: 2026-11-04
