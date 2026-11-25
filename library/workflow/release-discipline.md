@@ -2,7 +2,7 @@
 name: release-discipline
 description: 发布门禁硬阻断必做项、升级/回退包成对、发版后卫生、tag 与线上资产一致
 type: workflow
-source: 合并自 release-gate-requires-must-do-items-closed, release-package-must-pair-upgrade-and-rollback, post-release-housekeeping-mandatory, release-tag-must-match-published-artifact；zcodepro 复盘 2026-11-04（C:/Users/MECHREVO/Downloads/Project/zcode改造/reports/project-retrospective-2026-11-04.md §6.2）; ZCode 桌面重打版（2026-11-02 用户纠正：只给了 update-zcode，没有 restore-zcode）; zcodepro v29.20（2026-11-09 用户明确「记住：每次发版后都要做项目清理卫生整理」）; zcodepro 复盘 2026-11-04（C:/Users/MECHREVO/Downloads/Project/zcode改造/reports/project-retrospective-2026-11-04.md §6.3）
+source: 合并自 release-gate-requires-must-do-items-closed, release-package-must-pair-upgrade-and-rollback, post-release-housekeeping-mandatory, release-tag-must-match-published-artifact；zcodepro 复盘 2026-11-04（%USERPROFILE%/Downloads/Project/zcode改造/reports/project-retrospective-2026-11-04.md §6.2）; ZCode 桌面重打版（2026-11-02 用户纠正：只给了 update-zcode，没有 restore-zcode）; zcodepro v29.20（2026-11-09 用户明确「记住：每次发版后都要做项目清理卫生整理」）; zcodepro 复盘 2026-11-04（%USERPROFILE%/Downloads/Project/zcode改造/reports/project-retrospective-2026-11-04.md §6.3）
 date: 2026-11-02
 verified: 2026-11-10
 topic: delivery, change-discipline, git

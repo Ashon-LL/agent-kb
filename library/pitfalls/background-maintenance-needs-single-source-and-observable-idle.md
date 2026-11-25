@@ -2,7 +2,7 @@
 name: background-maintenance-needs-single-source-and-observable-idle
 description: 同一资源上的后台维护（VACUUM/压缩/清理）必须单源，且「空闲」判据要来自可观测的真实活动；多套各判各的空闲 + 判据读错字段恒为空，会在用户正在工作时抢独占锁
 type: pitfall
-source: zcodepro ADR-0059 / 2026-11-09 database is locked（C:/Users/MECHREVO/Downloads/Project/zcodepro/adr/0059-vacuum-single-source-and-observable-idle.md）
+source: zcodepro ADR-0059 / 2026-11-09 database is locked（%USERPROFILE%/Downloads/Project/zcodepro/adr/0059-vacuum-single-source-and-observable-idle.md）
 date: 2026-11-10
 verified: 2026-11-10
 topic: database, sqlite, safety

@@ -78,7 +78,7 @@ topic: powershell, container
 - 用**无引号** `<<PSEOF` → `$path` / `$bs` / `$_` 全被展开成空，
   文件**照样写出来了（exit 0）**，然后子进程抛
   `ParserError: An expression was expected after '('.`，源码被搅成
-  ` = 'C:\Users\MECHREVO\Downloads'` / ` = (.ToCharArray() | Where-Object {  -eq [char]92 }).Count`。
+  ` = '%USERPROFILE%\Downloads'` / ` = (.ToCharArray() | Where-Object {  -eq [char]92 }).Count`。
   ⇒ **exit 0 + 文件存在 ≠ 内容对**，必须回读或先 parse。
 
 **How to apply**：写 PowerShell 前先查定界符是否缩进、载荷是不是脚本（是就把 heredoc 定界符加引号）；

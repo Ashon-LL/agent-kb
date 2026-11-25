@@ -85,7 +85,7 @@ compaction 请求本身已经超过模型上限时（如 1.2M > 1.05M），压�
    - `auto_vacuum=0`（本机实测）⇒ 增量回收不可用，只能 `VACUUM`。而 **`VACUUM` 在 ZCode 运行时照样能跑通**（实测 2.9s 成功）：ZCode 平时只是持连接、不持活跃读事务，独占锁能拿到。**我一度断言"VACUUM 必须退出 ZCode"，被实测证伪**。真失败时报的是 `database is locked`，不是打不开。
    - ⚠️ **VACUUM 的结果先进 WAL、不落回主库**：做完立刻 `os.path.getsize(db.sqlite)` 会看到**大小完全没变**，极易误判成"没生效"。真相是主库已降到 279 MB、而 `-wal` 涨到 284.9 MB。必须补一步 `PRAGMA wal_checkpoint(TRUNCATE)`，WAL 才归零。**判据看 `page_count`/`freelist_count`，不要看文件大小。**
    - 本次实测终值：`page_count` 338,801→68,119、`freelist` 267,146→0、**1387.7 MB→279.0 MB**（连同副产物与备份共回收约 2.3 GB）。
-9. **路径要在"跑命令的那个 shell"里对得上**。本机同时有 Git Bash（`~` = `C:\Users\MECHREVO`）和 WSL/Kali（`~` = `/home/xxx`）：在 WSL 里敲 `os.path.expanduser('~/.zcode/...')` 会拼出不存在的位置，报的是 **`unable to open database file`**（看着像被占用/没权限，其实就是路径错了）。连库前先 `print` 一次展开后的绝对路径确认。
+9. **路径要在"跑命令的那个 shell"里对得上**。本机同时有 Git Bash（`~` = `%USERPROFILE%`）和 WSL/Kali（`~` = `/home/xxx`）：在 WSL 里敲 `os.path.expanduser('~/.zcode/...')` 会拼出不存在的位置，报的是 **`unable to open database file`**（看着像被占用/没权限，其实就是路径错了）。连库前先 `print` 一次展开后的绝对路径确认。
    - ⚠️ **更隐蔽的一个：WSL 里读 `/mnt/c` 上的 SQLite 库会报 `disk I/O error`**，哪怕文件完好。原因是 WAL 模式依赖 `-shm` 共享内存索引，DrvFs 挂载层不支持那套 mmap 语义。**判据 = 同一个文件 `os.path.getsize` 能读出正确大小、却一 `SELECT` 就 I/O error** ⇒ 挂载问题，不是损坏。**解法 = 要么从 Windows 侧查（Git Bash / Windows Python），要么先 `cp` 到 `/tmp` 再查。** 实测：`/mnt/c` 上 `disk I/O error`，`cp` 到 `/tmp` 后 `integrity_check = ok`、48 会话、10 顶层。跨项目通用（任何从 WSL 碰 Windows 上的 SQLite/WAL 库都会踩）。
 10. **UI 不会立刻反映**：ZCode 渲染进程的会话列表在内存里，可能仍显示已删项、甚至把 `tasks` 行回写。**数据层已干净，界面要重启才对得上**——这点要事先跟用户讲清，否则会以为没删成功。
 11. 留一份 `<标题>\t<id>\t<工作区>` 的清单文件，否则删完只剩 UUID 无法反查。备份本身会**抵消掉清理收益**（本次备份 1396 MB），确认无误后要删掉——用户说"不需要备份"就别留。
