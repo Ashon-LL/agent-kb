@@ -176,3 +176,6 @@
 ## 2026-11-25
 - 合并 2 条 → `pitfalls/video-generation-api-traps.md`：两篇都是视频生成 API 的计费/失败处理。
   - 成员：video-credit-estimate-can-understate-2k, video-terminal-failure-needs-upstream-error-before-retry
+
+## 2026-11-26
+- 同步运行时库新增 2 条（338 条）

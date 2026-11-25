@@ -2,7 +2,7 @@
 name: build-gate-must-verify-artifact-freshness
 description: 语法/构建闸门不能无条件接受上一轮残留产物：干净环境会因缺件失败、有残留时旧产物冒充本轮而过闸，导致交付件版本错位且全链绿灯；闸门必须按本轮实际执行的步骤动态决定检查集并校验产物新鲜度
 type: pitfall
-source: zcodepro 全量审计 2026-11-04（C:/Users/MECHREVO/Downloads/Project/zcode改造/reports/audit-2026-11-04/01-build-chain.md P1-2）
+source: zcodepro 全量审计 2026-11-04（%USERPROFILE%/Downloads/Project/zcode改造/reports/audit-2026-11-04/01-build-chain.md P1-2）
 date: 2026-11-10
 verified: 2026-11-10
 topic: ci, verification

@@ -14,9 +14,9 @@ topic: delivery
 
 | ❌ 不要 | ✅ 要 |
 |---|---|
-| `Downloads\Project\zcode改造\zcodepro-patch-src.zip` | `[zcodepro-patch-src.zip](C:\Users\MECHREVO\Downloads\Project\zcode改造\zcodepro-patch-src.zip)` |
-| `ZCode-3.15.2new-memfix6\INSTALL-replace-app.asar.bat` | `[INSTALL-replace-app.asar.bat](C:\Users\MECHREVO\Downloads\Project\zcode改造\ZCode-3.15.2new-memfix6\INSTALL-replace-app.asar.bat)` |
-| `%USERPROFILE%\.zcode\v2\crash\heap\renderer-memory.log` | `[renderer-memory.log](C:\Users\MECHREVO\.zcode\v2\crash\heap\renderer-memory.log)` |
+| `Downloads\Project\zcode改造\zcodepro-patch-src.zip` | `[zcodepro-patch-src.zip](%USERPROFILE%\Downloads\Project\zcode改造\zcodepro-patch-src.zip)` |
+| `ZCode-3.15.2new-memfix6\INSTALL-replace-app.asar.bat` | `[INSTALL-replace-app.asar.bat](%USERPROFILE%\Downloads\Project\zcode改造\ZCode-3.15.2new-memfix6\INSTALL-replace-app.asar.bat)` |
+| `%USERPROFILE%\.zcode\v2\crash\heap\renderer-memory.log` | `[renderer-memory.log](%USERPROFILE%\.zcode\v2\crash\heap\renderer-memory.log)` |
 
 ## How to apply
 

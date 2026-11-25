@@ -2,7 +2,7 @@
 name: windows-home-cleanup-safe-vs-traps
 description: Windows 用户目录清理口径——更新器安装包/缓存可删，但 %APPDATA%\npm 是全局 CLI 入口不是缓存（删了废掉 cnb/pnpm 等命令）；孤儿 MSI 记录要单独清
 type: tool
-source: 2026-10-06 default 会话清理 C:\Users\MECHREVO（释放 70.5 GB）
+source: 2026-10-06 default 会话清理 %USERPROFILE%（释放 70.5 GB）
 date: 2026-10-06
 verified: 2026-10-06
 topic: windows

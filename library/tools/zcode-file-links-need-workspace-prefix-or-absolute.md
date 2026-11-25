@@ -11,11 +11,11 @@ topic: zcode
 ## 经验
 
 ZCode 的 Markdown 文件链接按**工作区根目录**解析，不是按当前 shell cwd 或工程目录。
-工作区根是 `C:\Users\MECHREVO\Videos\Bili`，工程在 `10years-humanity/` 子目录时：
+工作区根是 `%USERPROFILE%\Videos\Bili`，工程在 `10years-humanity/` 子目录时：
 
 - ❌ `[x](out/preview/x.mp4)` → 解析成 `Bili/out/preview/x.mp4`（不存在）
 - ✅ `[x](10years-humanity/out/preview/x.mp4)` → 正确
-- ✅ `[x](C:/Users/MECHREVO/Videos/Bili/10years-humanity/out/preview/x.mp4)` → 最稳（正斜杠）
+- ✅ `[x](%USERPROFILE%/Videos/Bili/10years-humanity/out/preview/x.mp4)` → 最稳（正斜杠）
 
 ## Why
 

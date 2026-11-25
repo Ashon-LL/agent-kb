@@ -4,6 +4,7 @@
 > 目录：`tools/` 工具链 · `workflow/` 流程协作 · `pitfalls/` 失败教训
 
 ## pitfalls
+- [收割/挖掘必须覆盖当前主用平台](pitfalls/coverage-must-include-active-platform.md) — 只按历史平台写扫描器，切到 OpenCode 后会话静默不入库；新增平台先查库表再宣布支持
 - [portproxy 自环会扇出十万 socket 并把整个系统卡住](pitfalls/windows-portproxy-self-loop-socket-storm.md) — connectaddress 写成本机 LAN IP = 转发回自己的监听；单次连接 → 104,234 句柄 / 109,062 条 socket，全系统卡顿而光标仍能动；判据 netsh portproxy show + 按 PID 数端口，删规则后两数齐掉才算修好
 - [卸载注册表项键名可能是 GUID：按 DisplayName 值扫三处 Uninstall，校验要查真实键路径](pitfalls/windows-uninstall-key-guid-scan-by-value.md) — 按键名搜 0 命中且产品名路径校验假阳性；Electron 残留散落 7 处，侦察要搜全称+缩写前缀+@org；*dsh* 会误中 headshot
 - [错峰入场窗口终点固定会让后半元素恒透明](pitfalls/staggered-grid-fixed-end-makes-late-items-invisible.md) — seg(p,a+n*step,固定终点) 到 n 大时起点≥终点→元素永不画；用数量表达比例的点阵会 12/50 被误读成 24%；终点须随 n 后移且成片数格子
@@ -208,6 +209,7 @@
 - [dsh-go 卡「正在同步会话」先排除客户端](pitfalls/dsh-go-large-session-sync-stall.md) — 服务端 ms 级返回、同会话 Web UI 正常即确诊；大会话拆小/改用电脑开
 - [tkinter 后台线程别碰 UI](pitfalls/tkinter-worker-thread-touch-ui.md) — root.after 在工作线程报 main thread is not in main loop（root.update() 不算）；改用 Queue+主线程轮询；`except as e` 的回调 lambda 需默认参数绑定
 ## workflow/ 流程与协作
+- [Hook 注入文案短而不简](workflow/hook-injection-short-but-not-simplified.md) — 压 token 但保留命令/判据/例外/自愈句；删解释不删限定词；改 kb_core 后同步桥接副本
 - [接线清单机器校验+死字段审计](workflow/wiring-checklist-machine-verify.md) — 新增一家改 8-10 处，漏一处全静默
 - [错误文案是产品](workflow/error-message-is-product.md) — 纯文本<150 字符、识别语义就不复述原文
 - [vibe-video 技能生态可复用](workflow/vibe-video-skill-ecosystem-reuse.md) — B站知识大赏风格先复用成熟开源技能（HeyChengC/andyhuo520/liangdabiao/gnipbao）别从零写；纯代码逐帧零生图成本
