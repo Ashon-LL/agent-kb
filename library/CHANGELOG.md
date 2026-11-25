@@ -178,4 +178,5 @@
   - 成员：video-credit-estimate-can-understate-2k, video-terminal-failure-needs-upstream-error-before-retry
 
 ## 2026-11-26
-- 同步运行时库新增 2 条（338 条）
+- 工具与规程优化：`kb_harvest.py` / `kb_trigger_miner.py` 增加 OpenCode SQLite 会话源；`kb_validate.py` 增加密钥形状扫描；SKILL 改为 search-first、锁覆盖查重、Stop 平台注记。
+- 新增 `pitfalls/coverage-must-include-active-platform.md`。
