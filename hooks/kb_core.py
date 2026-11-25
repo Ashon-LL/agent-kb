@@ -171,12 +171,14 @@ def stop_reminder() -> str:
 
     开工有开工提醒、触发词有沉淀规程，唯独「收尾」没有任何提示——任务做完最容易
     忘记把新教训回流。这里补上最后一道：不判断该不该沉淀，只提醒一遍。
+
+    文案原则（用户 2026-11-25）：短而不简。短=压上下文；不简=保留路径、命令、
+    判据、例外与自愈条件，只删解释性理由和重复背景。
     """
     return (
-        f"【kb 收尾钩子】本次会话若有**跨项目可复用**的教训/经验（踩坑与修法、"
-        f"最佳实践），按 kb 技能规程沉淀进 {default_kb_path()}；"
-        f"写入后必须见 kb_validate [PASS]。项目专属状态留项目仓库的 AGENTS.md/README/任务书；"
-        f"平台若启用项目记忆再按其规则，不要依赖已关闭的功能。"
+        f"【kb 收尾】本次若有跨项目可复用教训（踩坑/修法/最佳实践），"
+        f"按 kb 技能写入 {default_kb_path()}；跑 `python ~/.agents/kb/kb_validate.py` 见 [PASS]。"
+        f"项目专属留项目 AGENTS.md/README/任务书；项目记忆按开关状态处理，不依赖已关闭功能。"
     )
 
 
@@ -199,24 +201,23 @@ def session_start_reminder(kb_path=None) -> str:
     if count:
         head = f"全局经验库 {shown} 就绪。"
     else:
-        head = f"全局经验库 {shown} 尚无条目（未找到可读的 INDEX.md）。"
+        head = f"全局经验库 {shown} 无条目（INDEX.md 不可读）。"
     return (
-        f"【kb 开工钩子】{head}"
-        "动手前按任务关键词跑 `python ~/.agents/kb/kb_search.py <关键词>`"
-        "（全文检索，症状词/口语也能命中；比扫 INDEX 快），命中读条目全文再干。"
+        f"【kb 开工】{head}"
+        "动手前用任务关键词跑 `python ~/.agents/kb/kb_search.py <关键词>`"
+        "（全文检索，口语/症状词可命中）；命中读全文再干。"
     )
 
 
 def user_prompt_reminder() -> str:
     """UserPromptSubmit 命中触发词时注入的沉淀规程。"""
     return (
-        "【kb 沉淀钩子】用户本条消息疑似要求沉淀经验。执行："
-        "1) 先 `python ~/.agents/kb/kb_search.py --similar 「本次内容关键词」` 查重（同族条目优先扩充现有文件而非新建）；若本条消息涉及既有主题，顺手 kb_search 该主题看有无同类既有教训；"
-        "2) 按 kb 技能规程落盘（frontmatter: name/description/type/source/date/verified/topic；正文: 经验/Why/How to apply）；"
-        "3) 更新 INDEX.md 并核对索引行数=实际文件数；"
-        "4) ⛔ 跑校验器 `python ~/.agents/kb/kb_validate.py`，看到 [PASS] 才算完"
-        "（报 [FAIL] 按它列的行逐条修，不要绕过、不要改校验器迁就条目）；"
-        "5) 回报条目路径与索引行。若用户并非要求沉淀，忽略本提醒正常干活。"
+        "【kb 沉淀】本条疑似长期/跨项目沉淀要求："
+        "1) `python ~/.agents/kb/kb_search.py --similar 「关键词」` 查重；同族优先扩充原条目，涉及既有主题再搜一次；"
+        "2) 按 kb 技能写入：frontmatter 七字段（name/description/type/source/date/verified/topic），正文按 经验/Why/How to apply；"
+        "3) 更新 INDEX.md，索引条目数=实际文件数；"
+        "4) 跑 `python ~/.agents/kb/kb_validate.py`，见 [PASS] 才算完；[FAIL] 逐条修，不绕过校验器、不删条目；"
+        "5) 回报条目路径与索引行。若并非长期/跨项目沉淀要求，忽略本提醒。"
     )
 
 

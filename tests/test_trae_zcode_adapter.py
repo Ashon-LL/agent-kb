@@ -32,6 +32,8 @@ def run_adapter(stdin_text: str, kb_path=None, extra_env=None):
         input=stdin_text,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=30,
         env=env,
     )
@@ -85,7 +87,7 @@ class TestSessionStart(unittest.TestCase):
         )
         self.assertEqual(proc.returncode, 0)
         ctx = json.loads(proc.stdout)["hookSpecificOutput"]["additionalContext"]
-        self.assertIn("开工钩子", ctx)
+        self.assertIn("开工", ctx)
         self.assertIn("就绪", ctx)
         self.assertNotIn("条）", ctx)
 
@@ -98,7 +100,7 @@ class TestUserPromptSubmit(unittest.TestCase):
         payload = {"hook_event_name": "UserPromptSubmit", "prompt": "记住这个坑"}
         proc = run_adapter(json.dumps(payload))
         self.assertEqual(proc.returncode, 0)
-        self.assertIn("沉淀钩子", self._context(proc))
+        self.assertIn("沉淀", self._context(proc))
 
     def test_no_trigger_word_is_silent(self):
         payload = {"hook_event_name": "UserPromptSubmit", "prompt": "帮我写个排序"}
@@ -112,7 +114,7 @@ class TestUserPromptSubmit(unittest.TestCase):
             json.dumps(payload), extra_env={"AGENT_KB_TRIGGER": "归档"}
         )
         self.assertEqual(proc.returncode, 0)
-        self.assertIn("沉淀钩子", self._context(proc))
+        self.assertIn("沉淀", self._context(proc))
 
     def test_hook_event_name_matches(self):
         payload = {"hook_event_name": "UserPromptSubmit", "prompt": "沉淀一下"}

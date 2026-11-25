@@ -271,13 +271,13 @@ set PYTHONUTF8=1 && python -m unittest discover tests/
 |---|---|---|---|
 | `/kb add` | 用户明确要求沉淀 | 是：按规程写入并跑 `kb_validate` | 仅显式 `--push` |
 | `/kb-harvest` | 定期/手动批量收割 | 先出候选，用户确认后写 | 仅显式 `--push` |
-| kb hooks | SessionStart / UserPromptSubmit / Stop | 否：只注入提醒与规程 | 否 |
+| kb hooks | SessionStart / UserPromptSubmit / Stop（Stop 仅 ZCode） | 否：只注入提醒与规程 | 否 |
 
 | 操作 | 命令 | 示例 |
 |---|---|---|
 | 检索 | `/kb <关键词>` | `/kb CNB` |
 | 写入 | `/kb add <内容> [--push]` | `/kb add 从 Python spawn npm CLI 必须用 .cmd` |
-| 收割 | `/kb-harvest [路径] [--push]` | `/kb-harvest`（ZCode 会话库 + 当前工作区；项目 memory 可选） |
+| 收割 | `/kb-harvest [路径] [--push]` | `/kb-harvest`（ZCode/OpenCode 会话库 + 当前工作区；项目 memory 可选） |
 | 审计 | 直接运行脚本 | `python ~/.agents/kb/kb_audit.py`（只读报告） |
 | 发布 | 直接运行脚本 | `python ~/.agents/kb/kb_publish.py --repo <agent-kb> --from-live --push` |
 

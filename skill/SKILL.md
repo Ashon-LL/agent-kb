@@ -1,12 +1,12 @@
 ---
 name: kb
-description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/kb <关键词>` 检索库内经验（底层 python ~/.agents/kb/kb_search.py，支持症状词与 topic 过滤）；`/kb add <一条经验>` 按规范写入；`/kb-harvest` 从 ZCode 会话库、当前工作区与可选的项目 memory 收割跨项目可复用经验（项目记忆关闭时仍可用）。**写入后必须跑 `python ~/.agents/kb/kb_validate.py`，看到 [PASS] 才算完**。非命令时：开始非平凡任务前先检索本库相关经验避免重复踩坑；任务闭环、修复踩坑、总结教训、复盘、发现值得记或引以为戒的内容，以及用户说'记住这个/沉淀经验/晋升到全局/以后别再犯/下次注意/这个坑记一下/写进知识库/长点记性/做个笔记/纳入kb/纳入记忆/记入/订正记忆/修正kb/值得一记/我希望/不希望'等一切表达沉淀意图、需求或约束时（含「…纳入kb了吗/修正kb了吗」这类确认疑问句），把可复用教训写入本库。跨项目可复用经验入本库；项目专属状态留项目仓库的 `AGENTS.md`/`README`/任务书（平台若启用项目 memory 再按其规则）。关键词：经验、教训、最佳实践、沉淀、记住、全局、复盘、踩坑、值得记、引以为戒、记性、笔记、备忘、存起来、写进知识库。"
+description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/kb <关键词>` 检索库内经验（底层 python ~/.agents/kb/kb_search.py，支持症状词与 topic 过滤）；`/kb add <一条经验>` 按规范写入；`/kb-harvest` 从 ZCode/OpenCode 会话库、当前工作区与可选的项目 memory 收割跨项目可复用经验（项目记忆关闭时仍可用）。**写入后必须跑 `python ~/.agents/kb/kb_validate.py`，看到 [PASS] 才算完**。非命令时：开始非平凡任务前先检索本库相关经验避免重复踩坑；任务闭环、修复踩坑、总结教训、复盘、发现值得记或引以为戒的内容，以及用户说'记住这个/沉淀经验/晋升到全局/以后别再犯/下次注意/这个坑记一下/写进知识库/长点记性/做个笔记/纳入kb/纳入记忆/记入/订正记忆/修正kb/值得一记/我希望/不希望'等表达长期、跨项目沉淀意图/需求/约束时（含「…纳入kb了吗/修正kb了吗」这类确认疑问句），把可复用教训写入本库。跨项目可复用经验入本库；项目专属状态留项目仓库的 `AGENTS.md`/`README`/任务书（平台若启用项目 memory 再按其规则）。关键词：经验、教训、最佳实践、沉淀、记住、全局、复盘、踩坑、值得记、引以为戒、记性、笔记、备忘、存起来、写进知识库。"
 ---
 
 # kb — 全局经验知识库
 
 > 本文档是 **agent-kb** 项目的核心 Skill 说明。所有 Hook 和 Command 都引用本文件作为唯一权威。
-> 项目仓库：`github.com/<your-org>/agent-kb`
+> 源码与 hooks 在 agent-kb 项目仓库；本文件是安装后的运行时 Skill。
 
 **本库的三层目的**（用户定，缺一不可——用它校准一切 kb 相关工作）：
 
@@ -16,7 +16,7 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
 3. **多 Agent 平台兼容**：一套库服务所有工具（接入形态因平台而异，记忆同一份）。
 
 > ⚠️ 机制护栏（校验器/触发词）只是手段；判断 kb 工作做得好不好，看这三层——尤其第 2 层。
-> 架构决策（为什么这样设计）见 `../docs/adr/README.md`；本文件只写操作规程。
+> 本文件只写操作规程；架构决策见源码仓库的 ADR（安装包未带则忽略）。
 
 ## 三条入口
 
@@ -24,10 +24,12 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
 |---|---|---|---|
 | `/kb add` | 用户明确要求沉淀 | 是：按本文件写入规程落盘并跑校验器 | 仅显式 `--push` |
 | `/kb-harvest` | 定期/手动批量收割 | 先出候选，用户确认后写 | 仅显式 `--push` |
-| kb hooks | SessionStart / UserPromptSubmit / Stop | 否：只注入提醒与规程 | 否 |
+| kb hooks | SessionStart / UserPromptSubmit（Stop 仅 ZCode） | 否：只注入提醒与规程 | 否 |
+
+> OpenCode 插件目前只有 SessionStart 与 UserPromptSubmit；Stop 收尾提醒仅 ZCode 的 `kb_hooks.py` 实现。
 
 **发布边界**：默认不推送。只有显式 `--push` 才由 `kb_publish.py` 同步运行时库、脱敏本机路径、
-跑 `kb_validate [PASS]`、精确提交并推送；不 force push，`mirror` 需额外 `--mirror`。
+扫描密钥形状、跑 `kb_validate [PASS]`、精确提交并推送；不 force push，`mirror` 需额外 `--mirror`。
 
 ## 库位置
 
@@ -39,16 +41,16 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
 | `workflow/` | 流程与协作方法（改代码、验收标准、跨平台链路） |
 | `pitfalls/` | 失败教训与反模式（踩过的坑、静默失败、假阳性） |
 
-配套脚本（**与库同目录，`kb_validate.py` 平铺 import `kb_core.py`，三个必须一起移动**）：
+配套脚本（**与库同目录平铺 import `kb_core.py`；移动库时整个目录一起移动**）：
 
 | 文件 | 作用 | 谁调用 |
 |---|---|---|
-| `kb_core.py` | 消息文本与触发词的**唯一真相源**；索引解析、库路径解析 | 只被 `kb_validate.py` 与 `kb_hooks.py` import |
+| `kb_core.py` | 消息文本与触发词的**唯一真相源**；索引解析、库路径解析 | 被 `kb_validate.py` / `kb_hooks.py` / `kb_search.py` / `kb_audit.py` / `kb_harvest.py` / `kb_trigger_miner.py` / `kb_lock.py` 平铺 import |
 | `kb_validate.py` | 写入后校验 schema/topic/双链/索引一致性/触发词副本 | 写入规程第 5 步，手动跑 |
 | `kb_search.py` | 关键词/症状词/topic 全文检索 + `--similar` 写入前查重 | 检索（Recall）与写入规程第 2 步 |
 | `kb_lock.py` | 跨平台写入锁（多会话并发写库时互斥，防读-改-写丢条目） | 写入规程第 3 步前 `with kb_write_lock():` |
 | `kb_trigger_miner.py` | 触发词挖掘器（扫新会话 → Jev 判定沉淀意图 → 产候选词报告） | 定期跑，人工过目后扩词表 |
-| `kb_harvest.py` | 只读收割候选生成器（ZCode 会话库 + 工作区 → 候选报告，不写入） | 定期跑，人工确认后按规程写入 |
+| `kb_harvest.py` | 只读收割候选生成器（ZCode/OpenCode 会话库 + 工作区 → 候选报告，不写入） | 定期跑，人工确认后按规程写入 |
 | `kb_audit.py` | 只读库审计（同族重复/零入链/过期待复核/topic 分布） | 定期跑，人工确认后再改条目 |
 | `kb_jev.py` | **kb 自带**的 Jev 客户端（TypeSafe System One 决策模型，多端点冗余） | 挖掘器等需要「高频小判断」的工具 |
 | `kb_hooks.py` | ZCode 钩子适配器，只做协议转换，**不存文案或触发词副本** | ZCode `config.json` 的 hooks.events |
@@ -58,10 +60,11 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
 ### Jev 能力（kb 自带，无需另装技能）
 
 部分 kb 工具需要「高频小判断」（如挖掘器判一条消息是否表达沉淀意图）。
-该能力由 `kb_jev.py` **内联**提供——**只装 agent-kb 即可用**，不需要额外安装其他技能。
+该能力由 `kb_jev.py` **内联**提供——不需要额外安装 agent-jev 技能，但**仍需配置 Jev 密钥**；无密钥时仅触发词挖掘器退出 2，其他功能不受影响。
 
 配置（按优先级）：环境变量 `KB_JEV_KEY`（+ 可选 `KB_JEV_ENDPOINT`/`KB_JEV_MODEL`），
 或密钥文件 `~/.agents/kb/jev.key`（单行密钥；兼容读 `~/.jev/{tokenrhythm,intern}.key`）。
+两家密钥不同时，分别放 `~/.jev/tokenrhythm.key` 与 `~/.jev/intern.key`；密钥不进库目录、不进条目。
 默认多端点冗余：tokenrhythm → intern，前一个失败自动切下一个；供应商表与 agent-jev 保持一致。
 `noul` 问题必须带 `criteria: {"true": "...", "false": "..."}`（书生端点强制）。
 自检：`python ~/.agents/kb/kb_jev.py`（打印各端点可用性，**不打印密钥**）。
@@ -70,13 +73,13 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
 
 ## 何时检索（Recall）
 
-开始以下任务前，先读 `INDEX.md`，命中相关条目则读全文再动手：
+开始以下任务前，先跑 `python ~/.agents/kb/kb_search.py <关键词...> [--topic 领域]`；命中相关条目则读全文再动手：
 
 - 非平凡任务（多步、涉及不熟悉的工具/环境、有既往踩坑可能的领域）
 - 用户提到"之前遇到过""上次说好的""别再犯"
 - 你即将执行的操作与某个已知坑同类（装软件、改 PATH、网络下载、跨工具配置）
 
-检索方式：优先 `python ~/.agents/kb/kb_search.py <关键词...> [--topic 领域]`——全文检索，症状词（挂了/卡死/不生效/黑窗）直达正文；`/kb <关键词>` 底层即它。无脚本环境退回 `grep -ri "关键词" ~/.agents/kb/`。
+检索方式：`kb_search` 是主入口——全文检索，症状词（挂了/卡死/不生效/黑窗）直达正文；`/kb <关键词>` 底层即它。只有需要浏览分类、或搜索无命中时，才看 `INDEX.md`。无脚本环境退回 `grep -ri "关键词" ~/.agents/kb/`。
 应用方式：命中的条目按 "How to apply" 执行；若条目与现状矛盾（环境已变），以实测为准并更新该条目。
 
 ## 何时写入（Capture）
@@ -86,36 +89,49 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
 1. 任务闭环时总结，发现**换个项目也用得上**的教训或方法
 2. 踩坑后找到根因与解法（尤其耗时 >10 分钟的）
 3. 用户明确表达"记住""沉淀""晋升""以后这样做"
-4. `/kb add <内容>` 命令直接要求写入
+4. 用户表达**长期、跨项目**的偏好/约束（"我希望/不希望/以后都/每次/始终"）
+5. `/kb add <内容>` 命令直接要求写入
 
-**不写入**的内容：项目专属状态（留项目仓库的 `AGENTS.md`/`README`/任务书；平台若启用项目 memory 再按其规则）、通用常识、可从代码/Git 推导的信息、一次性上下文。
+**不写入**的内容：项目专属状态（留项目仓库的 `AGENTS.md`/`README`/任务书；平台若启用项目 memory 再按其规则）、通用常识、可从代码/Git 推导的信息、一次性上下文、一次性 UI/功能偏好、未经实测的猜测。
 
 ## 写入规程
 
 1. **判类**：工具链 → `tools/`，方法流程 → `workflow/`，教训反模式 → `pitfalls/`
-2. **查重**：跑 `python ~/.agents/kb/kb_search.py --similar "<候选标题或一句话描述>"`，top5 同族候选里命中即**扩充它**而非新建（人肉读 INDEX 会漏——同族条目措辞往往互不重叠，2026-10-04 已有同族三副本的真实查重失败）
-3. **并发写保护**：多会话/多 Agent 可能同时在写库（本机实测发生过）——写入前用
-   `python -c "import sys;sys.path.insert(0,__import__('os').path.expanduser('~/.agents/kb'));from kb_lock import kb_write_lock;..."`
-   或直接在脚本里 `from kb_lock import kb_write_lock` 然后 `with kb_write_lock():` 包住「读 INDEX → 改 → 写回」整段。
+2. **加锁后查重**：多会话/多 Agent 可能同时在写库（本机实测发生过）。先按第 3 步取得写锁，再跑 `python ~/.agents/kb/kb_search.py --similar "<候选标题或一句话描述>"`，top5 同族候选里命中即**扩充它**而非新建（人肉读 INDEX 会漏——同族条目措辞往往互不重叠，2026-10-04 已有同族三副本的真实查重失败）
+3. **并发写保护**：锁必须从**查重前**开始，覆盖「查重 → 写文件 → 更新 INDEX」整段。脚本内：
+
+   ```python
+   import os, sys
+   sys.path.insert(0, os.path.expanduser("~/.agents/kb"))
+   from kb_lock import kb_write_lock
+
+   with kb_write_lock():
+       # 查重、写条目、更新 INDEX 都在这里
+       ...
+   ```
+
+   不要在锁外先查重再进锁写——两个会话会同时判「无重复」。
 4. **新建文件**：`<目录>/<kebab-slug>.md`，frontmatter **七个必填字段一个都不能少**：
 
    | 字段 | 填法 |
    |---|---|
    | `name` | 与文件名同名的 kebab-slug |
-   | `description` | 一句话摘要（检索全靠它）；只对某平台成立的结论要点名平台或加 `【作用域=X】` |
+   | `description` | 一句话摘要（检索权重高）；只对某平台成立的结论要点名平台或加 `【作用域=X】` |
    | `type` | `tool` / `workflow` / `pitfall`，**必须与所在目录一致** |
    | `source` | 来源项目或事件 |
    | `date` | 写入日期 `YYYY-MM-DD` |
    | `verified` | 经验被实测确认的日期 `YYYY-MM-DD` |
    | `topic` | 领域，取受控词表之一（见下） |
 
-   `topic` 受控词表（正交于 `type`；`type` 答"怎么用"，`topic` 答"属于哪个领域"）：
+   `topic` 受控词表（以 `kb_validate.py` 的 `TOPIC_VOCAB` 为准；正交于 `type`，`type` 答"怎么用"，`topic` 答"属于哪个领域"）：
    `agent-orchestration` `api-gateway` `browser` `change-discipline` `ci` `cnb` `container`
    `database` `sqlite` `delivery` `diagnosis` `git` `llm` `mcp` `methodology` `office`
    `powershell` `preference` `python` `registry` `reporting` `reverse-engineering`
    `rust` `safety` `security` `tauri` `toolchain` `verification` `windows` `zcode`
 
    正文三段式：**经验**（直接说怎么做）/ **Why**（不这样做会怎样）/ **How to apply**（何时用）。
+
+   **写入前脱敏**：token、密码、cookie、私钥、个人手机号等替换为 `<REDACTED>`；校验器会扫描常见密钥模式。
 
    **时效状态单独写**：原理与状态分层。凡写「某仓/某地址/某服务/某版本此刻是否存在」
    （「已删除/已失效/现行=」等），必须用状态块并给复核命令：
@@ -152,6 +168,14 @@ description: "全局经验知识库（默认 ~/.agents/kb）。命令用法：`/
 2. **字段并接**：`source` 追加并注明日期；`date` 取最早；`verified` 取最新实测日；`topic` 取并集（逗号多值）；`description` 重写为合并后的完整摘要
 3. **正文**：并入段标注来源日期；被并条目的 [[出链]] 一并带过来；全库 grep 被并条目名，把引用改指保留条目
 4. **收尾三件**：INDEX 删被并行、保留行钩子重写以覆盖合并后内容（检索全靠钩子行，漏改=检索降级）；CHANGELOG 记一条（谁并入谁、理由）；跑 kb_validate 见 [PASS]
+
+## 定期维护
+
+每 50 条或至少每月跑一次：
+
+1. `python ~/.agents/kb/kb_audit.py`：看同族重复、零入链、topic 分布。
+2. `python ~/.agents/kb/kb_validate.py --audit-volatile`：逐条核实时效状态。
+3. 按合并规程处理重复/过期条目，再跑 `python ~/.agents/kb/kb_validate.py` 见 `[PASS]`。
 
 ## 与项目本地记忆的分工
 

@@ -5,7 +5,7 @@
 背景：TRIGGER_PATTERN 是写死的正则（hook 是同步脚本、不能调 LLM），
 此前新词靠人工扫会话挖掘。本工具把「扫 → 判 → 汇总」自动化：
 
-  1. 从 ZCode 会话库提取**新增的**真用户消息（按状态文件的时间戳增量）
+  1. 从 ZCode / OpenCode 会话库提取**新增的**真用户消息（按状态文件的时间戳增量）
   2. 用现有 TRIGGER_PATTERN 过滤（已命中的跳过——无需再挖）
   3. 宽启发式预筛（含记忆/经验类词的消息），控制 Jev 调用量
   4. 用 **Jev** 逐条判定「是否在要求记录/纠正经验或规则」（noul 类型）
@@ -19,6 +19,7 @@
     python kb_trigger_miner.py                # 增量挖掘（用状态文件）
     python kb_trigger_miner.py --all           # 全量（重扫所有会话）
     python kb_trigger_miner.py --limit 200     # 本次最多判多少条（控 Jev 调用量）
+    python kb_trigger_miner.py --no-opencode   # 不扫 OpenCode 会话库
     python kb_trigger_miner.py --out report.md # 报告输出路径
 """
 import argparse
@@ -38,6 +39,7 @@ from kb_core import TRIGGER_PATTERN  # noqa: E402
 import kb_jev  # noqa: E402
 
 DB = Path.home() / ".zcode/cli/db/db.sqlite"
+OPENCODE_DB = Path.home() / ".local/share/opencode/opencode.db"
 STATE = Path.home() / ".agents/kb/.trigger-miner-state.json"
 
 # 宽启发式预筛（只为压 Jev 调用量，误筛掉的由下一轮补）
@@ -114,6 +116,41 @@ def extract_user_msgs(since_ts=0, db_path=None):
     return uniq
 
 
+def extract_opencode_msgs(since_ts=0, db_path=None):
+    """只读提取 OpenCode 顶层会话的 user 消息，返回 [(ts, text)]。
+
+    OpenCode 的 `session_message.data` 里，`metadata.displayText` 是干净的用户输入；
+    没有时才退回 `text`。子代理会话按 `session_v2.parent_id IS NULL` 排除。
+    """
+    db = Path(db_path) if db_path else OPENCODE_DB
+    if not db.is_file():
+        return []
+    con = sqlite3.connect(f"file:{db.as_posix()}?mode=ro", uri=True)
+    seen, out = set(), []
+    try:
+        rows = con.execute(
+            "SELECT m.time_created, m.data "
+            "FROM session_message m LEFT JOIN session_v2 s ON s.id = m.session_id "
+            "WHERE m.type = 'user' AND m.time_created > ? "
+            "AND (s.parent_id IS NULL OR s.parent_id = '') "
+            "ORDER BY m.time_created",
+            (since_ts,),
+        )
+        for ts, raw in rows:
+            try:
+                data = json.loads(raw)
+            except Exception:
+                continue
+            text = (data.get("metadata") or {}).get("displayText") or data.get("text") or ""
+            text = str(text).strip()
+            if text and text not in seen:
+                seen.add(text)
+                out.append((ts, text))
+    finally:
+        con.close()
+    return out
+
+
 def jev_judge(text, timeout=12):
     """用内联 kb_jev 判定是否沉淀意图；失败返回 None（不计入）。"""
     try:
@@ -140,6 +177,9 @@ def main():
     ap.add_argument("--limit", type=int, default=150, help="本次最多判多少条（控 Jev 调用量）")
     ap.add_argument("--threshold", type=float, default=0.6, help="Jev 判定阈值")
     ap.add_argument("--out", default=None, help="报告路径")
+    ap.add_argument("--no-zcode", action="store_true", help="不扫 ZCode 会话库")
+    ap.add_argument("--no-opencode", action="store_true", help="不扫 OpenCode 会话库")
+    ap.add_argument("--opencode-db", default=None, help="OpenCode 会话库路径（默认 ~/.local/share/opencode/opencode.db）")
     args = ap.parse_args()
 
     if not kb_jev.has_key():
@@ -148,7 +188,17 @@ def main():
         return 2
 
     since = 0 if args.all else load_since()
-    rows = extract_user_msgs(since)
+    rows = []
+    if not args.no_zcode:
+        rows.extend(extract_user_msgs(since))
+    if not args.no_opencode:
+        rows.extend(extract_opencode_msgs(since, args.opencode_db))
+    seen, uniq = set(), []
+    for ts, text in sorted(rows):
+        if text not in seen:
+            seen.add(text)
+            uniq.append((ts, text))
+    rows = uniq
     print(f"新增真用户消息（去重后）{len(rows)} 条" + (f"（自 ts>{since}）" if since else "（全量）"))
 
     # 已命中现有词表的跳过
@@ -214,4 +264,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

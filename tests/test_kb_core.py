@@ -156,11 +156,11 @@ class TestIndexCounting(unittest.TestCase):
         self.assertIn("就绪", text)
         self.assertNotIn("条）", text)
         self.assertIn(str(self.kb), text)
-        self.assertIn("开工钩子", text)
+        self.assertIn("开工", text)
 
     def test_reminder_on_empty_kb(self):
         text = kb_core.session_start_reminder(str(self.kb))
-        self.assertIn("尚无条目", text)
+        self.assertIn("无条目", text)
         self.assertNotIn("条）", text)
 
     def test_reminder_accepts_path_object(self):
@@ -171,7 +171,7 @@ class TestIndexCounting(unittest.TestCase):
 
     def test_default_arg_uses_runtime_path(self):
         # 不传参不报错（真实 ~/.agents/kb 可能不存在）
-        self.assertIn("开工钩子", kb_core.session_start_reminder())
+        self.assertIn("开工", kb_core.session_start_reminder())
 
 
 if __name__ == "__main__":

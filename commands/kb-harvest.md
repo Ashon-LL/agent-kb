@@ -1,5 +1,5 @@
 ---
-description: 从 ZCode 会话库、当前工作区与其他平台 memory 收割跨项目经验；ZCode 项目记忆关闭时仍可用。
+description: 从 ZCode/OpenCode 会话库、当前工作区与其他平台 memory 收割跨项目经验；ZCode 项目记忆关闭时仍可用。
 argument-hint: "[可选：指定扫描的项目路径或时间范围]"
 ---
 
@@ -10,13 +10,16 @@ argument-hint: "[可选：指定扫描的项目路径或时间范围]"
 
 ## 来源（按优先级）
 
-1. **ZCode 会话库（主来源，项目记忆关闭时仍可用）**
-   - 路径：`~/.zcode/cli/db/db.sqlite`，**只读**打开（`mode=ro`）。
+1. **ZCode / OpenCode 会话库（主来源，项目记忆关闭时仍可用）**
+   - ZCode：`~/.zcode/cli/db/db.sqlite`，**只读**打开（`mode=ro`）。
    - 只取 `session_id` 匹配 `^sess_[0-9a-f]{8}-` 的顶层会话。
    - 只取 `message.data.semantics.origin == "real_user"` 的消息。
    - 排除 `sess_dwf-*`、`sess_subagent*` 与 agent 运行时注入。
    - 默认看最近 7 天；用户给了 `$ARGUMENTS` 时按指定范围/路径。
    - 先按 `message.time_created` 做时间过滤，再读对应 `part` 的 `text`，不要全表扫。
+   - OpenCode：`~/.local/share/opencode/opencode.db`，**只读**打开（`mode=ro`）。
+   - 只取顶层会话（`session_v2.parent_id IS NULL`）的 `session_message.type='user'`。
+   - 优先 `data.metadata.displayText`（干净的用户输入），没有才退回 `data.text`；按 `time_created` 过滤。
 2. **当前工作区**
    - 以本会话工作目录为根，扫描文件名含「指南、手册、上手、给其他项目、交接、总结、复盘、教训」的 md。
    - 以及 `docs/`、`notes/`、`交付/`、`.analysis/` 等文档目录。
@@ -27,7 +30,7 @@ argument-hint: "[可选：指定扫描的项目路径或时间范围]"
 
 ## 步骤
 
-1. 先检查会话库是否存在、`message` / `part` 表是否可读；缺失或不可读时降级到来源 2/3，并明确告知用户。
+1. 先检查 ZCode 的 `message` / `part` 与 OpenCode 的 `session_message` / `session_v2` 是否可读；缺失或不可读时降级到来源 2/3，并明确告知用户。
 2. 按 kb 收录标准筛选：**跨项目可复用**的经验/教训/方法才入选；项目专属状态（进度、布局、待办）剔除；已在 `INDEX.md` 存在的跳过。
 3. 输出候选清单给用户过目，格式：`来源 | 拟入目录 | 标题 | 一句话理由`。到此为止，**不要未经确认直接写入**。
 4. 用户确认后（可能只确认部分），逐条按 kb 写入规程落盘：

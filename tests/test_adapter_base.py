@@ -238,7 +238,7 @@ class TestPlatformSpecifics(unittest.TestCase):
         r1 = _run("openclaw_adapter", {"hook_event_name": "session_start"})
         self.assertIn("开工", r1.stdout.decode("utf-8"))
         r2 = _run("openclaw_adapter", {"hook_event_name": "before_prompt_build", "prompt": "沉淀"})
-        self.assertIn("沉淀钩子", r2.stdout.decode("utf-8"))
+        self.assertIn("沉淀", r2.stdout.decode("utf-8"))
 
 
 class TestHeaderDocumentation(unittest.TestCase):

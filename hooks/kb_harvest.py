@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""kb_harvest.py — 只读收割候选生成器（ZCode / OpenCode / 平台会话库 + 当前工作区）。
+"""kb_harvest.py — 只读收割候选生成器（ZCode / OpenCode 会话库 + 当前工作区）。
 
 只做「提取候选」，**不调用 LLM、不写入经验库**；确认与落盘仍由人和 kb 规程完成。
 设计参考：
@@ -18,15 +18,14 @@
     python kb_harvest.py --no-session           # 只扫工作区
     python kb_harvest.py --no-workspace         # 只扫会话库
     python kb_harvest.py --no-zcode             # 跳过 ZCode 会话库
-    python kb_harvest.py --no-jsonl             # 跳过各平台 JSONL 会话
     python kb_harvest.py --no-opencode          # 跳过 OpenCode 会话库
+    python kb_harvest.py --no-jsonl             # 跳过各平台 JSONL 会话
     python kb_harvest.py --extra-sessions DIR   # 追加任意会话根（可重复）
     python kb_harvest.py --include-weak         # 连弱信号一起看（噪声较高）
 
 会话来源**平台无关**：自动发现 DSH（~/.dsh/sessions）、Claude Code（~/.claude/projects）、
 Codex（~/.codex/sessions）的 JSONL 会话，以及 --extra-sessions 指定的任意目录；
-ZCode 与 OpenCode 各走自己的 SQLite 库。用户与助手的文本都会看，
-子代理与系统注入按各自格式排除。
+ZCode 与 OpenCode 各走自己的 SQLite 库。用户与助手的文本都会看，子代理与系统注入按各自格式排除。
 """
 import argparse
 import json
@@ -123,6 +122,61 @@ def collect_session_candidates(days=7, limit=100, db_path=None, include_weak=Fal
         })
         if len(out) >= limit:
             break
+    return out, since
+
+
+def collect_opencode_candidates(days=7, limit=100, db_path=None, include_weak=False):
+    """从 OpenCode 会话库提取沉淀意图候选；返回 (候选列表, since_ts)。
+
+    只读打开 ~/.local/share/opencode/opencode.db；取顶层会话的 user 消息，
+    优先用 metadata.displayText（干净的用户输入），没有才退回 data.text。
+    """
+    since = int(time.time() * 1000) - max(1, int(days)) * 86400000
+    db = Path(db_path).expanduser() if db_path else Path.home() / ".local/share/opencode/opencode.db"
+    if not db.is_file():
+        return [], since
+    out = []
+    seen = set()
+    con = sqlite3.connect(f"file:{db.as_posix()}?mode=ro", uri=True)
+    try:
+        rows = con.execute(
+            "SELECT m.time_created, m.data, s.title "
+            "FROM session_message m LEFT JOIN session_v2 s ON s.id = m.session_id "
+            "WHERE m.type = 'user' AND m.time_created > ? "
+            "AND (s.parent_id IS NULL OR s.parent_id = '') "
+            "ORDER BY m.time_created",
+            (since,),
+        )
+        for ts, raw, title in rows:
+            try:
+                data = json.loads(raw)
+            except Exception:
+                continue
+            text = (data.get("metadata") or {}).get("displayText") or data.get("text") or ""
+            text = str(text).strip()
+            if not text or text in seen:
+                continue
+            strong = bool(TRIGGER_PATTERN.search(text))
+            weak = bool(HEURISTIC.search(text))
+            if not strong and not (include_weak and weak):
+                continue
+            seen.add(text)
+            out.append({
+                "source": "opencode-session",
+                "platform": "opencode",
+                "role": "user",
+                "signal": "strong" if strong else "weak",
+                "ts": ts,
+                "time": time.strftime("%Y-%m-%d %H:%M", time.localtime(ts / 1000)),
+                "suggest_dir": _suggest_dir(text),
+                "reason": _reason(text),
+                "text": _excerpt(text),
+                "session": title or "",
+            })
+            if len(out) >= limit:
+                break
+    finally:
+        con.close()
     return out, since
 
 
@@ -376,9 +430,11 @@ def main(argv=None):
     ap.add_argument("--days", type=int, default=7, help="会话回看天数（默认 7）")
     ap.add_argument("--limit", type=int, default=100, help="每类候选上限（默认 100）")
     ap.add_argument("--db", default=None, help="ZCode 会话库路径（默认 ~/.zcode/cli/db/db.sqlite）")
+    ap.add_argument("--opencode-db", default=None, help="OpenCode 会话库路径（默认 ~/.local/share/opencode/opencode.db）")
     ap.add_argument("--extra-sessions", action="append", default=[], metavar="DIR",
                     help="额外会话根目录（可重复；递归找 *.jsonl / *.jsonl.zstd）")
     ap.add_argument("--no-zcode", action="store_true", help="不扫 ZCode 会话库")
+    ap.add_argument("--no-opencode", action="store_true", help="不扫 OpenCode 会话库")
     ap.add_argument("--no-jsonl", action="store_true",
                     help="不扫各平台 JSONL 会话（DSH / Claude Code / Codex 等）")
     ap.add_argument("--workspace", default=".", help="工作区根目录（默认当前目录）")
@@ -403,6 +459,17 @@ def main(argv=None):
             sources.append(f"ZCode 会话库（最近 {args.days} 天）")
         except Exception as exc:
             print(f"[WARN] ZCode 会话库不可读，降级跳过：{exc}", file=sys.stderr)
+
+    if not args.no_session and not args.no_opencode:
+        try:
+            opencode_rows, _ = collect_opencode_candidates(
+                args.days, args.limit, args.opencode_db, args.include_weak
+            )
+            session.extend(opencode_rows)
+            if opencode_rows:
+                sources.append(f"OpenCode 会话库（最近 {args.days} 天）")
+        except Exception as exc:
+            print(f"[WARN] OpenCode 会话库不可读，降级跳过：{exc}", file=sys.stderr)
 
     if not args.no_session and not args.no_jsonl:
         try:

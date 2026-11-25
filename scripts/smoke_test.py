@@ -41,6 +41,8 @@ def run_adapter(stdin_obj, kb_path=None, extra_env=None):
             input=json.dumps(stdin_obj, ensure_ascii=False),
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=30,
             env=env,
         )
@@ -66,8 +68,8 @@ def check_session_start(kb_path):
     if hook.get("hookEventName") != "SessionStart":
         return False, f"hookEventName={hook.get('hookEventName')!r}，期望 'SessionStart'"
     ctx = hook.get("additionalContext") or ""
-    if "开工钩子" not in ctx:
-        return False, "additionalContext 缺“开工钩子”"
+    if "开工" not in ctx:
+        return False, "additionalContext 缺“开工”"
     if "就绪" not in ctx:
         return False, "additionalContext 缺“就绪”（FAKE_INDEX 有 2 条，应为就绪措辞）"
     if "条）" in ctx:
@@ -95,8 +97,8 @@ def check_user_prompt_triggered(kb_path=None):
         return False, (
             f"hookEventName={hook.get('hookEventName')!r}，期望 'UserPromptSubmit'"
         )
-    if "沉淀钩子" not in (hook.get("additionalContext") or ""):
-        return False, "additionalContext 缺“沉淀钩子”"
+    if "沉淀" not in (hook.get("additionalContext") or ""):
+        return False, "additionalContext 缺“沉淀”"
     return True, f"触发词 {TRIGGER_WORD!r} 命中，注入沉淀钩子"
 
 

@@ -10,13 +10,14 @@
   5) 索引路径集合 == 磁盘条目路径集合（新增/删除条目后漏更新索引，双向）
   6) 沉淀触发词副本一致（kb_core.py 为唯一真相源，核对 config.json matcher、钩子、
      以及全机 5 处部署副本是否仍与真源一致——断链或内容漂移都会报）
+  7) 条目/INDEX/CHANGELOG 中的高置信度密钥形状（sk-/ghp_/AKIA/私钥等）
 
 设计：与读库逻辑同源 —— 复用 hooks/kb_core.py 的 INDEX_FILENAME、_INDEX_ENTRY_RE、
 count_index_entries，避免校验器与契约方对「什么是索引行」产生分歧。
 
 退出码：0 = 通过；1 = 有 ERROR；2 = 用法/环境错误。
 用法：
-    python3 kb_validate.py [--kb PATH]          # 全量校验（1-6 项）
+    python3 kb_validate.py [--kb PATH]          # 全量校验（1-7 项）
     python3 kb_validate.py --check-triggers     # 只校验触发词副本是否与唯一真相源一致
 默认 kb 路径取 AGENT_KB_PATH 环境变量，否则 ~/.agents/kb。
 """
@@ -41,6 +42,22 @@ CONTENT_DIRS = ("pitfalls", "tools", "workflow")
 TYPE_TO_DIR = {"pitfall": "pitfalls", "tool": "tools", "workflow": "workflow"}
 DIR_TO_TYPE = {v: k for k, v in TYPE_TO_DIR.items()}
 REQUIRED_FIELDS = ("name", "description", "type", "source", "date", "verified", "topic")
+
+# 高置信度密钥形状：命中即 FAIL。只报前缀，不回显完整值。
+# 通用 `password = ...` 不在此列，避免把示例/占位符误判成泄漏。
+SECRET_PATTERNS = (
+    ("private-key", re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----")),
+    ("openai-key", re.compile(r"\bsk-(?:proj-)?[A-Za-z0-9]{20,}\b")),
+    ("sk-key", re.compile(r"(?<![A-Za-z0-9])sk-[A-Za-z0-9_-]{24,}\b")),
+    ("github-token", re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}\b")),
+    ("github-fine-grained", re.compile(r"\bgithub_pat_[A-Za-z0-9_]{20,}\b")),
+    ("aws-key", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
+    ("slack-token", re.compile(r"\bxox[baprs]-[A-Za-z0-9-]{10,}\b")),
+    ("google-api-key", re.compile(r"\bAIza[0-9A-Za-z_-]{35}\b")),
+    ("gitlab-token", re.compile(r"\bglpat-[A-Za-z0-9_-]{20,}\b")),
+    ("npm-token", re.compile(r"\bnpm_[A-Za-z0-9]{36}\b")),
+    ("bearer-token", re.compile(r"\bBearer\s+[A-Za-z0-9._\-]{20,}\b")),
+)
 
 # P3-1 受控领域词表（正交于 type；type 只回答「怎么用」，topic 回答「属于哪个领域」）
 # 词表是**代码里的固定元组**（无自动注册机制）：遇到库里还不存在的领域，直接往这里加一项
@@ -231,6 +248,27 @@ def audit_volatile(kb_path=None):
     return out
 
 
+def scan_secrets(entries, kb):
+    """扫描条目与 INDEX/CHANGELOG 中的高置信度密钥形状；返回问题列表。"""
+    files = dict(entries)
+    for name in (INDEX_FILENAME, "CHANGELOG.md"):
+        try:
+            files[name] = (kb / name).read_text(encoding="utf-8")
+        except Exception:
+            continue
+    out = []
+    for p, text in files.items():
+        for label, pattern in SECRET_PATTERNS:
+            m = pattern.search(text)
+            if not m:
+                continue
+            sample = m.group(0)
+            if any(mark in sample for mark in ("REDACTED", "<", ">", "...")):
+                continue
+            out.append(f"[secret] {p}: 疑似{label}（{sample[:6]}…）——写入前必须脱敏")
+    return out
+
+
 def validate(kb_path=None):
     """返回问题列表；空列表 = 通过。"""
     kb = resolve_kb_path(kb_path)
@@ -243,6 +281,7 @@ def validate(kb_path=None):
         return [f"库目录不存在：{kb}"]
 
     entries = collect_entries(kb)
+    problems.extend(scan_secrets(entries, kb))
 
     # INDEX 钩子映射（供 5c 用）：路径 -> (标题, 钩子)
     idx_hooks, notes_hook = {}, []

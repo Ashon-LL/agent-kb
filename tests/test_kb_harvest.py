@@ -128,6 +128,37 @@ class TestHarvest(unittest.TestCase):
         self.assertIn("记住这个坑", text)
         self.assertIn("docs/lesson.md", text)
 
+    def test_opencode_extracts_clean_user_text(self):
+        db = self.root / "opencode.db"
+        con = sqlite3.connect(db)
+        con.execute("CREATE TABLE session_v2 (id TEXT PRIMARY KEY, parent_id TEXT, title TEXT)")
+        con.execute(
+            "CREATE TABLE session_message (id TEXT, session_id TEXT, type TEXT, "
+            "time_created INTEGER, data TEXT)"
+        )
+        now = int(time.time() * 1000)
+        con.execute("INSERT INTO session_v2 VALUES ('ses_top', NULL, 'top')")
+        con.execute("INSERT INTO session_v2 VALUES ('ses_child', 'ses_top', 'child')")
+
+        def add(mid, sid, kind, ts, text, display=None):
+            data = {"text": text, "metadata": {"displayText": display or text}}
+            con.execute(
+                "INSERT INTO session_message VALUES (?,?,?,?,?)",
+                (mid, sid, kind, ts, json.dumps(data, ensure_ascii=False)),
+            )
+
+        add("m1", "ses_top", "user", now, "记住这个坑：OpenCode 也要收割")
+        add("m2", "ses_top", "assistant", now + 1, "记住这个坑：助手回复不算")
+        add("m3", "ses_child", "user", now + 2, "记住这个坑：子代理不算")
+        add("m4", "ses_top", "user", now + 3, "今天天气很好")
+        con.commit()
+        con.close()
+
+        cands, _ = kb_harvest.collect_opencode_candidates(days=1, db_path=db)
+        self.assertEqual(len(cands), 1)
+        self.assertEqual(cands[0]["platform"], "opencode")
+        self.assertIn("OpenCode 也要收割", cands[0]["text"])
+
     def test_cli_writes_report_and_json(self):
         out = self.root / "report.md"
         jsonout = self.root / "report.json"
@@ -135,7 +166,7 @@ class TestHarvest(unittest.TestCase):
             rc = kb_harvest.main([
                 "--days", "1", "--db", str(self.db),
                 "--workspace", str(self.ws),
-                "--no-jsonl",
+                "--no-jsonl", "--no-opencode",
                 "--out", str(out), "--json", str(jsonout),
             ])
         self.assertEqual(rc, 0)
