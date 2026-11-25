@@ -137,12 +137,23 @@ def _copy_live(repo, live):
         if not dst_index.exists() or dst_index.read_bytes() != src_index.read_bytes():
             shutil.copy2(src_index, dst_index)
             copied.append("library/INDEX.md")
+    # CHANGELOG 以运行库为准同步（含脱敏），否则运行库的详细记录会被下面的通用行覆盖
+    src_cl = live / "CHANGELOG.md"
+    dst_cl = library / "CHANGELOG.md"
+    if src_cl.is_file() and (not dst_cl.exists() or dst_cl.read_bytes() != src_cl.read_bytes()):
+        shutil.copy2(src_cl, dst_cl)
+        sanitize_file(dst_cl)
+        copied.append("library/CHANGELOG.md")
     after = _count_entries(library)
     if after > before:
-        with (library / "CHANGELOG.md").open("a", encoding="utf-8") as f:
-            f.write(f"\n## {time.strftime('%Y-%m-%d')}\n"
-                    f"- 同步运行时库新增 {after - before} 条（{after} 条）\n")
-        copied.append("library/CHANGELOG.md")
+        today = time.strftime("%Y-%m-%d")
+        existing = dst_cl.read_text(encoding="utf-8") if dst_cl.is_file() else ""
+        if f"## {today}" not in existing:
+            with dst_cl.open("a", encoding="utf-8") as f:
+                f.write(f"\n## {today}\n"
+                        f"- 同步运行时库新增 {after - before} 条（{after} 条）\n")
+            if "library/CHANGELOG.md" not in copied:
+                copied.append("library/CHANGELOG.md")
     return copied
 
 

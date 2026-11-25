@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -79,6 +80,25 @@ class TestPublish(unittest.TestCase):
         self.assertIn("library: test entry", log)
         self.assertTrue((self.repo / "library" / "CHANGELOG.md").read_text(
             encoding="utf-8").count("同步运行时库新增 1 条") == 1)
+
+    def test_changelog_synced_from_live_not_overwritten(self):
+        (self.live / "pitfalls").mkdir(parents=True)
+        (self.live / "pitfalls" / "new.md").write_text("x", encoding="utf-8")
+        (self.live / "INDEX.md").write_text(
+            "# INDEX\n- [new](pitfalls/new.md) — new\n", encoding="utf-8")
+        today = time.strftime("%Y-%m-%d")
+        (self.live / "CHANGELOG.md").write_text(
+            f"# CHANGELOG\n\n## {today}\n- 详细记录：修复发布器 CHANGELOG 同步\n",
+            encoding="utf-8",
+        )
+        rc = kb_publish.main([
+            "--repo", str(self.repo), "--live", str(self.live),
+            "--from-live", "--message", "test changelog", "--skip-validate",
+        ])
+        self.assertEqual(rc, 0)
+        text = (self.repo / "library" / "CHANGELOG.md").read_text(encoding="utf-8")
+        self.assertIn("详细记录：修复发布器 CHANGELOG 同步", text)
+        self.assertNotIn("同步运行时库新增", text)
 
     def test_reject_changes_outside_library(self):
         (self.repo / "notes.txt").write_text("x", encoding="utf-8")
