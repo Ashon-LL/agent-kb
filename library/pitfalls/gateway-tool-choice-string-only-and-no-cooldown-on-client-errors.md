@@ -45,7 +45,7 @@ OpenAI 客户端常见对象形态 `{"type":"function","function":{"name":"get_w
 OpenAI 流式 chunk 的 content/tool_calls 嵌在 `choices[0].delta` 里，不是顶层 `delta`。
 取顶层会把正常的多轮续跑误判成「第二轮无正文输出」——先在帧级 dump 一次再写校验。
 
-**相关**：[[newapi-model-limits-column-is-csv-not-json]]（同类「上游只认一种形态，写错形态全挂」）、
+**相关**：[[newapi-channel-data-model]]（同类「上游只认一种形态，写错形态全挂」）、
 [[redacted-get-full-put-wipes-secrets]]（同类「客户端侧误操作打停全站」）
 
 ## 追加实测（2026-10-06，CodeArts InferHub，同一错误码的两个新触发点）

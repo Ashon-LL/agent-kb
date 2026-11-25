@@ -61,8 +61,86 @@
 > 2026-10-18 日常沉淀：+1（`email-html-alignment-must-be-inline`：邮件 HTML 对齐必须内联；客户端剥 style 造成「部分列跑偏」）。
 > 2026-10-23 检索器修正（kb_search）：关键词匹配归一（NFKC 全角转半角 + ASCII 大小写不敏感）；多词从「缺词扣分」改为「命中任一即保留、按命中数排序」；默认返回条数 10→20；无直接命中时自动降级为 2-gram 近似候选。复现并修复四类「存在却搜不到」：`oauth` vs `OAuth`、全角写法、三词只命中一词、词序不同。新增 5 条单测。
 
-## 2026-11-10
-- 同步运行时库新增 64 条，仓库条目 298 → 362；INDEX 同步。
+## 2026-11-25
+- 合并 3 条 → `pitfalls/git-credential-scope-and-rotation.md`：三篇同属 git 凭据链路：host/path 查找、空 helper 阻塞、轮换时误删他库条目。
+  - 成员：credential-helper-empty-value-blocks-git-fetch, credential-rotation-must-cover-all-entries, git-credential-host-vs-path-scope
 
-## 2026-11-24
-- 同步运行时库新增 26 条（388 条）
+## 2026-11-25
+- 合并 3 条 → `pitfalls/redaction-three-principles.md`：三篇同属脱敏决策链：判定依据、遮蔽唯一性/范围、可写上下文边界。
+  - 成员：redaction-must-key-on-field-not-value, redaction-needs-uniqueness-and-canonical-source, over-redaction-removes-useful-context
+
+## 2026-11-25
+- 合并 2 条 → `workflow/token-and-secrets-hygiene.md`：credentials-never 是 token-and-secrets-hygiene 的一个子规则，收编进总条。
+  - 成员：credentials-never-in-memory-or-logs, token-and-secrets-hygiene
+
+## 2026-11-25
+- 合并 3 条 → `pitfalls/chaoxing-task-automation.md`：三篇同属超星任务自动化的三个子任务。
+  - 成员：chaoxing-quiz-question-bank-title-mapping, chaoxing-slider-captcha-gap-and-drag, chaoxing-video-report-threshold-vs-navigation-gate
+
+## 2026-11-25
+- 合并 2 条 → `pitfalls/newapi-routing-and-abilities.md`：base_url 与 abilities 都决定请求最终走哪条渠道，是同一路由链路。
+  - 成员：newapi-base-url-never-carry-v1, newapi-disable-must-sync-abilities
+
+## 2026-11-25
+- 合并 2 条 → `pitfalls/newapi-channel-data-model.md`：两篇都在讲“同一状态存在两处表示，改一处不生效”的渠道数据模型。
+  - 成员：newapi-model-limits-column-is-csv-not-json, newapi-multikey-size-must-track-key-count
+
+## 2026-11-25
+- 合并 2 条 → `tools/catpaw-miaoshou-integration.md`：同一平台的两条接入链路：账号设置读写与 LLM 兼容桥。
+  - 成员：catpaw-miaoshou-as-llm-provider-via-catpaw2api, meituan-catpaw-miaoshou-settings-api
+
+## 2026-11-25
+- 合并 2 条 → `tools/warp-connectivity-and-split-tunnel.md`：同一客户端的连接协议与分流配置。
+  - 成员：warp-protocol-masque-vs-wireguard, warp-split-tunnel-china-direct
+
+## 2026-11-25
+- 合并 2 条 → `tools/powershell7-install-msix-and-zip.md`：同一产品的两个安装时代，互为前后版本。
+  - 成员：powershell7-zip-install-github-blocked, winget-powershell7-msix-userscope
+
+## 2026-11-25
+- 合并 2 条 → `tools/browser-extension-forensics-and-migration.md`：同一扩展安装/取证链路：读注册与迁移机制。
+  - 成员：browser-extension-forensics-profile-leveldb, browser-extension-migration-mechanism-first
+
+## 2026-11-25
+- 合并 2 条 → `pitfalls/word-ooxml-delivery-traps.md`：docx 管线与 OOXML 属性失效是同一交付面的两类症状。
+  - 成员：docx-pipeline-delivery-gotchas, ooxml-layout-attributes-silently-ignored
+
+## 2026-11-25
+- 合并 2 条 → `pitfalls/figure-geometry-and-placement.md`：同一图表验收：版式位置与几何自检。
+  - 成员：figure-placement-and-legend-occlusion, matplotlib-figure-geometry-selfcheck
+
+## 2026-11-25
+- 合并 2 条 → `pitfalls/pptx-image-and-animation-pipeline.md`：同一 PPTX 图片/动画交付面的两种实现路径。
+  - 成员：pptx-anim-com-not-handwritten-xml, qoder-office-pptx-image-and-animation-workarounds
+
+## 2026-11-25
+- 迁出 4 条：zcodepro-release-copy-format / importing-historical-runs-into-mh-agent-open（项目专属），kb-accident-three-layer-lessons / use-jev-and-kb-deliberately（元经验，已被同族覆盖）。
+  - 原文件暂存于工作区 references/kb-moved-2026-11-25/；入链已改指最接近的保留条目。
+
+## 2026-11-25
+- 合并 5 条 → `workflow/ask-and-report.md`：五条都是用户交互/汇报纪律，属于同一套输出契约。
+  - 成员：ask-with-options-early-never-at-end, never-pad-reports-with-desired-state, explain-dont-advise, no-sycophantic-agreement-openers, report-what-you-did-not-what-you-meant-to-do
+
+## 2026-11-25
+- 合并 5 条 → `workflow/authorization-and-scope.md`：五条都在定义“用户授权到什么程度、我能动什么”。
+  - 成员：approval-is-explicit-not-analogous, judgment-correction-is-not-change-authorization, user-authority-overrides-default-discipline, prohibitions-need-second-confirmation, destructive-actions-must-be-reported-explicitly
+
+## 2026-11-25
+- 合并 4 条 → `workflow/user-input-contract.md`：四条都是把用户输入原样落成实现/汇报的契约。
+  - 成员：do-not-fill-unprovided-values-with-defaults, user-list-to-plan-must-diff-each-item, user-given-equalities-must-stay-equal, units-decimal-1k-1000-1m-1e6
+
+## 2026-11-25
+- 合并 3 条 → `workflow/video-review-and-acceptance.md`：三条都是代码动画成片的验收方法。
+  - 成员：video-motion-metrics-fps-calibration, code-drawn-video-frame-review-checklist, video-motion-review-without-video-input
+
+## 2026-11-25
+- 合并 3 条 → `workflow/sync-semantics.md`：三条都在澄清“同步到最新”的动作边界。
+  - 成员：local-sync-must-reach-user-visible-layer, local-sync-means-runtime-not-just-workspace, sync-latest-is-not-a-release
+
+## 2026-11-25
+- 合并 4 条 → `pitfalls/measurement-and-sampling.md`：四条都是“测量数据怎么采、怎么切、怎么验”的方法。
+  - 成员：measurement-must-verify-control-group, burst-sample-after-idle-must-be-discarded, memory-curves-need-event-boundaries-and-time-axis, interaction-latency-must-use-event-timing
+
+## 2026-11-25
+- 合并 3 条 → `workflow/change-scope-boundary.md`：三条都在定义“最小改动”的边界，防止退化成不修或乱开战线。
+  - 成员：minimal-change-and-no-scope-creep, minimal-change-degenerates-into-skipping-real-bugs, dont-open-frontline-for-edge-features

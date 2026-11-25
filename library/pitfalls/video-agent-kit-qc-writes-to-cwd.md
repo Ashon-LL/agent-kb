@@ -23,7 +23,7 @@ video-agent-kit 的 QC / 抽帧 / 分析类工具把输出目录解析成**当�
 ## Why
 
 这些边车目录不报错、不显眼，容易在 `git status`/打包/备份时混进去；工作区根不是项目目录，
-留下的空目录会被误认为新工程结构。2026-11 在 `%USERPROFILE%\Videos\Bili` 根调用时
+留下的空目录会被误认为新工程结构。2026-11 在 `C:\Users\MECHREVO\Videos\Bili` 根调用时
 实际留下过空 `out/` 与 `.v2c/`。
 
 ## How to apply

@@ -33,5 +33,5 @@ topic: methodology
 3. 回退前先 `git status` 确认工作区只有这一轮改动，否则 checkout 会误伤。
 4. 真正值得拆的是「依赖少 + 行数多」的块；高依赖块应保持内聚，最多做内部函数级整理。
 
-关联 [[dont-open-frontline-for-edge-features]]、[[minimal-change-and-no-scope-creep]]、
-[[user-list-to-plan-must-diff-each-item]]。
+关联 [[change-scope-boundary]]、[[change-scope-boundary]]、
+[[user-input-contract]]。

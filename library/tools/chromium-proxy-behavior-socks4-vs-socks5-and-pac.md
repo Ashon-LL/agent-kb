@@ -23,4 +23,4 @@ topic: browser
 
 **Why**：在污染网络里想"只让指定域名走代理"，直觉是上 SOCKS5（更现代、支持域名），结果正好把解析权交给了解析同样被污染的一方——现象是"连上了但证书是别的站的"（实测 `chatgpt.com` 拿到 `*.facebook.com` 的证书），很容易误判成"这条隧道不通"，从而错误放弃方案。判断"隧道通不通"必须用**IP + SNI** 直连测试，把 DNS 变量摘出去。
 
-**How to apply**：需要"逐域名分流"时：①PAC 用 `SOCKS`（v4）令牌而非 `SOCKS5`；②目标域名的正确 IP 从能通的状态下取样后钉进 hosts；③代理服务端确认接受 SOCKS4。需要"任意外网都走隧道"时别用 PAC（hosts 白名单的维护量不可控），改隧道级方案，见 [[warp-split-tunnel-china-direct]]。相关：[[browser-extension-forensics-profile-leveldb]]
+**How to apply**：需要"逐域名分流"时：①PAC 用 `SOCKS`（v4）令牌而非 `SOCKS5`；②目标域名的正确 IP 从能通的状态下取样后钉进 hosts；③代理服务端确认接受 SOCKS4。需要"任意外网都走隧道"时别用 PAC（hosts 白名单的维护量不可控），改隧道级方案，见 [[warp-connectivity-and-split-tunnel]]。相关：[[browser-extension-forensics-and-migration]]

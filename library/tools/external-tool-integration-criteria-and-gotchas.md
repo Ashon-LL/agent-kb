@@ -44,4 +44,4 @@ topic: mcp
 - SDK 依赖走**惰性导入**：缺装时降级成 `sdk_unavailable`，⛔ 不让整个服务起不来。
 
 **关联**：[[fail-open-except-swallows-caller-type-errors]]、
-[[local-sync-must-reach-user-visible-layer]]。
+[[sync-semantics]]。

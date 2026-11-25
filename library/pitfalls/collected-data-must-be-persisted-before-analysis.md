@@ -30,4 +30,4 @@ topic: cnb, methodology
 判"数据会不会丢"只看一件事——**raw 是否已经落盘并 push**。
 相关：[[log-text-is-not-spec-read-emitting-code]]、[[cnb-workspace-agent-direct-channel]]
 
-关联 [[importing-historical-runs-into-mh-agent-open]]、[[taskbook-write-the-property-not-your-guessed-mechanism]]、[[workflow-is-a-probe-not-the-goal]]、[[local-ssh-fail-is-not-cloud-task-death]]。
+关联 [[sync-semantics]]、[[taskbook-write-the-property-not-your-guessed-mechanism]]、[[workflow-is-a-probe-not-the-goal]]、[[local-ssh-fail-is-not-cloud-task-death]]。

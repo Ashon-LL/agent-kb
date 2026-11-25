@@ -14,4 +14,4 @@ verified: 2026-10-03
 
 **How to apply**：反向也成立——门禁/上游修复没落地前别让工作流续跑，必然撞没修的墙=空转。"双线跟进"=两线互相把控：CNB那线的产出必须及时落到软件这线（取回→复算→合入→同步→重跑验证）；软件这线的运行决策（续跑/暂停）要受CNB那线状态约束（没修好就别硬跑）。
 
-关联 [[collected-data-must-be-persisted-before-analysis]]、[[importing-historical-runs-into-mh-agent-open]]、[[taskbook-write-the-property-not-your-guessed-mechanism]]、[[local-ssh-fail-is-not-cloud-task-death]]。
+关联 [[collected-data-must-be-persisted-before-analysis]]、[[sync-semantics]]、[[taskbook-write-the-property-not-your-guessed-mechanism]]、[[local-ssh-fail-is-not-cloud-task-death]]。

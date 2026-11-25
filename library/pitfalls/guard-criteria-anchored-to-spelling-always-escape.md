@@ -66,4 +66,4 @@ topic: change-discipline
 [[config-field-name-is-not-spec-read-consuming-code]]（名义≠实际语义同族）、
 ablation-must-self-verify-change-applied（自证「改到了吗」同族）。
 
-关联 [[dont-open-frontline-for-edge-features]]、[[prefer-narrow-native-switch-over-broad-global-or-plugin]]、[[minimal-change-and-no-scope-creep]]。
+关联 [[change-scope-boundary]]、[[prefer-narrow-native-switch-over-broad-global-or-plugin]]、[[change-scope-boundary]]。

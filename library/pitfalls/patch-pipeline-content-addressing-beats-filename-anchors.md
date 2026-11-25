@@ -19,4 +19,4 @@ verified: 2026-10-23
 4. **注入点的查找方式也要防漂移**：用 `text.find('/*zsm:')` 找「第一个自家标记」当插入点是稳的（自家标记前缀不变），但要注意新版本可能在标记前加了字节（实测 +1 字节换行）——插入点偏移不影响，但别把偏移量算进断言。
 5. **每轮都跑完整校验电池**：entry-diff（恰好 N 个条目变化）、integrity 重算、`node --check`、roundtrip 逐字节一致、单测、沙盘演练、哈希负测试。纯重新打包的版本（只改版本号 JSON）也应该零适配直接出包——如果它没做到，说明锚点里混进了会漂移的东西。
 
-关联 [[injected-ui-feature-failure-check-credential-plumbing-first]]、[[no-assertion-without-measurement]]、[[measurement-must-verify-control-group]]、[[user-given-equalities-must-stay-equal]]。
+关联 [[injected-ui-feature-failure-check-credential-plumbing-first]]、[[no-assertion-without-measurement]]、[[measurement-and-sampling]]、[[user-input-contract]]。

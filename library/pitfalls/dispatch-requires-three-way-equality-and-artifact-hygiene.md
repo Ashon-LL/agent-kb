@@ -41,4 +41,4 @@ topic: delivery
 4. **派单后立刻重核**：目标仓会被执行者推进 ⇒ 第一时间再比三方，发现分叉就地统一
    （并保留 `backup/pre-unify-<date>` tag 作退路）。
 
-**关联**：[[local-sync-must-reach-user-visible-layer]]（同一族：只核自己这一层不够）。
+**关联**：[[sync-semantics]]（同一族：只核自己这一层不够）。

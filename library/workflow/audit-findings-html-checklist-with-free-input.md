@@ -27,4 +27,4 @@ verified: 2026-11-15
 5. 页面必须本地运行：不联网、不上传、不发布；用 localStorage 保存，脚本语法与导出函数用 Node/vm 做静态验证。
 6. 生成前确认上一句被撤回的指令没有残留执行；页面只负责收集选择，不触发代码修改。
 
-关联 [[judgment-correction-is-not-change-authorization]]、[[ask-with-options-early-never-at-end]]。
+关联 [[authorization-and-scope]]、[[ask-and-report]]。

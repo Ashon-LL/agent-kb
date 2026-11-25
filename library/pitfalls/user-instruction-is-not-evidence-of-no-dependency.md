@@ -19,4 +19,4 @@ related: [[bulk-delete-requires-reverse-dep-check]]
 - 收到「删 / 清掉 / 下线 X」时，把它当**待验证的假设**：「X 已无人依赖」。先 grep 反向依赖 + 看调用方是否活链，再动手。
 - 验证到与指令矛盾时**当场报告而不是硬办**：「X 仍被 Y 调用（活链路），删了会导致 Z 失效 —— 要不要连 Y 一起下线，还是只删 X？」让用户做真正该做的决策。
 - 用户答「彻底下线」时，把范围确认到**具体清单**（哪些端点/工具/配置项留、哪些删），因为「下线 X」在代码里往往牵连一片。
-- 配套：[[ask-with-options-early-never-at-end]]（当场给多选项）；[[bulk-delete-requires-reverse-dep-check]]（删除动作的核实清单）。
+- 配套：[[ask-and-report]]（当场给多选项）；[[bulk-delete-requires-reverse-dep-check]]（删除动作的核实清单）。

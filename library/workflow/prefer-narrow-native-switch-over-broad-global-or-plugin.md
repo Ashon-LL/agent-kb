@@ -23,4 +23,4 @@ topic: change-discipline
 
 相关：[[survey-before-acting-on-own-project]]、[[verify-with-real-pipeline-and-readonly-probes]]、[[custom-llm-endpoint-capabilities-default-false]]。
 
-关联 [[dont-open-frontline-for-edge-features]]、[[guard-criteria-anchored-to-spelling-always-escape]]、[[minimal-change-and-no-scope-creep]]。
+关联 [[change-scope-boundary]]、[[guard-criteria-anchored-to-spelling-always-escape]]、[[change-scope-boundary]]。

@@ -2,7 +2,7 @@
 name: acceptance-tool-version-drift-false-failure
 description: 一键验收脚本若把版本号/产物哈希/包目录写死，换代后会拿旧包对已正确安装的新版，把「装对了」误报成 FAIL；验收工具必须从当前交付元数据动态读取期望值
 type: pitfall
-source: zcodepro 2026-11-10 装机验收（%USERPROFILE%/Downloads/Project/zcodepro/tools/quick_post_install_check_v2919.py 实测）
+source: zcodepro 2026-11-10 装机验收（C:/Users/MECHREVO/Downloads/Project/zcodepro/tools/quick_post_install_check_v2919.py 实测）
 date: 2026-11-10
 verified: 2026-11-10
 topic: verification, delivery

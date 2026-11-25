@@ -13,7 +13,7 @@ topic: api-gateway
 
 # New API rc.26：渠道 CRUD 端点形状
 
-rc.26 实测（apigogo 生产库 `/opt/apishow/data/one-api.db`）。同族条目：[[newapi-base-url-never-carry-v1]]、[[newapi-disable-must-sync-abilities]]、[[newapi-multikey-size-must-track-key-count]]。
+rc.26 实测（apigogo 生产库 `/opt/apishow/data/one-api.db`）。同族条目：[[newapi-routing-and-abilities]]、[[newapi-routing-and-abilities]]、[[newapi-channel-data-model]]。
 
 ## POST /api/channel/ —— 必须包一层 + 必须给 mode
 
@@ -64,7 +64,7 @@ SELECT COUNT(*) FROM channels WHERE id=177;   -- 0，真的没了
 删前必做三查：① `abilities WHERE channel_id=?` 应已零行 ② 该渠道所属 `group` 的其他模型是否另有供给
 （否则断供）③ 名字双确认（`id` + `name` 都对得上，防 id 复用误删）。
 
-渠道 `status` 语义见 [[newapi-disable-must-sync-abilities]]：`1`=Enabled、`2`=ManuallyDisabled、`0`=Unknown（API 只收 1/2，传 0 是**假成功**）。
+渠道 `status` 语义见 [[newapi-routing-and-abilities]]：`1`=Enabled、`2`=ManuallyDisabled、`0`=Unknown（API 只收 1/2，传 0 是**假成功**）。
 
 ## GET /api/channel/test/{id}?model=X —— **必须 admin 认证**，连通性验证首选
 
@@ -103,7 +103,7 @@ def norm(v):
 
 对已是 dict 的 value 直接 `json.loads(obj)` 会抛 `TypeError`；若脚本用 `except: return {}` 吞掉 → 合并后只剩新增键 → PUT 整表覆盖 → **清空全表**。此坑 2026-08-26（ch118 清空全站 ModelRatio）与 **2026-09-29（ch178：ModelRatio 312→5、CompletionRatio 94→5、UserUsableGroups 5→1，症状=所有非 default 组 token 403「无权访问 X 分组」）各犯一次**，均为 kb 原文「value 是 JSON 字符串」误导所致——现更正为「类型不稳定，须 isinstance 判断」。
 
-写回用 `PUT /api/option/`，body `{"key": "...", "value": "..."}`，**按 key 更新单个 option**——但 value 是整段 JSON，所以改 GroupRatio/ModelRatio 等映射类 option 必须：GET 原值 → 本地留副本 → normalize → 合并 → PUT 回完整值 → **回读验证全表**（键数 + 关键原键逐一对比备份，**不能只验新增键**——09-29 两次事故都是回读只查新键、原键被清空没发现）。同族全景（四类静默事故 + 标准六步）见 [[redacted-get-full-put-wipes-secrets]]；另参见 [[newapi-base-url-never-carry-v1]] 与记忆 `newapi-modelratio-wipe-20260826`。
+写回用 `PUT /api/option/`，body `{"key": "...", "value": "..."}`，**按 key 更新单个 option**——但 value 是整段 JSON，所以改 GroupRatio/ModelRatio 等映射类 option 必须：GET 原值 → 本地留副本 → normalize → 合并 → PUT 回完整值 → **回读验证全表**（键数 + 关键原键逐一对比备份，**不能只验新增键**——09-29 两次事故都是回读只查新键、原键被清空没发现）。同族全景（四类静默事故 + 标准六步）见 [[redacted-get-full-put-wipes-secrets]]；另参见 [[newapi-routing-and-abilities]] 与记忆 `newapi-modelratio-wipe-20260826`。
 
 
 ## PUT /api/channel/ —— **是 PATCH + GORM 非零字段更新**（2026-10-12 读源码定谳，推翻 2026-10-01 旧结论）

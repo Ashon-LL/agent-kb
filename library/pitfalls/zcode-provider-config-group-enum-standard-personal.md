@@ -28,4 +28,4 @@ topic: zcode
 
 相关：[[zcode-provider-config-no-reasoning-enabled-schema]]
 
-关联 [[kb-accident-three-layer-lessons]]、[[zcode-workflow-cwd-drift-and-amend-same-name]]。
+关联 [[same-concept-multiple-implementations-pick-semantics]]、[[zcode-workflow-cwd-drift-and-amend-same-name]]。

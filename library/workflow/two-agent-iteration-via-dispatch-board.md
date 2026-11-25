@@ -38,5 +38,5 @@ topic: agent-orchestration
 
 **⛔ 派活书里不要写约束清单**（只给：背景与已排除项 / 目标（列候选路径，说"由你判断"）/
 怎么算解决（可复算判据）/ 交付）。写太多"不许做 X"会把对方框死，
-它会为了守规矩而不做本该做的事（见 [[minimal-change-degenerates-into-skipping-real-bugs]]）。
+它会为了守规矩而不做本该做的事（见 [[change-scope-boundary]]）。
 **明确标注"哪些不许碰"（如涉及产品口径变更的门禁）即可，其余给判断空间。**

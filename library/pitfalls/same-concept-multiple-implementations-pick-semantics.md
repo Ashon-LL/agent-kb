@@ -33,4 +33,4 @@ topic: methodology
 6. **改文件前先看它是否被周期性覆盖**：`stat -c %y <file>` 隔几秒采样几次；若 mtime 一直在变，说明有进程在写它——手改**既会被冲掉、也不影响内存态**。这类系统的状态只能通过**它自己的接口**改。
 7. **验证要落到"目标账号真的在干活"**：本例用「近 3 分钟请求全部落在新账号 + 旧账号零流量」证明摘除生效，而不是只看状态字段变成 true。
 
-**相邻**：同族"两处状态必须一致"见 [[newapi-disable-must-sync-abilities]]；多层各有凭据见 [[layered-service-credentials-must-match-layer]]；别把权限不足当对象不存在见 [[defect-localization-methodology]]。
+**相邻**：同族"两处状态必须一致"见 [[newapi-routing-and-abilities]]；多层各有凭据见 [[layered-service-credentials-must-match-layer]]；别把权限不足当对象不存在见 [[defect-localization-methodology]]。

@@ -17,4 +17,4 @@ topic: change-discipline
 
 **Why**：2026-11-07 给 WB 面板部署 MCP schema 修复前做备份，命令写成 `ls -d /opt/apishow/backups/pre-wb-* | sort | head -n -2 | xargs -r rm -rf`。字母序下 `pre-wb-fix5-20261107` / `pre-wb-mcp-negprompt-20261107` / `pre-wb-upgrade-20261102` 落在「后 2 个」之外，被整批删除，连带刚 `mkdir` 的备份目录。回滚所需的那一版（2026.11.7.1000）靠立刻重建才保住；更早的 2026.11.5.1120 备份丢失（站主确认不需要）。
 
-**How to apply**：任何「留 N 份」的清理动作，先按时间排序、先列清单、后删除；备份与清理拆成两条命令。关联 [[newapi-disable-must-sync-abilities]]（同类「一条命令里做太多事」的坑）。
+**How to apply**：任何「留 N 份」的清理动作，先按时间排序、先列清单、后删除；备份与清理拆成两条命令。关联 [[newapi-routing-and-abilities]]（同类「一条命令里做太多事」的坑）。

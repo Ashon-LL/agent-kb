@@ -38,7 +38,7 @@ topic: agent-orchestration
 ⇒ 修完必须用 `inspect.getsource` 之类的**静态反锁**把创建路径钉住，
 而不只是测「数据层能写这个字段」。
 
-**关联**：[[local-sync-must-reach-user-visible-layer]]（同一个教训的另一面：
+**关联**：[[sync-semantics]]（同一个教训的另一面：
 只看自己这一层的产物不够）；同项目记忆：阶段模型专条。
 
 ## 附：判「默认走哪条路径」必须找判据唯一出处（20261020 我栽过）

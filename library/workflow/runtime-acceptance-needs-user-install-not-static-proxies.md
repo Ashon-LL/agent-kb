@@ -35,5 +35,5 @@ verified: 2026-11-07
 6. **拆验收层级**：能即时判的特征（如某接口调用量突然连发）单独做即时脚本，
    需要长时段的指标（堆地板斜率、峰值）留在 ≥4h 脚本；即时 PASS 明确标注「不构成完善结论」。
 
-关联 [[memory-curves-need-event-boundaries-and-time-axis]]（双轴判读口径）、
+关联 [[measurement-and-sampling]]（双轴判读口径）、
 [[no-assertion-without-measurement]]（不许无实测下结论）。

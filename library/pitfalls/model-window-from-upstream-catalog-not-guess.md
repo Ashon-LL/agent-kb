@@ -45,4 +45,4 @@ topic: llm
 
 ## 相关
 
-[[trae-remote-query-500kb-bytes-silent-close]]、[[research-upstream-before-fixing]]、[[model-rename-without-rule-sync-loses-capabilities]]、[[do-not-fill-unprovided-values-with-defaults]]
+[[trae-remote-query-500kb-bytes-silent-close]]、[[research-upstream-before-fixing]]、[[model-rename-without-rule-sync-loses-capabilities]]、[[user-input-contract]]

@@ -32,6 +32,6 @@ topic: browser
 
 **How to apply**：① 输入超时先测 `mouse.move` / `evaluate` 分辨"渲染器死"还是"输入被浏览器 UI 挡"；② 换 DOM 点击并把**所有可见 `.ui-dialog` 的按钮文案打出来**再选；③ 上传/删除后**必须回读列表**核对条目类型与文件名，不认"点过了"；④ 判产物新旧用**构建时间 + 内容特征串计数**（如某段落 grep 计数），并对可疑端点试权威版参数；⑤ 判 PDF 版式类问题时渲染成图，不信 `-layout` 文本。
 
-⛔ **落点纪律（本技能自带的最大陷阱）**：本技能文档示例把工作目录写成 `C:/Users/<name>/ego/<goal>-YYYYMMDD-HHMM/`，**那只是示例**。团队纪律是工作产物放**项目目录本身**（本次被用户当场纠正两次：不该在用户主目录另开 `C:\Users\<user>\<task>\`，也不是 `~/.zcode/workspace/<项目>/`）。照抄示例路径会制造仓库外的孤儿目录。相关：[[tencent-browser-skill-setup]]、[[browser-extension-migration-mechanism-first]]。
+⛔ **落点纪律（本技能自带的最大陷阱）**：本技能文档示例把工作目录写成 `C:/Users/<name>/ego/<goal>-YYYYMMDD-HHMM/`，**那只是示例**。团队纪律是工作产物放**项目目录本身**（本次被用户当场纠正两次：不该在用户主目录另开 `C:\Users\<user>\<task>\`，也不是 `~/.zcode/workspace/<项目>/`）。照抄示例路径会制造仓库外的孤儿目录。相关：[[tencent-browser-skill-setup]]、[[browser-extension-forensics-and-migration]]。
 
 **2026-11-08 补充（窗口最小化）**：窗口最小化时 `page.screenshot()` 报 minimized、`page.mouse.click()` 落不下去（但 `page.evaluate()`/DOM click/`page.keyboard` 仍可用，`mouse.move` 也不报错——极易误判点击生效）。需要 trusted click（如开 file chooser）时先恢复窗口：`const w = await page.cdp('Browser.getWindowForTarget',{}); await page.cdp('Browser.setWindowBounds',{windowId:w.windowId,bounds:{windowState:'maximized'}})`。本轮 B 站投稿封面 file chooser 一直超时，恢复窗口后才正常。

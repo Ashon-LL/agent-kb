@@ -35,4 +35,4 @@ topic: cnb, diagnosis
 
 **代价**：我因此向用户误报了「任务没跑完、需要重启重跑」——差点让用户为**已经完成的工作**再付一次钱。
 
-关联 [[collected-data-must-be-persisted-before-analysis]]、[[importing-historical-runs-into-mh-agent-open]]、[[taskbook-write-the-property-not-your-guessed-mechanism]]、[[workflow-is-a-probe-not-the-goal]]。
+关联 [[collected-data-must-be-persisted-before-analysis]]、[[sync-semantics]]、[[taskbook-write-the-property-not-your-guessed-mechanism]]、[[workflow-is-a-probe-not-the-goal]]。

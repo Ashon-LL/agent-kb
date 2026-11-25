@@ -24,5 +24,5 @@ topic: delivery
 - 显示名用文件名或简短中文，路径用绝对路径（不要 `...` 省略）。
 - Windows 反斜杠可直接放在链接目标里；含空格用尖括号或百分号编码，视渲染器而定，优先测一次。
 
-关联 [[deliver-user-tuned-artifact]]、[[report-what-you-did-not-what-you-meant-to-do]]、
+关联 [[deliver-user-tuned-artifact]]、[[ask-and-report]]、
 [[user-large-files-hardlink-not-copy]]。

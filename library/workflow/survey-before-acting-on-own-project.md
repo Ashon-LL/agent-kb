@@ -39,6 +39,6 @@ zcodepro 跟进果冻 `features.html` 的「失败自动重试」时，用户已
 
 关联 [[quantity-and-config-claim-three-errors]]（归属/数字/状态别张口就来）、
 [[tautological-assertion-and-self-scoped-recheck]]（测试必须来自真实产物并做变异反证）、
-[[survey-false-negatives-substring-and-enumeration]]、[[browser-extension-forensics-profile-leveldb]]。
+[[survey-false-negatives-substring-and-enumeration]]、[[browser-extension-forensics-and-migration]]。
 
 <!-- hook-reviewed 2026-11-15: INDEX 已覆盖上游功能页/可解包产物/归属/半路分叉/旧哈希 -->

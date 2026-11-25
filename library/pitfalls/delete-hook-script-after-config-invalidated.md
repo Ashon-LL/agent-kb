@@ -26,5 +26,5 @@ topic: toolchain, zcode
 - 删除前记下原路径与配置片段，便于回滚。
 - 插件改动提交前检查 version 是否递增（可写进发布脚本自检）。
 
-关联 [[zcode-platform-verified-facts]]、[[kb-accident-three-layer-lessons]]、
+关联 [[zcode-platform-verified-facts]]、[[same-concept-multiple-implementations-pick-semantics]]、
 [[codex-hooks-are-claude-compatible]]。

@@ -8,7 +8,6 @@
 - [卸载注册表项键名可能是 GUID：按 DisplayName 值扫三处 Uninstall，校验要查真实键路径](pitfalls/windows-uninstall-key-guid-scan-by-value.md) — 按键名搜 0 命中且产品名路径校验假阳性；Electron 残留散落 7 处，侦察要搜全称+缩写前缀+@org；*dsh* 会误中 headshot
 - [错峰入场窗口终点固定会让后半元素恒透明](pitfalls/staggered-grid-fixed-end-makes-late-items-invisible.md) — seg(p,a+n*step,固定终点) 到 n 大时起点≥终点→元素永不画；用数量表达比例的点阵会 12/50 被误读成 24%；终点须随 n 后移且成片数格子
 - [注入打包产物的顶层代码不能依赖隐式全局；交付前必须真实启动冒烟](pitfalls/bundle-injection-strict-scope-startup-smoke.md) — 严格模式里裸赋值 `x=function…` 求值期 ReferenceError；`node --check` 查不出；子进程日志零行+宿主 transport_closed 先跑同入口复现；冒烟失败禁止出包
-- [判定错不是授权改代码；用户只问就只答](pitfalls/judgment-correction-is-not-change-authorization.md) — 「你判断错了」=改结论不是改代码；没点名的功能只列不动；越界要回滚
 - [重建产物的 diff 要锚在稳定标记上；可重试判定要同时看状态码](pitfalls/rebuilt-bundle-diff-needs-stable-anchors.md) — 重新混淆后字面量/块级 diff 全是噪声；用接口名·手写文案·常量·注册名定位；发布说明与产物冲突以产物为准；多路外发要时间序断言+变异反证
 - [行业协会发布页把关键数字藏在图片时不要判作无数据](pitfalls/research-slide-deck-image-only-pages.md) — 发布页正文为空时，关键数字可能在图片/PDF里；联系表+OCR+逐页核读并区分直给与派生/ 教训与反模式
 - [确定性错误必须不可重试](pitfalls/api-gateway-deterministic-errors-not-retried.md) — 重试预算×换号会放大成 30+ 次上游调用
@@ -44,7 +43,6 @@
 - [别在 relay 里自造请求体大小闸，先看上游新版本的压缩/413 做法](pitfalls/relay-selfmade-body-gate-vs-upstream-compression.md) — Trae2api 自 v1.0.6 修了边界洞、v1.0.9 用「裁剪压缩+413」；我们自造 400条/2MB→429 把合法请求判死、还诱发 New API 跨源重放（RetryTimes=10）；升级后同请求 429→200
 - [「空闲回收」判据必须是「有没有事在做」不是「有没有人在看」](pitfalls/idle-reclaim-criteria-must-be-work-not-attention.md) — 无人值守/自动化场景下 UI 状态判据**结构上失效**（实测订阅事件 0 条 vs 正常时段 3 条/次）；先枚举进程所有「活着」的形态再定判据，优先用对端主动推的心跳/通知（与谁在场无关）；挂点选记录构造处 + try/catch + 宽限窗口；★阈值和判据是两件事，修误杀只改判据、不顺手拉长用户阈值
 - [成品包补丁锚点要内容寻址，别写死文件名/变量名](pitfalls/patch-pipeline-content-addressing-beats-filename-anchors.md) — 压缩名每代全换（实测三代文件名/类名/函数名整体漂移）；内容寻址的收益可量化：新版 27,995 条目只 1 针失配、其余零适配直接出包；★配套要求＝桩测试动态解析绑定名，否则版本改名后测试静默失真（17 个假 FAIL 而产品完全正确）；引用原名用正则取回不复制；任何测试失败先怀疑桩
-- [图件必须做渲染前几何自检（并按图元类型分级判据）](pitfalls/matplotlib-figure-geometry-selfcheck.md) — 图例压柱/注释压柱/出画布只有 bbox 几何量可靠；三层根因：避让写在 continue 之后、漏 `ax.patches`、`Annotation.get_window_extent` 含箭头 ⇒ 取 `Text` 基类 bbox；内边距按 `borderaxespad×fontsize×dpi/72`、抬 ylim 造留白须设增幅上限、柱内数值标签豁免要含水平居中、布局守卫后要再避让一次；门禁须临时副本+随附工具库，正例 0 违规且负例必须能拦住
 - [CNB NPC 派单：@地址/配置源/timeout 不是会话上限](pitfalls/cnb-npc-dispatch-channel-config-and-time-caps.md) — 裸 `@角色` 不产生事件（必须 `@<NPC仓>(<角色>)`+`--work-mode`，CLI 评论 2 秒建 pipeline）；评论事件配置源在 **NPC 仓** `.cnb.yml`（改机型/轮次要改 fork）；`timeout` 只管单次工具执行、实测 2h01m 被 SIGKILL（声明 6h 无效）；`strings 日志 grep =7200000` 会命中自己注释文本、真实值 `<masked>`；长任务靠增量推送兜底
 - [注入式 UI 增强失效先查「取凭据/取上下文」段](pitfalls/injected-ui-feature-failure-check-credential-plumbing-first.md) — 引擎/锚点/桥全在也可能是 gate 前那几行把 Key 拿不到就静默 return；判据＝桩 DOM 跑真块 A/B（调用次数）；打包应用主 chunk grep testid 0 命中是正常（lazy chunk + 常量压缩）；修法＝复用已桥接通道多路复用 + 主进程按 id 读明文配置兜底
 - [JOSE 定长 r‖s 转 DER 必须剥前导零](pitfalls/jose-raw-sig-to-der-must-strip-leading-zero.md) — DER 要求最小编码；首字节为 0 时被 OpenSSL/cryptography 拒签，伪装成「签名器 10% 随机失败」；先统计失败样本特征再怀疑 nonce
@@ -58,23 +56,18 @@
 - [多账号领取的「按人去重」会把第二号活动隐藏](pitfalls/multi-account-claim-per-person-dedup-hides-second-account.md) — 列表缺失≠无此活动；直接 claim 幂等兜底；别拿缓存字段下「没得领」结论
 - [账号池 credit-priority 必须服务账号=计费账号贯穿](pitfalls/pool-credit-priority-keep-serving-and-billing-account-tied.md) — 选号贯穿转发/上报/刷新；验证看余额差落谁家；无余额信号退化为健康轮询
 - [划界看调用方而非文件位置](pitfalls/classify-by-consumer-not-by-file-location.md) — 同一文件常混着多方共用件；「住在哪」不等于「属于谁」，re-export 转发层尤甚
-- [测量前先自检对照组与测量层](pitfalls/measurement-must-verify-control-group.md) — 对照组选「改动前真实状态」而非「本来就正常的状态」；GPU/合成开销主线程测不到；测试抓到错≠机制在生效
 - [对平台能力零实测就零断言](pitfalls/no-assertion-without-measurement.md) — 别臆测/想当然/凭记忆下结论；口头陈述是线索不是定论；先看本机先例再搜文档，用户纠正后最小修正；症状词：搞错、又错、越做越错
 - [批量删除前必须逐包核实反向依赖](pitfalls/bulk-delete-requires-reverse-dep-check.md) — 删一个可执行文件 ≠ 删它所在目录；同目录兄弟包常被别的组件直接 import，删前逐个 grep
 - [用户指令不是依赖已消失的证据](pitfalls/user-instruction-is-not-evidence-of-no-dependency.md) — 「删掉 X」只定义目标，X 是否还有人用要去查；验证到矛盾时当场报告而非硬办
-- [「同步/都要最新」≠发版](pitfalls/sync-latest-is-not-a-release.md) — 动作上限=对齐到最新即停；bump/重建/tag 必须用户明说才做（动作不得升格）；补充：用户说「我升级了/有新问题」不是发版许可，内部修复并入当前版号
 - [桌面应用积分反代走结算上报端点](pitfalls/desktop-app-points-reverse-proxy-via-usage-report.md) — 聊天不扣分，扣分在独立 usage-report 结算端点；从客户端 outbox 拿真实 schema，UUIDv7 报告字段严格校验；同账号多网关权益面各自漂移（/v1 403、/v2 200 都正常），可用性按需复测别拿一次快照当永久事实
 - [模型换名漏同步会丢掉能力声明](pitfalls/model-rename-without-rule-sync-loses-capabilities.md) — 换名只改清单不改规则 ⇒ supportsToolCall 归默认 false ⇒ 工具调用退化成正文；三处同步 + 反证先行
 - [ZCode 会话幻忙卡死：停止无效/发消息无响应](pitfalls/zcode-session-phantom-busy-stop-noop.md) — 日志 v4.stop.* 里 runtimeStopKind=idle 而 expectedForegroundExecutionId 不变＝客户端幻忙（运行时早已空闲）；停止是 no-op、新消息不进调度；关该会话窗口即恢复、数据无损；诱因＝超长会话＋多进程共写会话库 database is locked
 
 - [邮件 HTML 对齐必须内联 + 块居中要用属性，不能只靠 <style>](pitfalls/email-html-alignment-must-be-inline.md) — 剥 <style> 后 `th` 默认居中、数字列被右对齐 ⇒ 「只有部分列跑偏」；**块居中与格内左对齐是两件事**：居中用 `td align=center`/`table align=center`+`cellpadding` 属性（零副作用），对齐逐格内联；验收=剥掉样式后用无头浏览器截图 + 断言每个单元格都带内联对齐
 - [聚合报表缺失值必须先判类型再运算](pitfalls/aggregate-report-missing-values-must-be-none-guarded.md) — 任一源都可能返回 None：做差/求和前 `isinstance` 两边都判，缺失渲染成 `—`/`n/a`；这类崩溃是**间歇**的（同脚本同天早上成功、手动重跑就炸）⇒ 一次成功不等于健壮
-- [用户给的「相等」必须原样落成同值](pitfalls/user-given-equalities-must-stay-equal.md) — 排序里的 `=` 是并列意图：等号组落成同值 + 同档只用 `‖`（`>`/`→` 仅跨档）；把同档内的权重差异写成先后 = 「没看懂输入」；非榜单对象照给值但明说是我给的
 - [fail-open 的 except 会吞调用方类型错误](pitfalls/fail-open-except-swallows-caller-type-errors.md) — 宽 except 把 AttributeError 归到「环境读不出」，真故障变静默跳过；入口 Path() 归一 + except 收窄
 - [运行态异常也可能是用户造成的](pitfalls/runtime-anomalies-may-be-operator-actions.md) — 进程没了/端口空着/文件变了先想「是不是用户自己关的改的」；叙述去定性、恢复态动作先问；先查人为操作再查故障
 - [出处要分「事实/推断/未见记录」三档](pitfalls/stated-provenance-needs-evidence-and-conditions.md) — 没找到记录≠不存在；4 样本编不出 P90；来源一致≠条件成立；「统一/全部」类词必须逐项复核
-- [「以为在做」与「做了」要分开报](pitfalls/report-what-you-did-not-what-you-meant-to-do.md) — 后台/自动化尤其易犯：创建成功≠进程存活；说「已生效」前必须另起一次独立验证；错误的监控声明比没监控更糟；症状词：我以为
-- [最小面原则会退化成「发现了但不修」](pitfalls/minimal-change-degenerates-into-skipping-real-bugs.md) — 最小面是「先修哪个」的规则，不是「能不能不修」的许可；复算见红要先分「真缺陷 vs 用例自身问题」两种都修
 - [并行测试必须先隔离「会写仓库工作树的用例」](pitfalls/parallel-test-run-must-isolate-repo-mutators.md) — 会写工作树的用例独占跑；-n 别进 addopts
 - [跨环境传文件/凭据要走原生机制，别造明文副本](pitfalls/cross-env-file-handoff-must-use-native-mechanism.md) — Git Bash 的 /tmp 与 Windows Python 的 /tmp 不是同一个目录（⇒ FileNotFoundError）；真错是为传一个秘密在盘上造第二份明文；应让目标侧自己取（同进程内读+写）、用 load_secrets/tomllib 别手写解析、写完断言键存在+值非空并由实际使用方验证
 - [动态工作流的子代理身份与门禁三坑](pitfalls/dynamic-workflow-agent-identity-and-gates.md) — 循环内建 agent 撞重名；门禁先清被拦对象
@@ -84,12 +77,10 @@
 - [校验器 `continue` 掉缺项 = 门禁全绿地漏检](pitfalls/silent-continue-masks-lost-check-coverage.md) — 缺项 continue ⇒ 校验被跳过、门禁仍全绿
 - [New API rc.26 渠道 CRUD 端点形状](pitfalls/newapi-rc26-channel-crud-shapes.md) — body 包 mode（POST）/扁平 body（PUT 走 PATCH+GORM 非零字段：稀疏安全、清空不行、免重启）、删走路径参且硬删、option value 类型不稳定、摘模型要连死 mapping 键一起清
 - [New API rc.26 令牌 CRUD 三坑](pitfalls/newapi-rc26-token-crud-shapes.md) — key 在响应里、列表是掩码、DELETE 恒失败
-- [New API model_limits 列是 CSV 不是 JSON](pitfalls/newapi-model-limits-column-is-csv-not-json.md) — 写 JSON 数组⇒该令牌全模型 403；SQL 改完必重启
 - [Tauri Linux CI 需 webkit2gtk-4.1，无 Ubuntu 镜像](pitfalls/tauri-linux-ci-needs-webkit-41-and-target-override.md) — 无 Ubuntu 镜像；本机只编 Windows 目标
 - [GitHub PR 表单是 details 折叠开关](pitfalls/github-pr-form-is-a-details-disclosure.md) — 大按钮非导航；用原生 setter+requestSubmit
 - [孤儿常量与导入期告警不是阻塞项](pitfalls/orphan-constants-and-import-warnings-are-not-blockers.md) — 9 条：判阻塞先 grep 使用点、只有终点可观测物算证据、附两层证据排障法（中间态 vs 终态）
 - [读-改-写全量 PUT 事故家族](pitfalls/redacted-get-full-put-wipes-secrets.md) — GET 脱敏/结构判错/白名单拒收四类静默事故；option 写操作六步铁律（留档→normalize→合并→PUT→回读全表→实测）
-- [脱敏必须按键名判定并做负向自测](pitfalls/redaction-must-key-on-field-not-value.md) — 掩码判值不判键、行首锚定漏注释行，密钥静默裸奔；自测=断言输出不含已知密钥
 - [环境变更陈述必须命令复测](pitfalls/env-claims-must-be-reverified.md) — 环境陈述一律命令复测；“通过”字样不可信
 - [一次性脚本改文件四铁律](pitfalls/oneoff-script-file-edit-rules.md) — 备份不被重跑覆盖、重发留段头、改后校验存在性
 - [文件更新 ≠ 代码在跑](pitfalls/file-change-not-code-running.md) — 核对进程启动晚于文件 mtime，别看“已更新”
@@ -101,16 +92,9 @@
 - [PS here-string 定界符语法与运行时字节分岔](pitfalls/powershell-herestring-grammar-and-runtime-divergence.md) — 开闭不对称、<< 是重定向、UTF8 不跨运行时
 - [bind mount 属主必须匹配容器 uid](pitfalls/bind-mount-owner-must-match-container-uid.md) — 属主由宿主决定、容器内 chown 无效；看容器真读到
 - [吞掉 OSError 会把权限错配伪装成「未配置」](pitfalls/broad-oserror-swallow-hides-permission-misconfig.md) — 只吞 FileNotFoundError、其余 OSError 冒泡
-- [Qoder Office pptx 图片管线故障与页内动画注入](pitfalls/qoder-office-pptx-image-and-animation-workarounds.md) — 12 条：带图 put_page 拆两步、动画 zip 注 timing、GIF 循环直替、字体须装 HKLM、slide rels 相对路径等
-- [改 pptx 动画用 COM 原生接口，别手写 timing XML](pitfalls/pptx-anim-com-not-handwritten-xml.md) — 平铺 clickEffect 会退化成"点一次出一条"；COM TriggerType 2/3 让 PowerPoint 自己重写；20 条坑（分组须显式声明勿按坐标猜/错峰要分批/图与遮罩同组/Shapes 不收 Id/AddEffect 第4参是 Trigger/Visible·Runs·HWND/关闭弹框用 ReadOnly=1/Unsplash 免费图判定/媒体自动去重/源素材须留 ID 记录）
 - [裸 wait 会被常驻子进程永久阻塞](pitfalls/bare-wait-deadlocks-on-long-lived-children.md) — 裸 wait 被常驻子进程永久阻塞；兜底包整个脚本
-- [空值 credential.helper 阻塞 git fetch，unset-all 误删好条目](pitfalls/credential-helper-empty-value-blocks-git-fetch.md) — 空值 helper 让 git 阻塞；unset-all 误删好条目
-- [凭据管理器里的 host 级条目会抢先命中](pitfalls/credential-rotation-must-cover-all-entries.md) — host 级条目抢先命中；按库隔离挂专用 helper
 - [docker compose config 会打印全部 env 真值](pitfalls/docker-compose-config-expands-secrets.md) — 含密钥的 compose 上用 config 校验=把 token/key 打进终端/日志；用 -q 或改看 ss -tlnp / docker inspect
 - [测性能前清续跑锚点](pitfalls/clear-resume-anchors-before-benchmark.md) — 测墙钟前先清续跑锚点，否则只测到收尾
-- [docx 管线交付坑](pitfalls/docx-pipeline-delivery-gotchas.md) — Word 重存丢字号、draw.io 0 字节导出
-- [OOXML 排版属性四类静默失效](pitfalls/ooxml-layout-attributes-silently-ignored.md) — *Chars 覆盖磅值、exact 行距裁图、重存丢 tblW
-- [图-引用距离与图例遮挡](pitfalls/figure-placement-and-legend-occlusion.md) — 几何自检只判出界不判遮挡；图须紧邻引用句不跨页
 - [自动化"在跑"要查两件事](pitfalls/automation-artifacts-lie-existence-and-freshness.md) — 存在性与新鲜度须双层独立检查
 - [日志字面语义不是规格](pitfalls/log-text-is-not-spec-read-emitting-code.md) — 先 grep 发提示语的代码；汇报分三档；目录清单/余额/状态字段都不等于能力（29 个模型实测 7 个 400；封禁号余额仍正常）——判可用只认真实调用
 - [采集件必须「先落盘后统计」](pitfalls/collected-data-must-be-persisted-before-analysis.md) — ⛔ `collect();stats();dump()` 会把数据困在内存：实测 1.26M tokens 采集随 kill 归零；顺序铁律=采集→dump→push→统计，跑器归档进仓、分批增量落盘、统计特征预计算
@@ -118,7 +102,6 @@
 - [更新脚本杀进程必须锚定真身](pitfalls/updater-kill-must-anchor-to-live-install.md) — 按进程名无条件 `taskkill` 会连用户正在用的实例一起杀掉（自测踩五次，被误判成"又崩了"）；必须同时满足「目标=真实安装目录」+「确有文件要写」；另附「外部硬杀 vs 真崩溃」的取证判据
 - [启动应用别让它成为脚本的子进程](pitfalls/launcher-must-not-parent-the-gui-app.md) — `Start-Process 应用.exe` 会让应用继承脚本窗口的控制台句柄（日志跑进脚本里）并落在脚本进程树里（默认终端 Windows Terminal 关标签杀整棵树 ⇒ 关窗口=关应用；更隐蔽的变体：脚本窗口跑完自己关闭也照样带走应用，看起来像应用闪退）；交给 `explorer.exe` 代办；GUI 子系统也不能幸免；⛔ `-NoStart` 类自测盖不到启动路径；大文件覆盖改原子替换
 - [本机 SSH 断 ≠ 云端任务死](pitfalls/local-ssh-fail-is-not-cloud-task-death.md) — 判完成看 git 远端新提交、判环境看平台 status/duration；心跳 FAIL 只说明本机通道断（实测：心跳 02:54 全 FAIL，容器内执行者一路干到 04:18 并全部完成归档）
-- [把历史工作流导进 MH-Agent-Open 的三个必核点](workflow/importing-historical-runs-into-mh-agent-open.md) — ①先确认形态（桌面 `~/.MHAgentOpen` vs 容器 `/data`，导错=白干）②文件须在**契约声明位置**（工作区根，不是归档目录）③校验=按 output_files 逐个 test -f；缺件分「在别处」与「真丢了」，后者如实报不造空壳
 - [shell 初始化文件是分层的](pitfalls/shell-init-files-are-layered-not-one.md) — 登录/交互/ssh命令执行三者读不同文件，只改一处会出现"同一台机器两个版本"；脚本用绝对路径；⛔Debian /etc/profile 会重置 PATH ⇒「登录壳报缺件」是假失败，须两种壳各验一次
 - [配置字段名不是规格](pitfalls/config-field-name-is-not-spec-read-consuming-code.md) — 10 条：名字像的字段各管一事、声明式列表缺项会清掉无关能力、默认值在代码不在配置、UI 字段先证有消费者、反向验证能力
 - [自定义 LLM 端点能力默认全关](pitfalls/custom-llm-endpoint-capabilities-default-false.md) — 认不出的端点按「未知兼容端点」处理，`supportsTools` 默认 false ⇒ 不发 tools ⇒ 工具调用退化成正文；显式声明 + 反证 + 看真实配置文件
@@ -131,17 +114,13 @@
 - [DETACHED_PROCESS 会引发黑窗风暴](pitfalls/detached-process-causes-console-window-storm.md) — 与 CREATE_NO_WINDOW 互斥，改用 NO_WINDOW
 - [强规范对象别自造编码器](pitfalls/dont-handroll-spec-encoders-use-libraries-plus-fallback.md) — QR/条码/PDF 别自造编码器（错得静默）
 - [测试的扫描范围/前提/断言三类假单](pitfalls/test-scope-must-be-pinned-by-index-not-walk.md) — 范围用 git ls-files；断言放宽分支是假绿
-- [禁止讨好式确认开场](pitfalls/no-sycophantic-agreement-openers.md) — 删讨好开场；被纠正=认领+修正+干活
 - [跟进 agent 循环看进展不看动静](pitfalls/agent-loop-follow-progress-not-liveness.md) — 同错×N+零交付判不收敛；守望须设时限
-- [New API base_url 不能带 /v1](pitfalls/newapi-base-url-never-carry-v1.md) — 带了变 /v1/v1 报 404；全绿证不了 base_url
-- [New API 多密钥 size 必须跟段数](pitfalls/newapi-multikey-size-must-track-key-count.md) — ⛔追加 key 不改 size⇒新钥当后缀；**10-08 起加钥首选原生 PUT**（GET 掩码→回填真钥→禁带 status→自动重建 size/BLOB→免重启）
 - [台账核对必须双向](pitfalls/ledger-audit-must-be-bidirectional.md) — 只跑单向会漏整类问题；库里有值≠线上在用
 - [待办台账会腐烂，开单前先复核](pitfalls/backlog-records-rot-verify-before-dispatch.md) — 未做≠还没做，按机制复核；实测 6/6 已闭环
 - [kb 检索无结果≠库里没有](pitfalls/kb-search-miss-is-not-kb-empty.md) — 检索失败≠对象不存在；症状词多轮+ls 目录+读 INDEX 三步；20261023 实测漏读 6 条直接相关
 - [同名配置键在不同步骤类型下语义不同](pitfalls/same-config-key-different-semantics-per-step-type.md) — 脚本 Job=总时长+无输出超时，npc:go=单次工具执行；调大总时长会静默松掉 10min 无输出保护；症状词：卡住；真上限见 [CNB 2h 硬顶](tools/cnb-pipeline-2h-hard-cap.md)
 - [守卫判据锚「写法」必被换写法绕过](pitfalls/guard-criteria-anchored-to-spelling-always-escape.md) — 四连逃逸实证；静态判结构、渲染占位交运行时几何门、变异集裁定强弱；同族变体：判据钉文件布局，重构即失效（搬 store 后扫不到，10 红）
 - [fork 同步上游会静默覆盖本仓定制](pitfalls/fork-sync-force-update-wipes-local-customizations.md) — 同步=force update（重写历史）；定制行带标记+清单，同步后逐项 grep 复核再补回；⛔ 20261023 更正：apigogo/x 并未删除（20261019 已重建，实测带密钥 imports+4 核 runner）⇒ 现行派单入口 = @apigogo/x(中书令)；原理仍适用
-- [New API 禁用渠道/改分组都要重建 abilities](pitfalls/newapi-disable-must-sync-abilities.md) — abilities 是唯一路由事实源；须手工重建+回读
 - [产出端与消费端状态不匹配会静默空转](pitfalls/producer-consumer-status-mismatch-silently-noops.md) — 产出写 candidate、消费只查 active ⇒ 空转
 - [容器镜像内源码补丁必须配重放脚本](pitfalls/container-image-source-patches-need-replay-script.md) — 扛 restart 不扛 rm/升级；须配幂等重放脚本
 - [第三方应用 DB 列格式由读它的代码决定](pitfalls/third-party-db-columns-typed-by-reading-code.md) — 弱类型收得下≠读得动；一行类型不符可整表查询失败
@@ -172,12 +151,9 @@
 - [守卫必须覆盖改动那一层](pitfalls/guard-must-cover-the-changed-layer.md) — Python 守卫 + Rust 改动 = 没有守卫；加守卫问"扫的层和改动的层是同一层吗"
 - [恒真断言与自圈复检；用户阈值不能被更短内部宽限窗架空](pitfalls/tautological-assertion-and-self-scoped-recheck.md)（2026-11-15 补） — `or True` 比没守卫更危险；改动=复检=守卫三圈重合产假绿；删恒真断言常立刻暴露真差异
 - [消融实验必须自证改到了](pitfalls/ablation-must-self-verify-change-applied.md) — 连续测错三次静默产出假数字；判据是计算后取值不是调用动作；根修=单页轮转+颠倒顺序+单对象传参+硬闸
-- [别给边缘功能开战线](pitfalls/dont-open-frontline-for-edge-features.md) — 本来没坏只是不通→四层管线 40 分钟净零；改前先问挡不挡主线；降级路径已干净=完成态不是待办
 - [盘点/逆向的两类搜索假阴性](pitfalls/survey-false-negatives-substring-and-enumeration.md) — 子串误命中当结论 + 枚举前缀即边界；否定结论须能说清枚举集合怎么来的
 - [安全探针假阳性三防](pitfalls/leak-probe-false-positive-three-guards.md) — 关键词命中拒绝话术当泄露；报 LEAK 前须看原文+设对照组+复现；判定式分语义不分子串
 - [数字/配置/功能存在性张口就来的错](pitfalls/quantity-and-config-claim-three-errors.md) — 量纲/作用域/归属；"字段缺失"≠功能关闭；minified 中文 UI 里英文组件名 0 命中≠功能不存在，要用实机文案+截图判重（2026-11-10 补）；统计口径写明
-- [凭据原文不进记忆/kb/日志](pitfalls/credentials-never-in-memory-or-logs.md) — 只记取值位置不记取值；装凭据走管道不 echo；脱敏用整体替换非只遮尾巴
-- [kb 事故三层教训](pitfalls/kb-accident-three-layer-lessons.md) — 改运行中应用扩展点路径会全废；多个同名近似物先摊开地图；用户连问两次基础问题先停下讲清楚
 - [摘要行限定词必须带作用域](pitfalls/summary-scope-qualifiers-must-be-explicit.md) — 不带作用域单读反向；别给通用规律乱加作用域标记；别用代理指标判定检查坏没坏
 - [跨 shell 送文本的转义坑合集](pitfalls/ssh-heredoc-delimiter-must-be-quoted.md) — 定界符不加引号 `$VAR` 提前展开；`commit -m` 反引号被命令替换（消息静默变空且禁 force push 改不回）；多层嵌套引号断链⇒写文件再 scp；转义串锚点在两层解释器里错位⇒按行匹配
 - [管道子 shell 会吞掉退出码](pitfalls/pipeline-subshell-swallows-exit-code.md) — cmd | tee 里 exit 1 不传播，systemd/CI 把失败报成成功；主体包函数用 return + PIPESTATUS[0]
@@ -186,6 +162,7 @@
 - [scope 白名单硬编码时加 key 无效](pitfalls/scope-whitelist-hardcoded-switch-auth-path.md) — 403 insufficient scope 先查源码白名单；同端点换认证路径做 A/B，走 JWT/会话取全权
 - [vite 产物名与 scope id 随源码行尾全图变化](pitfalls/vite-build-output-names-track-source-eol.md) — CRLF↔LF 改 data-v-* 再级联改全部 chunk 哈希名；git 归一看不见；对拍勿误判「构建过期」
 - [「只有浏览器成功」先查凭据失效再谈 TLS 指纹](pitfalls/browser-only-success-check-credential-first.md) — 同一 token 浏览器 200、curl/python/TLS伪装全 401 ⇒ 先页内裸 token 复测+指纹比对+新鲜凭据重放；实测真因=改密码吊销+cookie 轮换，WAF 假设是死凭据喂出来的
+- [模态数组解析 str() 强转泄漏 dict repr](pitfalls/list-parse-str-coercion-leaks-dict-repr.md) — 对象数组按 type 提取，写完回读断言元素在受控词表
 - [ZCode provider_config 的 group 只收 standard-personal](pitfalls/zcode-provider-config-group-enum-standard-personal.md) — config.group 是内部枚举，写成站点组名整份配置拒载、UI 全空；站点分组隔离靠令牌；排障走 [provider-config] 日志 ZodError path
 - [provider_config 智能与手动规则互斥](pitfalls/zcode-provider-config-smart-manual-rule-conflict.md) — 同一 Provider/Model 双重声明 Zod 整份拒载、UI 全空；脚本重建规则前查手动清单+终检交集
 - [新增宿主网关端口先放行白名单再固化开机重放](pitfalls/host-gateway-port-allowlist-before-relay-onboarding.md) — 绑网桥 IP 的服务白名单外被静默 DROP：直连 200、经容器网关 i/o timeout；iptables 一次性规则重启即丢，必须写进维护链的开机脚本
@@ -204,12 +181,9 @@
 - [二选一的错误文案不能当单一结论](pitfalls/binary-error-text-needs-branch-evidence.md) — 「A，或 B」只是候选清单；必须用终点可观测物取证落在哪支（容器是否存在/exit 137/时刻）；文案里的数字不等于上限来源
 - [易变状态必须带时效标记与复核命令](pitfalls/volatile-state-must-carry-expiry-and-recheck.md) — 原理与状态分层；「已删除/已失效/现行=」须带实测证据+失效条件+复核命令；状态复制到多处会变「真理」；description 要覆盖状态主题；体检跑 `--audit-volatile` 逐条实测
 - [拆大组件先算依赖密度](pitfalls/split-large-component-by-dependency-density.md) — 行数×模板外部符号数；密度高＝内聚不该拆；拆完总行数不降（props/emit 管道）就是净负收益
-- [交互延迟只能用 Event Timing 量](pitfalls/interaction-latency-must-use-event-timing.md) — rAF 计时漏掉光栅化/合成、dispatchEvent 不进合成器、无头软件光栅可把 840ms 漂成 34s；体感差先质疑测法
 - [squash 合并后祖先判据恒假](pitfalls/squash-merge-defeats-ancestor-check.md) — 判「已合入」查 PR `state:closed`+`mergeable_state:merged`；`git merge-base --is-ancestor` 与 `refs/pull` 都不可用
 - [临时文件会被 git add -A 一并提交](pitfalls/temp-files-must-not-be-added-by-add-all.md) — 先删再 add 只是治标；根治是把 commit message 文件写到仓库外，add 天然碰不到
 - [正则不能跨嵌套花括号 / 批量替换别改坏函数定义](pitfalls/regex-cannot-span-nested-braces.md) — `[^}]*` 跨层改坏结构；按行号/解析树逐行改 + 编译复验；heredoc 反引号被 shell 吃掉；批量去调用点时先把 `function sym(` 占位保护，否则生成 `function void 0(){` 全链语法崩（2026-11-10 补）
-- [过度脱敏会删掉执行方要的上下文](pitfalls/over-redaction-removes-useful-context.md) — 公开地址/项目名/许可证默认可写；脱敏只针对凭据与本机绝对路径；拿不准写进去加边界说明
-- [用户清单转计划必须逐项 diff](pitfalls/user-list-to-plan-must-diff-each-item.md) — 清单是契约；漏项补上或显式说明「本批不含」；拍板动词不得替换（恢复≠止血）
 - [工具输出上限必须改在真正截断的字段](pitfalls/tool-output-cap-must-target-truncation-field.md) — 改「透传给模型的元数据」等于没改；夹在截断入口且只收紧不放大；验收要能证明判据会变
 - [退役/rc=1 的测试不算执行型覆盖](pitfalls/retired-test-is-not-execution-coverage.md)
 - [偶发失败先留全量证据；边界断言要留余量](pitfalls/flaky-test-needs-margin-and-full-failure-log.md)
@@ -224,7 +198,6 @@
 
 - [Remotion 4 工程实测坑合集](pitfalls/remotion-project-gotchas.md) — 像素格式/LightLeak/effects/eslint/EALLOWSCRIPTS；EP02 补：字体 900+ 请求、端口、r3f postprocessing 黑帧、粒子字幕密度、freeze、渲染预算、LRA
 - [文件"自己消失"先查杀软隔离区](pitfalls/av-quarantine-removes-project-files.md) — 火绒隔离库是 SQLite（QuarantineEx.db 表 FilesV3_60 有原路径/SHA1/判定名）+ Defender Get-MpThreatDetection；扫描器与反连测试用例最易被启发式命中，恢复前先想清楚
-- [批量脱敏先算遮蔽碰撞，全量与脱敏版分仓；宽松正则全目录通杀会毁掉图片 base64](pitfalls/redaction-needs-uniqueness-and-canonical-source.md) — 6+4 遮蔽先证唯一（189→189）；docs/投递包分仓标口径；自检扫交付物本体；按键名判定并排除 `data:image/*;base64,` 等编码载荷，改前做可解码性校验（实测 HKp 正则把 80 字符换成 *** 致 provider 400；2026-11-10 补）
 - [MCP 说明可提到 schema 未声明的字段](pitfalls/mcp-instructions-may-name-undeclared-tool-fields.md) — instructions 不是参数规格，prepare_video 传 negative_prompt 前先查 inputSchema；2026.11.7.1100 修复后已补齐并实测复核
 
 - [备份清理按字母序会删错版本](pitfalls/backup-prune-must-sort-by-mtime.md) — 「留最近 N 份」必须按 mtime 排序并先列清单；按字母序一次误删 3 个目录（含较新的 fix5），且别把新建备份放进了同一条 prune 命令
@@ -246,7 +219,6 @@
 ## workflow/ 流程与协作
 - [接线清单机器校验+死字段审计](workflow/wiring-checklist-machine-verify.md) — 新增一家改 8-10 处，漏一处全静默
 - [错误文案是产品](workflow/error-message-is-product.md) — 纯文本<150 字符、识别语义就不复述原文
-- [未提供的值不要替用户填默认](workflow/do-not-fill-unprovided-values-with-defaults.md) — 只写有来源的值，未知标「未提供」；把程序默认当用户设置=伪造来源（实测 DSH 最大输出 128K 被纠正）
 - [vibe-video 技能生态可复用](workflow/vibe-video-skill-ecosystem-reuse.md) — B站知识大赏风格先复用成熟开源技能（HeyChengC/andyhuo520/liangdabiao/gnipbao）别从零写；纯代码逐帧零生图成本
 
 - [代码动画与 HTML 风格视频的分野](workflow/code-animation-vs-html-video.md) — 判据是场景语法不是技术栈：连续世界/摄影机/物体持续/连续微动/光材质/字是几何/声音同帧；对照 3B1B 与扁平疫情图表；数据段去卡片、上 3D、形变承接
@@ -256,16 +228,12 @@
 - [接手半途任务先 diff 部署面与版本面](workflow/diff-deployed-vs-vcs-before-reimplementing.md) — 新实现常写在部署目录没回流仓库；找到现成版做回流别重写，丢注释里的踩坑修正是重写最大代价
 - [多工具共享脚本用硬链接统一](workflow/hardlink-unify-shared-scripts-across-tools.md) — 留一个真相源其余同 inode；**仓库 scripts/ ↔ ~/.agents/kb/tools/ 副本必须双向同步（跨项目使用，两处不能硬链）**；git 会断链、校验器按内容兜底；改配置指向换不掉副本漂移
 - [哨兵（后台监查进程）](workflow/sentinel-background-watch.md) — 起后台进程轮询并自己判终态 exit；响≠好消息
-- [最小改动与不越界三铁律](workflow/minimal-change-and-no-scope-creep.md) — 按字面范围改、闭环即止、不做表面修补；症状词：往返、回撤、返工
-- [「本地同步到最新」= 运行时同步，不只是 git](workflow/local-sync-means-runtime-not-just-workspace.md) — 验收面是打开软件看到最新：镜像重建+容器重启+health 实测 version 三件套；只 pull 开发区会让他误判"什么都没做"
 - [线上是运营态、全量扫描双扫对齐](workflow/online-is-authoritative-dual-scan.md) — 漂移以线上为权威先问再修；只扫本地不算全量
 - [上游异常先查现状再动手](workflow/research-upstream-before-fixing.md) — 免费源脆弱；是否已切换以 DB/API 实测为准
 - [子代理编排实战细节](workflow/subagent-orchestration-lessons.md) — 契约先行+文件不相交才并行；失败先续跑勿重派
-- [Jev 与 KB 的适用场景及 DSH 清单核验](workflow/use-jev-and-kb-deliberately.md) — Jev 做类型化判断、KB 做检索沉淀
 - [日志全量通读方法论](workflow/log-full-read-not-just-errors.md) — 只筛 error 会漏显示假象与产品缺陷
 - [平台操作优先 CLI 而非浏览器](workflow/cli-over-browser-automation.md) — 先读文档用命令/API；浏览器只留扫码与一次性 token
 - [ZCode 内嵌浏览器（IAB）web 自动化能力边界](pitfalls/zcode-iab-web-automation-capability-boundary.md) — 能做：DOM 读写/受控表单/需用户激活的交互用 cua 真实点击（坐标=截图栅格）/同源 iframe；⛔ 不能做：文件选择器与 window.open 弹窗（真实点击也不够）⇒ 上传与弹窗类必须真浏览器；用 aria-expanded/value 验证是否真生效；症状词：没反应
-- [凭据卫生](workflow/token-and-secrets-hygiene.md) — 凭据管理器优先，`.local_secrets` 可能是旧值只作兜底；CNB 仓库/全局令牌分工；token 不落仓库
 - [长期保活用平台 cron，不依赖本机](workflow/platform-native-keepalive-over-local-cron.md) — CNB `.cnb.yml` main crontab + crontab sync + build log 验证；本机/单机 timer 只兜底
 - [git 操作先核对仓库归属](workflow/git-remote-ownership-check.md) — 先 remote -v 认角色；默认分支=ls-remote --symref；过期缓存可清：`git remote set-head <r> --auto/--delete`（别只忍着污染值）
 - [数值结论必须带基准与主语](workflow/numeric-claims-need-baseline-and-subject.md) — 数字全真但表述错也会被读成离谱结论
@@ -282,21 +250,15 @@
 - [决策理由落 ADR 而非 PR 描述/代码史书](workflow/adr-over-pr-description-and-code-history.md) — 优先级 ADR>代码注释>PR 描述；PR 描述随时间失上下文，注释写史书会污染代码
 - [两个 Agent 分工迭代：用派活板代替人工转述](workflow/two-agent-iteration-via-dispatch-board.md) — 待办/进行中/已完成三区 + 维护约定；「已完成」表要带维护者复算结论而不只是自报；派活书别写约束清单（会把对方框死）
 - [多入口共管同一系统：用共享指南做共同口径](workflow/shared-guide-for-parallel-agents.md) — 只写当前正确事实+踩过的坑；指明唯一事实源；动生产前先读实时状态；改动留痕；红线集中列
-- [用户指令覆盖一切默认纪律](workflow/user-authority-overrides-default-discipline.md) — 存疑一句话报告后照做；不许为门禁变绿回退用户指令；"我知A用户说反B"=读错上下文
-- [禁令类结论需二次确认](workflow/prohibitions-need-second-confirmation.md) — 禁令说错会静默阻止正确行动；"事实+条件+规避"优于"⛔别做"；措辞不得比原文宽
-- [提问当场给多选项不拖到收尾](workflow/ask-with-options-early-never-at-end.md) — 开放式文字问+末尾抛=让用户在已完成动作后才发现要决策；"我真服了你了"=别解释直接给选项或动手
 - [审查发现多时做本地 HTML 复选项页](workflow/audit-findings-html-checklist-with-free-input.md) — 证据/归因/3–6 方案/代价/推荐项/逐题自由输入/localStorage/导出 Markdown+JSON；用户逐项选择而非替他决定
 - [两个 Agent 互相等=死锁](workflow/two-agents-waiting-on-each-other-is-deadlock.md) — 给明确到无解释空间的下一步；判"在等"看会话文件 mtime+writerOccupied+无待发指令三条同时成立
-- [破坏性动作必须显式报告](workflow/destructive-actions-must-be-reported-explicitly.md) — 杀进程/覆盖文件在回复开头明说；"✅已应用"不能掩盖副作用；"打算做"必须先问哪怕看起来有益
 - [先理清全局给计划再动手](workflow/plan-before-acting-and-verify-before-claiming.md) — 外发/破坏动作前报状态等确认；声称完成必须附验证证据；入口/通道/模式三类使用方式要直接问别假设
-- [别把待决定项包装成已定](workflow/never-pad-reports-with-desired-state.md) — 成果汇报只放已发生的事；需要拍板当场摆多选项独立成段；工具债是自己收拾不是塞给对方
 - [工作流是探针不是目的](workflow/workflow-is-a-probe-not-the-goal.md) — 问题充分取证就转派单修，比硬跑完更有价值；门禁没落地别续跑；"双线跟进"=两线互相把控
 - [动手前先只读盘点现状；跟随上游以功能页和可解包产物为事实源](workflow/survey-before-acting-on-own-project.md) — 连续迭代自有项目功能常早已存在；先列"已有什么vs缺什么"再决定动什么；二次开发逐符号对齐上游，防止归属错、半路分叉、旧哈希冒充当前状态；症状词：忘了吗、说过很多次、不是说了
 - [子代理的"已关闭/已不存在/最新版"断言要抽查](workflow/subagent-absence-and-security-claims-need-selfcheck.md) — 三类转述错误：策略读错路径反向、Test-Path 遇带引号路径报假孤儿、winget 无驱动项≠无新版；进用户可见结论前自己跑一条命令；子代理>1h 未完成就停掉自己跑精简版
 - [PowerShell 子串匹配当删除条件的误伤](workflow/powershell-substring-match-bulk-delete-hazard.md) — `-match "ACC"` 连删 ACCESSIBILITY 与 ACCESS_TOKEN（含 GitHub PAT）；精确用 -eq/-ceq，先打印清单再删＋动手前 reg export/复制快照
 - [关掉某个对象时优先最小作用域原生开关](workflow/prefer-narrow-native-switch-over-broad-global-or-plugin.md) — 逐对象状态机 → prompt 软约束 → 全局开关 → 自写插件，找到第一档就停；全局 allow-list 会误伤
 - [派单前先查在跑面（重复派单）](workflow/check-inflight-work-before-dispatch.md) — 派单/开 issue 前三查（开放 PR / 远端分支 / 最近构建）；命中即不派，改为收窄在跑的那支；与「台账会腐烂」互补=两个核对面
-- [批准范围不做类推扩展](workflow/approval-is-explicit-not-analogous.md) — 点名批准只做那几项；关 issue/台账前先查背后有无在跑的流程（评审/返工挂它回奏）；可逆≠可以顺手做
 - [store 管数据、页面管节拍与副作用](workflow/store-owns-data-page-owns-cadence.md) — 同一份数据两个持有者必漂移；通知类副作用留页面（需历史状态），数据与写入口归 store
 - [视觉判定权归执行者](workflow/visual-verdict-belongs-to-executor.md) — 执行者能看图就以审稿人视角判整页（图文数字一致/图注/轴刻度）；视觉角色只在无视觉能力时兜底
 - [给用户的路径必须可点击](workflow/user-paths-must-be-clickable-links.md) — 交付物/脚本/日志/配置一律 Markdown 链接 `[名](绝对路径)`，不给纯文本串
@@ -306,15 +268,19 @@
 
 - [规格先读上游再实测，别盲探](workflow/read-upstream-specs-before-probing.md) — 参数规格（上下文/输出上限/档位）先读源码/`gh release view`/PR/目录元数据；实测只作验收且要有判别力；上游不可达时用 AST 断言+符号检查做证据链
 - [工具与产物的位置纪律](workflow/no-new-artifacts-in-c-root.md) — 工具装正规位（C:\Software / Program Files）；产物只放当前工作目录；用户目录 C:\Users\<用户> 下禁止新建自建目录（_归档/_tmp 也不行）；已散落=搬家→更新引用→删原位
-- [单位口径：1K=1000，1M=100万（十进制）](workflow/units-decimal-1k-1000-1m-1e6.md) — 对用户表述 K/M 一律十进制，禁 1024 系换算、禁「64K（65536）」式括号注换算；二进制量写 KiB 或完整数字；引上游报错原样照抄
 
 - [项目卫生是常驻动作不是收尾补课](workflow/project-hygiene-continuous.md) — 一次性文件当场删／文档随手同步／目录有真实内容就删 .gitkeep／交付前跑 check(lint+格式化)／产物只落工程内／体积有数／不擅自 commit
 - [发布门禁必须硬阻断本版必做项未关闭](workflow/release-gate-requires-must-do-items-closed.md) — 用户点名计入本版的 P1 只记待办就发布 → 同版本重制/资产覆盖/tag 漂移；发布前逐项给出关闭证据
 
-- [无视频输入时的动效验收](workflow/video-motion-review-without-video-input.md) — 0.6s 逐幕条带 + 1fps 接触表 + 成片抽帧；只声称看帧，不声称看视频
-- [代码绘帧视觉审查清单](workflow/code-drawn-video-frame-review-checklist.md) — 标题断行/图标不可认/文字互撞/图形压字/词云噪声/WARN 先例
 - [无活跃会话授权要先按事件语义分类](workflow/idle-window-authorization-needs-work-event-classification.md) — 心跳≠忙，turn/tool/model started 才是；助手探测本身制造事件，「等空闲」不成立就停下请用户定夺，别反复探测（2026-11-10）
 - [项目膨胀后按可验收子模块拆 + 四件套](workflow/module-acceptance-four-file-set.md) — 说明/验收标准/试验方案/验收报告 + md 总目录 + 耦合红线；「先看文档与已有轮子」写进 AGENTS；用 lint 卡门禁
+- [凭据卫生：只记位置，不记取值](workflow/token-and-secrets-hygiene.md) — 凭据卫生：库级令牌按 protocol+host+path 存 Windows 凭据管理器或 CNB helper；token 不内联命令行、不落仓库；凭据原文不进记忆/kb/日志
+- [提问与汇报](workflow/ask-and-report.md) — 要问就当场给多选项、汇报只放已发生的事、只解释不推销、不讨好开场、声称生效必须独立验证
+- [授权与范围](workflow/authorization-and-scope.md) — 明确批准才做、判断纠正≠改代码、用户指令优先、禁令需二次确认、破坏性动作开头显式报告
+- [用户输入契约](workflow/user-input-contract.md) — 用户未给的值不填默认、清单逐项 diff、相等原样落值、单位用十进制
+- [视频审查与验收](workflow/video-review-and-acceptance.md) — 代码动画视频的抽帧/指标/视觉清单：帧率缩放、接触表、逐幕抽帧、人视角监看
+- [同步语义：到运行时才算数](workflow/sync-semantics.md) — 同步/更新=到用户可见运行时层，不等于发版；本地副本不算数
+- [最小改动边界](workflow/change-scope-boundary.md) — 最小改动是排序规则不是不修缺陷；边缘功能不主动开战线；修完闭环即止
 ## tools/ 环境与平台
 
 - [dsh-go 配置落点与凭证格式](tools/dsh-go-config-paths-and-credentials.md) — provider 写 $DSH_HOME/profiles/web/cordis.patch.yml、key 写 .credentials.yaml；app 数据 adb 进不去（非 debuggable/无 root）
@@ -325,7 +291,6 @@
 - [Windows Agent 直连 WSL2 Kali 的 stdio MCP](tools/wsl2-stdio-mcp-bridge-for-windows-agent.md) — 用 wsl.exe 替代 VMware/SSH/IP；ZCode mcp.servers 严格 schema；MSYS_NO_PATHCONV、gh tarball、阿里云 PyPI、mcp<2 启动器、168 工具验收；顺手退役 0.0.0.0:5000 旧服务
 - [Git Bash 的 `&` 会拆掉 gh auth login 参数](tools/git-bash-ampersand-breaks-gh-auth-login.md) — 管道送 stdin；Fine-grained 全选=完全权限但删不了库
 - [GitHub 大陆双向通路（下载+推送）](tools/github-china-network-workarounds.md) — 下载用 jsdelivr/curl 续传；推送须探测+hosts 一体；`github-push-ip-retry.py` DoH 源已扩（阿里/腾讯×2 + UDP 电信/联通/百度/360/CNNIC，2026-10-06 实测国外 DoH 被墙）
-- [WARP 连不上先换协议 MASQUE↔WireGuard](tools/warp-protocol-masque-vs-wireguard.md) — 卡 Connecting/happy-eyeballs 多为 MASQUE(QUIC 443/8095) 被挡；`tunnel protocol set WireGuard`(UDP 2408) 即通；设置持久化
 - [git 传输死时走 Git Data API 构造提交](tools/github-git-data-api-push-without-git-transport.md) — 零 git 二进制建分支推提交；须本地 SHA1 预验证
 - [细粒度 PAT 缺 PR 写权限 → 403](tools/github-fine-grained-pat-pr-write-403.md) — 能推≠能开 PR；先 GET /pulls 分辨权限 vs 不存在
 - [直连云环境里的 AI Agent（CNB 工作区）](tools/cnb-workspace-agent-direct-channel.md) — 附**可执行脚本** `tools/cnb-workspace-agent-cli.py`（reply/history/sessions/keepalive/**watch**） — SSH 进容器 + `POST :8688/api/v1/sessions/{id}/reply` 发消息（⛔ 必带 `x-codebuddy-request: 1`）；⭐20261016 新增：**CLI 打通=继承 serve 进程注入环境（含 CNB_TOKEN 本库令牌，~7 天过期）**、**保活硬门槛=「进页面」（创建后 10 分钟内未进 VS Code 页面即回收，SSH 不算）**（旧「SSH 即心跳」已更正）；附「工作区 start 不能指定模型」「Dockerfile 构建期无 git 凭据」等相邻事实；关闭取证看 backup_status/commit_count/备份自述（file_count 非未提交口径）、平台全量日志不含对话、对话关闭后不可追
@@ -341,8 +306,6 @@
 - [数模论文图与摘要视觉基线](tools/mathmodel-paper-visual-baseline.md) — 高级图型清单、rcParams 固化、摘要按方法→数值
 - [stdio MCP 安装验收法](tools/mcp-stdio-install-smoke-test.md) — 装前必实测 initialize+tools/list
 - [MCP 多密钥池化代理](tools/mcp-multikey-keypool-proxy.md) — 单 key 官方 server 的多密钥正解=逐 key 子进程+stdio 代理（故障转移+冷却自愈）；含 npx 缓存残缺（zod v3/v4 缺失→秒退且零日志）取证法
-- [浏览器扩展取证：profile + LevelDB](tools/browser-extension-forensics-profile-leveldb.md) — 判启停/权限读 Secure Preferences（userScripts 须 granted+active 都有）；LevelDB 锁定用 FileShare.ReadWrite 读；location=4 解包扩展删源即失效但注册项须 UI 删；油猴脚本可能依赖本机 RPC 端口（PanLinker→16800 无监听＝不可用）
-- [跨浏览器迁扩展：先确认机制再动手](tools/browser-extension-migration-mechanism-first.md) — ego-lite 只认自家安装（外部塞文件/注册会被删）；Chrome 与 Edge 商店同一扩展 ID 不同，按 ID 做差集必误判；chrome://extensions 快照是异步渲染不能当证据，判装没装看 Extensions 目录 + Secure Preferences
 - [ego-browser 表单站自动化：弹窗与产物取证](tools/ego-browser-form-automation-dialogs-and-cache.md) — `Input.dispatchMouseEvent` 超时但 `mouse.move`/`evaluate` 正常 ⇒ 是浏览器级权限气泡挡的，改走 DOM `.click()`；DOM 点击"没反应"先列出所有可见 `.ui-dialog` 的按钮文案（EM 确认键=Proceed / Proceed without ORCID iD，只点 Close 等于没做）；EM 上传拒重名须先删后传；`fileDownload.asp` 不带 `authVer=true` 返回旧版成品；`pdftotext -layout` 会把表格封面错读成字段错位，必须渲染成图；窗口最小化时 mouse.click 落不下去（DOM/keyboard 仍可用），CDP Browser.setWindowBounds maximized 恢复后才能 trusted click
 - [MCP 有没有用看 handler 返回什么](tools/mcp-prompt-template-servers-add-no-capability.md) — 别读 description 宣称，读 handler 返回什么
 - [CNB 密钥库导入与消费链路](tools/cnb-secret-repo-imports.md) — 密钥库拒一切令牌、只能网页编辑；`.cnb.yml` 顶层键须是分支名；Prepare 秒失败无日志的取证手法；NPC 镜像无 `python` 只有 `python3`；应用不读 env 时须加翻译步骤
@@ -360,7 +323,6 @@
 - [Windows 用户目录清理：可删的 vs 陷阱](tools/windows-home-cleanup-safe-vs-traps.md) — `*updater*`/缓存/解包暂存可删；⛔ `%APPDATA%\npm` 是全局 CLI 入口不是缓存；孤儿 MSI 记录单清
 - [ESP32 编译烧录链路（本机 arduino-cli）](tools/esp32-arduino-cli-flash-workflow.md) — 工具链落点 + FQBN 必带 huge_app + sketch 目录同名硬约束 + ELF 体积分析法；附 GFX/ST7789 三坑与"参考图别手绘"
 
-- [WARP 分隧道：外网走隧道、大陆直连](tools/warp-split-tunnel-china-direct.md) — 消费版只能"排除"，故排除大陆 v4+v6 网段；DNS 必须随隧道走故勿用 mode proxy；裸 Python 测国内站点会误判超时
 - [Chromium 代理实测：SOCKS4/SOCKS5 与 PAC](tools/chromium-proxy-behavior-socks4-vs-socks5-and-pac.md) — 系统代理 socks= 与 PAC 的 SOCKS 令牌都是 SOCKS4（本地解析、读 hosts），SOCKS5 才远端发域名；用探针 SOCKS 服务看 ATYP 判定
 - [Codex hooks 与 Claude 同构](tools/codex-hooks-are-claude-compatible.md) — 事件名与 stdin/stdout 协议一致、脚本可原样复用；用户级只能写 config.toml [hooks]；解析失败只 warning 不报错；桥接 .cmd 需 CRLF、路径用正斜杠绝对路径、改后必复测（fail-open 吞错）
 - [Tencent BrowserSkill（bsk）：接入与使用](tools/tencent-browser-skill-setup.md) — 三件套安装（CLI/扩展/技能）+ 收割型宿主 daemon 托管启动（run_in_background + --foreground + BSK_AUTO_START=0）+ upload 需扩展「允许访问文件 URL」+ instance_id 重装即变勿写死（20261014 实测）
@@ -371,15 +333,15 @@
 - [Agent 遇 2FA 网页登录卡点：凭据管理器 + keepassxc-cli 一条命令出码](tools/agent-2fa-totp-noninteractive.md) — gh PAT 不受影响、网页 UI 卡在六位码拿不到第二因子；主密码进 Windows 凭据管理器（cmdkey /generic + CredRead）再管道喂 `keepassxc-cli show -t`，抓 stdout 的 `^\d{6}$`；★keepassxc-cli 2.8 无 --totp 只能靠 GUI 直接输 base32 密钥、pykeepass 4.2 保存后 KeePassXC 报"标头与哈希不匹配"打不开库、PS 的 ErrorActionPreference=Stop 会把原生 stderr 变终止错误（2026-10-24）
 - [ZCode 插件 Python 运行时隔离](tools/zcode-plugin-python-runtime-isolation.md) — 插件 MCP 硬要 mcp 1.x，与系统 2.x 冲突；建独立 venv 装依赖并把 manifest/hooks 的 python3 重指向它，不动系统解释器；插件更新会还原需重跑脚本
 - [skills CLI 安装作用域与目标平台](tools/skills-cli-install-scope-and-agent.md) — `npx skills add` 默认项目级（-g 才用户级）、`-a zcode` 指定平台、Windows 加 --copy；装前用 -l 先列
-- [winget 装 PowerShell 7 是 MSIX 用户级](tools/winget-powershell7-msix-userscope.md) — pwsh 在 WindowsApps 别名(非 Program Files\PowerShell)；验证 pwsh --version+Get-AppxPackage；powershell 仍 5.1、pwsh 才是 7；Terminal 默认 profile GUID={574e775e…}、source=Windows.Terminal.PowershellCore；**2026-11-23 更正：7.7 起无 MSI，本机已卸 MSIX、改用官方 ZIP 装到 Program Files\PowerShell\7**
-- [PowerShell 7.7 无 MSI：GitHub 被墙时用 TUNA 镜像装 ZIP 到 Program Files](tools/powershell7-zip-install-github-blocked.md) — 7.7 起资产只有 zip/msixbundle，winget 走 github 报 0x80072efd；TUNA github-release 目录名含空格要 %20；zip+hashes.sha256 校验、解压前删同名 junction、Unblock-File、机器 PATH 前置；卸 MSIX 会连带杀掉正在跑的 pwsh（命令中断≠失败）；宿主 env 未刷新时 shell 写绝对路径即可生效
 
 - [Computer Use（Windows）动作时延与输入通道](tools/computer-use-windows-action-timing.md) — 系统热键须 holdSeconds≈0.6s；Qt 快速 typeText 把 `-` 变双并吞后一字符（≥50ms 间隔或 paste 可解）；动画中截图报 geometry changed、打开的搜索面板只回白帧；后台键盘显式拒发；索引须每轮重取
 - [B站投稿流程与字段语义](tools/bilibili-upload-flow.md) — 视频直传首个 file input；创作声明「含AI生成内容」+「内容为自制」是两个独立控件；封面用 hidden input 上传；合集需 Lv2；审核期列表显示仅自己可见、通过后自动公开；字幕/评论 API 须先 goto api.bilibili.com 同源否则 -101；封面 16:9 需确认同步后再点一次完成；「开启通知」弹窗真按钮是知道了；单条评论@上限约10（17报12013）；识别DSH机器人看评论自认内容而非昵称；标题会被上传文件名覆盖，需编辑页 page.fill 重填
 - [DSH 会话存储与残留清理](tools/dsh-session-store-and-cleanup.md) — 会话分三层：正文 sessions/<proj>/<id>/*.zstd、索引 workspace.json（sessionIds/archivedSessionIds）、缓存 projcache+overview-cache，删会话须三处同步；会话层 workspace-write 时 ~/.dsh 全写拒且 run_code 提权不穿透，须切 danger-full-access
-- [妙手（CatPaw）设置与自定义模型 API](tools/meituan-catpaw-miaoshou-settings-api.md) — 设置走网关照；读用 x-auth-token 头（Bearer 会 401）、写 PUT /api/gateway/user/setting 且 propertyScope 只收 LOCAL/CLOUD（COMMON 报 400）；单键约 70KB 上限（31 条完整自定义模型 200、32 条 500）；条目 modelTypeName=上游 model 不能加前缀、modelTypeId 由 -1e9 递减；本地 unified json 是加密缓存
-- [妙手当 LLM 供应商：catpaw2api 桥接](tools/catpaw-miaoshou-as-llm-provider-via-catpaw2api.md) — 妙手无 OpenAI 端点，用第三方 catpaw2api（nocode.cn/api/chat/*，free 计划轮询 history）；Windows 三坑：ps1 写 JSON 带 BOM 致 Go 解析失败、auth.json 毫秒 vs auths 秒、计划任务 Execute 须全路径
 - [OpenCode 模型能力字段与 models.dev 取数](tools/opencode-model-capabilities-config.md) — capabilities.input/output 管多模态、capabilities.reasoning{supported,toggle,effort,budget} 管思考等级；供应商 /models 若带 context_length/input_modalities/reasoning_levels 优先用（同一网关不同密钥字段不同）；models.dev 默认 UA 403 须伪装 Mozilla；多源数据打架按 canonical_model_id 取众数
+- [妙手/CatPaw 接入：设置 API 与 LLM 桥接](tools/catpaw-miaoshou-integration.md) — 妙手（CatPaw/CatX）设置 API 与 catpaw2api LLM 桥接；含鉴权头、propertyScope、限额与 Windows 落地坑
+- [WARP 连接与分流](tools/warp-connectivity-and-split-tunnel.md) — WARP/Cloudflare One 协议切换（MASQUE↔WireGuard）与大陆直连分流；含 DNS 与 exclude 网段
+- [PowerShell 7 安装：MSIX 与 ZIP](tools/powershell7-install-msix-and-zip.md) — PowerShell 7.7 前 MSIX/winget 与 7.7 后无 MSI 的 ZIP 兜底；含 PATH、Unblock-File、卸载 MSIX 的进程中断
+- [浏览器扩展取证与迁移](tools/browser-extension-forensics-and-migration.md) — Edge/Chrome 扩展的 Secure Preferences/LevelDB 取证与跨浏览器迁移机制；含 location=4、扩展 ID 差异、安装器删除外部扩展
 
 ## 条目格式
 
@@ -403,29 +365,28 @@ topic: 受控词表之一（见 kb 技能）
 - [模型窗口读上游目录，不靠猜；provider 配置逐键验 schema](pitfalls/model-window-from-upstream-catalog-not-guess.md) — 窗口取 /v1/models 的 context_length；ZCode 加 maxOutputTokens 会 ZodError 整份拒载并降级空配置；模型元数据在 config.modelConfigRules（contextWindow / optionSpecs.maxOutputTokens.max 是上限）
 - [Web自动化优先调页面函数与服务端接口](pitfalls/web-automation-call-page-functions-not-dom-clicks.md) — element.click()/UI模拟时灵时不灵；从onclick属性和源码reverse出页面函数与完成接口直接调用是确定性方案；iframe递归遍历/字体混淆用截图读/SPA切换后reload/验证看服务器快照
 - [Codex hook 命令必须是合法 PowerShell](pitfalls/codex-hook-command-must-be-valid-in-powershell.md) — Windows 上 hook 走 pwsh，「"a.exe" "b.py"」双引号串写法 ParserError 且发生在进程创建前（日志无痕，易误判成没调度）；改用无空格 .cmd 桥或加 & 调用符；~/.agents 不是 hook 配置源
-- [「同步到最新」要打到用户拿到东西的那一层](pitfalls/local-sync-must-reach-user-visible-layer.md) — 启动器每次 pull 会覆盖本地镜像，改本地等于没改；gitignore 的旧 dist 把「源码编译不过」藏了一整天；验证要回拉制品库 digest + 走用户入口
 - [接外部工具集：判据是「模型自己做不到」](tools/external-tool-integration-criteria-and-gotchas.md) — 工具数是反向指标（1894 个多是 convert_*/calculate_* 微函数）；握手超时先怀疑客户端（curl 0.47s vs CLI 60s）；URL 里可能要 ASCII slug
 - [ZCode 本地文件链接格式](tools/zcode-file-links-need-workspace-prefix-or-absolute.md) — 必须绝对路径或带工程子目录前缀，否则相对工作区根解析打不开
 - [「阶段」与「执行单元」必须分开](pitfalls/semantic-unit-vs-execution-unit-must-be-separate.md) — 两者压成一个概念会逼出变体爆炸（写作技能 10 个=笛卡尔积）与身份撞车（skill_name 当主键）；修法是加语义层不动执行层 + 零语义漂移（一次性回填/只在多单元阶段渲染/只在声明时序列化）；最易漏的是创建路径（老数据正常、新建全丢）
 - [派单前核三方等值 + 载荷先入仓 + 产物落项目内](pitfalls/dispatch-requires-three-way-equality-and-artifact-hygiene.md) — 「我上次核过」在派单语境一律无效（执行者 87 秒就能推进目标仓 ⇒ 三方分叉）；执行者要用的载荷必须先入仓（签名 URL 是旁路）；产物唯一落点 = 项目内 `_tmp/`（先确认 gitignore）
 - [含正则元字符的检索词作证据必须加 -F](pitfalls/regex-anchor-literal-search-false-zero-hit.md) — `rg '$FORMAT'` 里 `$` 是行尾锚点⇒恒零命中，会被当成「全仓无消费点」写进审计结论；凡把命中数（尤其 0）当证据，pattern 含 `$ ( ) [ ] . *` 即切 `-F` 并在证据行注明模式
 - [审计能力先查产物再判未实现](pitfalls/audit-capability-check-artifact-before-marking-unimplemented.md) — 审计说「未实现/无消费者」时先在最终产物 grep 关键符号并追调用点；CLI SOCKS 实际已打包 proxy-agent SocksProxyAgent，两个设置键实际有渲染层读取点；凭技术栈假设判未实现会重复造轮子或改坏已有能力
-- [先解释再说，别瞎建议](workflow/explain-dont-advise.md) — 用户要「说明白」时只给是什么/为什么：把界面现象翻译成后台机制、数字能对上现象、不给下一步建议（被问才给选项+代价）
 - [指令分层：全局只放跨项目通用，专属坑下放项目级](workflow/instruction-layering-global-vs-project.md) — 每条全局约束先问「换个项目还成立吗」；fpylll/PIL/平台按钮这类留全局只会稀释授权与清理纪律；全局留一句指针防回灌
-- [git 凭据按 host 查询会丢仓库级权限](pitfalls/git-credential-host-vs-path-scope.md) — 查凭据要带 path；400=有写权限，403 scope=没有；别急着新建令牌
-- [停顿后首个增量样本必须丢弃](pitfalls/burst-sample-after-idle-must-be-discarded.md) — 增量估算速率在恢复第一拍必出假高尖峰
 - [minified 别名必须构建期解析](pitfalls/minified-alias-must-resolve-at-build-time.md) — 硬编码别名+空 catch 把错绑藏成静默行为降级
 - [ZCode 目标投影需 forceSnapshot 对账](pitfalls/zcode-goal-projection-needs-forcesnapshot.md) — 增量 resync 不覆盖目标，点击变绿其实是触发了快照
 - [权重重复结构只给宽度，顺序来自 PRNG：日期种子枚举](pitfalls/ctf-weight-structure-gives-widths-not-order.md) — 唯一值远小于元素数⇒候选池+按索引取用；指纹行精确相等+全池覆盖双判据锁日期种子，置换用相邻种子；结构枚举 200 万+ 0 命中
 - [嵌套 iframe 的坐标要点到顶层：逐层加 frameElement 偏移](pitfalls/nested-iframe-coordinates-need-frame-offset-sum.md) — getBoundingClientRect 只是帧内坐标，直接拿它 mouse.click 会静默全落空（实测 19 次点击零命中）；换算后同一点即生效；点完查 check_answer/check_answer_dx 才算数
 - [答案客观存在的题必须外层检索：模型记忆只当初筛](pitfalls/factual-quiz-answers-need-retrieval-not-model-recall.md) — 125 题实测：只凭判断多选题在"教材条目数"上反复错（该选 AB 却全选丢 20 分）；检索词用题干核心短语+答案，多选重点核对"列了几条"，判断题核对人名/年代/顺序
-- [内存曲线要事件边界+时间轴双轴互校](pitfalls/memory-curves-need-event-boundaries-and-time-axis.md) — 只按时间会把重启/装机拼成假曲线；只按事件会漏掉段内缓涨与闲置不释放；按主进程 pid 变化与装机 mtime 切段，段内再看 30min 窗地板、峰值、斜率
 - [流式投影 advance 必须 delete 旧 key](pitfalls/v4-projection-partition-advance-must-delete-old-key.md) — WeakMap 不延长寿命的假定在旧数组另有强引用时失效；三份堆快照 1.5–1.7GB，先做强可达检查再动刀，只补删不裁剪 history
 - [运行态验收需用户安装，静态全绿只是代理信号](workflow/runtime-acceptance-needs-user-install-not-static-proxies.md) — 目标写的是真实环境日志就只认运行态；验收脚本做完就停，把阻塞留档等用户动作，别反复堆静态检查冒充完成
-- [超星视频：任务点 ≈87% 上报，但下一章要 ≥90% 才放行](pitfalls/chaoxing-video-report-threshold-vs-navigation-gate.md) — 87% 上报后立刻切下一章会被服务端反复重定向回上一章；视频一律播到 94–97%，判据看下一章 URL 能否稳定停留，别误判为 enc 失效
-- [超星章节测验标题=题库编号，但答案库里的"我的答案"不可全信](pitfalls/chaoxing-quiz-question-bank-title-mapping.md) — 有"得分"标注的才是对答，无标注多为错答；选项顺序可能变，须按题干文本对齐；判断题按课程价值取向复核，别硬套
-- [视频运动验收的帧率口径与对音判据](pitfalls/video-motion-metrics-fps-calibration.md) — 帧间差随帧率缩放用隔帧差；平滑场景加纹理；慢攻击音效峰滞后≠错位；指标全过≠观众看懂，须人视角监看；8/255 只适用亮场3D，暗场图文用同风格已通过成片基线（2026-11-09 补）
 
-- [zcodepro 发版文案格式](workflow/zcodepro-release-copy-format.md) — 新增/修复/去掉三段+发版状态，简短有力
-- [超星考试滑块验证：回归定缺口 + 闭环拖动](pitfalls/chaoxing-slider-captcha-gap-and-drag.md) — 缺口是拼图块+半透明覆盖，用 big≈a*piece+b 的相关峰定位（0.71 vs 0.48）；拼图块 left 落后手柄约 8px，必须读 .cx_imgBtn 闭环修正再松手；偏了会静默换图
 - [可选能力默认不能改变官方调用路径：opt-in 写成 opt-out 会撞官方守卫](pitfalls/opt-in-feature-must-not-flip-default-call-path.md) — 给官方函数加开关默认必须=原行为；果冻 preserveUsage===true vs 我方 !==false 导致归档删除必抛 session-data.deleting
+- [Git 凭据作用域与轮换](pitfalls/git-credential-scope-and-rotation.md) — git 凭据的 host/path 作用域、空 helper、轮换误删与按库隔离；含 GCM/CNB helper 实测判据
+- [脱敏三原则：按键名、保唯一、留边界](pitfalls/redaction-three-principles.md) — 脱敏/掩码按键名而非值、遮蔽值唯一性与全量/脱敏分仓、过度脱敏的边界；含负向自测与二进制载荷防误伤
+- [超星任务自动化：题库、滑块与视频进度](pitfalls/chaoxing-task-automation.md) — 超星题库编号映射、滑块缺口闭环拖动、视频上报阈值与导航门槛；同一平台的三关
+- [New API 路由与 abilities](pitfalls/newapi-routing-and-abilities.md) — New API base_url 不带 /v1、abilities 是路由唯一事实源、禁用/改组必须同步重建；含 status 语义与占位符错位
+- [New API 渠道数据模型：model_limits 与多密钥](pitfalls/newapi-channel-data-model.md) — New API tokens.model_limits 是 CSV、多密钥渠道 multi_key_size 必须与 key 段数一致；含原生 PUT 加钥流程
+- [Word/OOXML 交付坑](pitfalls/word-ooxml-delivery-traps.md) — Word/docx 交付管线与 OOXML 静默失效：字号/行距/表宽、子元素顺序、draw.io 0 字节、WinRAR 中文路径
+- [图表几何与版式自检](pitfalls/figure-geometry-and-placement.md) — 图例遮挡、图离引用句过远与 matplotlib 几何自检；含图元分级 bbox、临时副本重跑门禁
+- [PPTX 图片/动画管线](pitfalls/pptx-image-and-animation-pipeline.md) — PPTX 动画用 COM 原生接口而非手写 XML；Qoder Office MCP 图片管线故障与页内动画 zip 注 XML
+- [测量与采样](pitfalls/measurement-and-sampling.md) — 测量前验对照组与测量层、空闲后首个突发样本丢弃、内存曲线按事件边界切段、交互延迟用 Event Timing

@@ -33,4 +33,4 @@ topic: safety, toolchain
 - 真崩溃：有新 dump / minidump、有 `js_heap_exhausted` 之类的判据、事件日志有记录。
 - 想定位"是谁杀的"，先枚举**自己跑过的所有 destructive 命令的时间点**与日志截断点对齐——2026-10-29 这次五个重启点（00:22:19 / 00:23:53 / 00:33:24 / 00:35:54 / 00:40:27）全部对上自测运行时刻，而修掉脚本后再跑同一条测试（00:43:37）**没有产生任何重启**。
 
-关联 [[pkill-self-match-kills-own-shell]]、[[destructive-actions-must-be-reported-explicitly]]、[[file-change-not-code-running]]。
+关联 [[pkill-self-match-kills-own-shell]]、[[authorization-and-scope]]、[[file-change-not-code-running]]。

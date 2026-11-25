@@ -19,4 +19,4 @@ verified: 2026-10-23
 4. **阈值和判据是两件事，别混着改**：修误杀应该改判据；顺手把默认阈值从 15 分钟拉到 60 分钟是**未经授权改用户配置**，会被明确要求撤回。正确做法是判据修好后阈值原样不动。
 5. **复盘要拿「事件计数」当证据**：不要只说「日志里没看到订阅」，要数出来——「该时段订阅事件 0 条，对照时段 3 条/次」，这样才排除「我 grep 漏了」。
 
-关联 [[no-assertion-without-measurement]]、[[injected-ui-feature-failure-check-credential-plumbing-first]]、[[measurement-must-verify-control-group]]。
+关联 [[no-assertion-without-measurement]]、[[injected-ui-feature-failure-check-credential-plumbing-first]]、[[measurement-and-sampling]]。

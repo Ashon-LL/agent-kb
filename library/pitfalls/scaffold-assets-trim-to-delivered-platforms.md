@@ -12,7 +12,7 @@ topic: delivery
 
 **Why**：MH-Agent-Open 的 `desktop-wails/` 86 个跟踪文件里只有 20 个是 Windows 实际要用的；其余 66 个是模板噪音，还会让“这项目到底发布什么”变得不可读。更隐蔽的是生成器的 `update build-assets` 默认重写全部平台目录——删完不设守卫，下一次有人按 README 跑一遍就复活。反过来，删平台目录必须同批改 Taskfile，否则 `wails3 build` 会在 `generate:icons` 引用 `darwin/icons.icns` 这类路径上炸。
 
-**How to apply**：接手/初始化脚手架后先问“我们交付哪个平台”，按平台裁剪资产与 include，跑一次真实构建（不是只跑 lint），再加范围守卫。裁剪后若原本的 `update build-assets` 任务已删除，就要在配置注释里写明“版本/元数据文件改为手工维护”，否则版本号会漂。相关：[[local-sync-must-reach-user-visible-layer]]（交付链要对齐用户实际拿到的那层）。
+**How to apply**：接手/初始化脚手架后先问“我们交付哪个平台”，按平台裁剪资产与 include，跑一次真实构建（不是只跑 lint），再加范围守卫。裁剪后若原本的 `update build-assets` 任务已删除，就要在配置注释里写明“版本/元数据文件改为手工维护”，否则版本号会漂。相关：[[sync-semantics]]（交付链要对齐用户实际拿到的那层）。
 
 **补充（2026-10-30，同一工程的资源生成器）**：裁剪平台资产后，构建仍可能残留模板的**资源生成器**问题。
 Wails v3 的 `wails3 generate syso` 生成的 VERSIONINFO 能被 `pefile` / `strings -el` 读出完整字符串，

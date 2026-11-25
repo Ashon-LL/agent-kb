@@ -27,7 +27,7 @@ topic: zcode
 先把时间序列按进程拉出来，看 `heapUsedKb` 的斜率，再找**同一行里跟着涨的计数器**；
 更有效的是跨进程对照：本次两个 renderer 一个 3.3GB、另一个 207MB，而 `shiki.tokensCache` 分别 3 与 0、
 `projection.rows` 后者反而更多 —— **同样的计数器、差 17 倍的堆占用，直接把已埋点的那几张表全排除**，
-省掉一轮白修。同 [[measurement-must-verify-control-group]] 的道理：对照组要选「本来就正常的同类状态」。
+省掉一轮白修。同 [[measurement-and-sampling]] 的道理：对照组要选「本来就正常的同类状态」。
 
 **四、兜底治理的可落地形状**（本次实现，纯主进程、零协议改动）：
 - app ready 前 `app.commandLine.appendSwitch("js-flags", "--expose-gc")`（只能早期设，仿

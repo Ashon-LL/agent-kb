@@ -27,4 +27,4 @@ topic: methodology, reporting
 5. **自检**：写完全局后通读一遍，凡出现具体库名/维度/按钮名/文件名/某题名的条目，基本都该下放。
 6. **过期条目要「连实体一起删」**：删一条全局规则前，先核它指向的实体还在不在（`ls`/`find`/`grep`）。2026-11-01 处理「团队记忆」那条时发现 `team-memory.py`、禁用的 `memory_hooks.py.disabled-*`、配置 `.bak` 三样都还在——只删规则会让人以为东西没了，反过来误调一个连不上网关的脚本；正确做法是规则与实体同批清掉，删完再 `find` 复查。同理，路径类规则（"产物放 X"）先 `ls` 确认 X 还在用，避免把过期路径当规矩执行。
 
-关联 [[approval-is-explicit-not-analogous]]。
+关联 [[authorization-and-scope]]。

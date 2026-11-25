@@ -32,4 +32,4 @@ topic: office, browser
 
 相关：[[html-to-docx-windows-venv-layout]]、[[workbuddy-present-files-url-opens-sidebar-browser]]
 
-关联 [[qoder-office-pptx-image-and-animation-workarounds]]。
+关联 [[pptx-image-and-animation-pipeline]]。

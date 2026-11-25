@@ -29,4 +29,4 @@ seg(p, .1 + n*.003, .24 + n*.003)
 
 - 写错峰公式时先算末元素窗口，确保终点>起点且在幕内；用「窗口宽度固定，整体平移」的写法。
 - 凡是**用数量表达比例**的点阵/网格/车列，成片抽帧必须数一遍实际显示的元素个数，并和标注的百分比对照；不能只靠静态关键帧门禁。
-- 与 [[code-drawn-video-frame-review-checklist]]、[[video-motion-review-without-video-input]] 配合：门禁过 ≠ 数量对，成片抽帧要看统计示意元素的实际数量。
+- 与 [[video-review-and-acceptance]]、[[video-review-and-acceptance]] 配合：门禁过 ≠ 数量对，成片抽帧要看统计示意元素的实际数量。

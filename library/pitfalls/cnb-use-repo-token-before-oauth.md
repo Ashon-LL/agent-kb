@@ -66,5 +66,5 @@ path=<owner>/<repo>.git
   `errcode 10023 Missing required scopes: account-engage:r`；而 registry 写/删
   （`registry-package:rw` / `registry-package-delete`）反而**只有库级令牌有权**。
 - ⇒ 正确姿势 = **优先库级、权限不足自动回落用户级**。已做成 wrapper：
-  `%USERPROFILE%\bin\cnb-repo`（先 `git credential fill` 取库级注入 `CNB_TOKEN`，
+  `C:\Users\MECHREVO\bin\cnb-repo`（先 `git credential fill` 取库级注入 `CNB_TOKEN`，
   命中 `Missing required scopes/10023/403` 则回落 CLI 默认）。已加入 `~/.bashrc` 的 PATH。

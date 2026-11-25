@@ -36,10 +36,10 @@ Map、渲染单元缓存间接引用旧数组，那份数组连同它 slice 出�
    清掉了普通 Map 成员；只 `delete(map, key)` 而实例里的 `subscribers` 还挂着闭包，等于没清。
 5. 行为级测试要把真实产物里的 `advance` 和 cleanup 闭包抽出来执行，断言
    「旧 key 已删 / 新 key 在 / 需整窗重建的 early-return 分支不误删 / onEmpty 仍触发」。
-6. 验收回到 [[memory-curves-need-event-boundaries-and-time-axis]] 的双轴：
+6. 验收回到 [[measurement-and-sampling]] 的双轴：
    装机后按新的重启事件切段，看段内 30min 窗地板斜率与峰值，不许用刚更新完的单点值。
 
-关联 [[renderer-reload-is-not-context-loss]]、[[measurement-must-verify-control-group]]。
+关联 [[renderer-reload-is-not-context-loss]]、[[measurement-and-sampling]]。
 
 ---
 

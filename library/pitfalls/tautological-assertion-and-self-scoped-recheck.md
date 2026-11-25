@@ -55,7 +55,7 @@ P0-02 首轮的完整假绿链（三层完全重合，任一层宽一点就能�
 
 **检索症状词**：assert(true)、自注入常量、桩不回调、or True、恒真、断言空转、假绿、残留 0、复检范围、守卫没抓到。
 
-**同族**：[[guard-must-cover-the-changed-layer]]（跨层守卫=没有守卫）、[[guard-criteria-anchored-to-spelling-always-escape]]（锚写法被绕）、[[test-scope-must-be-pinned-by-index-not-walk]]（扫描范围/前提/断言三类假单）、[[silent-continue-masks-lost-check-coverage]]（continue 掉缺项）、[[measurement-must-verify-control-group]]（测试抓到错≠机制在生效）。
+**同族**：[[guard-must-cover-the-changed-layer]]（跨层守卫=没有守卫）、[[guard-criteria-anchored-to-spelling-always-escape]]（锚写法被绕）、[[test-scope-must-be-pinned-by-index-not-walk]]（扫描范围/前提/断言三类假单）、[[silent-continue-masks-lost-check-coverage]]（continue 掉缺项）、[[measurement-and-sampling]]（测试抓到错≠机制在生效）。
 
 ## 2026-11-15 补：用户阈值不能被内部更短宽限窗否决（zcodepro idle reclaim 误杀）
 

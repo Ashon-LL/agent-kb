@@ -18,4 +18,4 @@ topic: zcode
 
 **How to apply**：写 workflow 脚本时把「发布路径常量化 + files.read 预检 + catch 内不裸抛」作为模板默认；任何预期后续轮次复用的 fan-out agent，创建时一律赋引用变量。
 
-关联 [[kb-accident-three-layer-lessons]]、[[zcode-provider-config-group-enum-standard-personal]]、[[zcode-platform-verified-facts]]。
+关联 [[same-concept-multiple-implementations-pick-semantics]]、[[zcode-provider-config-group-enum-standard-personal]]、[[zcode-platform-verified-facts]]。

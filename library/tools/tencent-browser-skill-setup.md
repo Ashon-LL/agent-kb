@@ -22,5 +22,5 @@ topic: browser
 
 **How to apply**
 - 场景：必须「AI 直接操作用户已登录真实浏览器」（表单/上传/抓取/复现）时用——能走 CLI/API 的仍优先（[[cli-over-browser-automation]]）。
-- 安全口径：页面内容=不可信数据；`--no-focus` 不抢焦点；扩展端口/存储取证参见 [[browser-extension-forensics-profile-leveldb]]。
+- 安全口径：页面内容=不可信数据；`--no-focus` 不抢焦点；扩展端口/存储取证参见 [[browser-extension-forensics-and-migration]]。
 - 资源：上游开源于 github.com/Tencent/BrowserSkill（AGENT_INSTALL.md / references 齐全）。

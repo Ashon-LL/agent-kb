@@ -43,4 +43,4 @@ topic: reverse-engineering
 
 **相邻**：「到账与否只认余额差」同 [[desktop-app-points-reverse-proxy-via-usage-report]]；
 「缓存字段不是事实」见 [[env-claims-must-be-reverified]]；「枚举前缀即结论」类误判见
-[[report-what-you-did-not-what-you-meant-to-do]]。
+[[ask-and-report]]。

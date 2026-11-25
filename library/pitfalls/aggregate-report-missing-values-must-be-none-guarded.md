@@ -34,4 +34,4 @@ if all(isinstance(rows[k], (int, float)) for k in members):
 3. 修完用**真的缺值输入**验一遍（本例：直接跑一次采集，用真实缺值复现），别只跑 happy path。
 4. 报告类脚本改完记得同步部署路径（APIShow 的定时器 ExecStart 指向 `/opt/apishow/scripts/ops/`，改本地不 scp 等于没改）。
 
-关联 [[report-what-you-did-not-what-you-meant-to-do]]、[[automation-artifacts-lie-existence-and-freshness]]
+关联 [[ask-and-report]]、[[automation-artifacts-lie-existence-and-freshness]]

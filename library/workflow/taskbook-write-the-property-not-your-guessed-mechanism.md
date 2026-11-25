@@ -98,6 +98,6 @@ args += ["--timeout", str(effective)]    # DEFAULT = 600
 **任务书要改、裁定要发，并把这条教训记住**。
 
 相关：[[config-field-name-is-not-spec-read-consuming-code]]（同源：名字/字面不是规格）、
-[[no-sycophantic-agreement-openers]]、[[agent-loop-follow-progress-not-liveness]]。
+[[ask-and-report]]、[[agent-loop-follow-progress-not-liveness]]。
 
-关联 [[cnb-npc-dispatch-essentials]]。 [[collected-data-must-be-persisted-before-analysis]]、[[importing-historical-runs-into-mh-agent-open]]、[[workflow-is-a-probe-not-the-goal]]、[[local-ssh-fail-is-not-cloud-task-death]]。
+关联 [[cnb-npc-dispatch-essentials]]。 [[collected-data-must-be-persisted-before-analysis]]、[[sync-semantics]]、[[workflow-is-a-probe-not-the-goal]]、[[local-ssh-fail-is-not-cloud-task-death]]。

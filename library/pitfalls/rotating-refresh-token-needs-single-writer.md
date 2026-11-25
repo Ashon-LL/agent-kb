@@ -28,6 +28,6 @@ topic: api-gateway
 5. **接管顺序**：先把新组件跑成只读（或任务-only、不碰 token），验证稳定后再切换 owner，最后关掉旧 owner 的刷新。切错顺序 = 直接制造竞态。
 6. **凭据文件加锁不是解法**：文件锁只能防"同时写"，防不了"读到已被别人 rotate 掉的旧 RT"——**要防的是多个读者各自去刷新**，所以要在**架构上**保证单一 owner，而不是在文件层加锁。
 
-**相邻**：凭据只对所属层有效见 [[layered-service-credentials-must-match-layer]]；凭据轮换要覆盖所有条目见 [[credential-rotation-must-cover-all-entries]]。
+**相邻**：凭据只对所属层有效见 [[layered-service-credentials-must-match-layer]]；凭据轮换要覆盖所有条目见 [[git-credential-scope-and-rotation]]。
 
 关联 [[newapi-rc26-token-crud-shapes]]。

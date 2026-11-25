@@ -14,4 +14,4 @@ verified: 2026-10-03
 
 **How to apply**：收工指令模板——"本轮到此为止。不要再改任何仓库文件、不要新开任务。剩下的由我同步给用户。若你之后不再回话，即为正常收工，不是异常。"判"在等"要看三条同时成立：会话文件N分钟无写入 + writerOccupied:true + 我方无待发指令。会话文件mtime仍在动=他还在收尾，不是"在等"。
 
-关联 [[npc-iterate-by-sending-failure-text-back]]、[[approval-is-explicit-not-analogous]]、[[cross-agent-skill-dir-semantics]]。
+关联 [[npc-iterate-by-sending-failure-text-back]]、[[authorization-and-scope]]、[[cross-agent-skill-dir-semantics]]。

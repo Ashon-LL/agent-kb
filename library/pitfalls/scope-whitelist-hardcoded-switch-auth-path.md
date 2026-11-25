@@ -23,7 +23,7 @@ cron 端点要 `system` scope，而 `system` 不在 `ALL_OPEN_API_SCOPES` ⇒ **
 
 **How to apply:** 遇 403 insufficient scope 按顺序：① 在源码里找该 scope 常量的**定义处与校验处**，确认它是否在允许列表内；② 对同一端点用另一种凭证做 A/B，区分「凭证类型」与「凭证内容」；③ 确认是白名单就去找平台自己的**会话式认证**（login → JWT/cookie，通常是全权），而不是继续申请 key。别把 API key 当成唯一的机器凭证形态。
 
-⚠ JWT 有 TTL（本例 7 天），落凭据库时同时记 `jwt_expires_at` 与重登方法，别只存 token。凭据真值只进 `.local_secrets/`，正文只记取值位置：[[credentials-never-in-memory-or-logs]]。
+⚠ JWT 有 TTL（本例 7 天），落凭据库时同时记 `jwt_expires_at` 与重登方法，别只存 token。凭据真值只进 `.local_secrets/`，正文只记取值位置：[[token-and-secrets-hygiene]]。
 
 相关：[[redacted-get-full-put-wipes-secrets]]、[[layered-service-credentials-must-match-layer]]、[[env-claims-must-be-reverified]]。
 

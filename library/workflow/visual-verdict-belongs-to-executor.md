@@ -32,5 +32,5 @@ topic: delivery, methodology
 - 判的是**整页一致性**（图、正文、表、图注互相印证），不是单独「图好不好看」。
 - 不要自行给视觉角色加流程规则；能力声明由用户裁定，不要反复实测。
 
-关联 [[deliver-user-tuned-artifact]]、[[figure-placement-and-legend-occlusion]]、
+关联 [[deliver-user-tuned-artifact]]、[[figure-geometry-and-placement]]、
 [[mathmodel-paper-visual-baseline]]、[[no-assertion-without-measurement]]。

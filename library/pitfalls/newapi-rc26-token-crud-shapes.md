@@ -11,7 +11,7 @@ topic: api-gateway
 
 # New API rc.26：令牌 CRUD 端点形状
 
-rc.26 实测（apigogo 生产库 `/opt/apishow/data/one-api.db`）。同族条目：[[newapi-rc26-channel-crud-shapes]]、[[newapi-disable-must-sync-abilities]]、[[newapi-multikey-size-must-track-key-count]]。
+rc.26 实测（apigogo 生产库 `/opt/apishow/data/one-api.db`）。同族条目：[[newapi-rc26-channel-crud-shapes]]、[[newapi-routing-and-abilities]]、[[newapi-channel-data-model]]。
 
 ## POST /api/token/ —— 成功但 `data` 为 null，**响应里拿不到 key**
 
