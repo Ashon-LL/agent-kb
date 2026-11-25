@@ -18,4 +18,4 @@ topic: git
 **How to apply**：每次在服务器上改源码，改完就 git add -A && git commit（提交信息写清改了什么）；
 对无远端的关键 fork，定期 git bundle create 到另一台机器/目录，并记录生成时间。
 
-相关：[[diff-deployed-vs-vcs-before-reimplementing]]、[[post-release-housekeeping-mandatory]]
+相关：[[diff-deployed-vs-vcs-before-reimplementing]]、[[release-discipline]]

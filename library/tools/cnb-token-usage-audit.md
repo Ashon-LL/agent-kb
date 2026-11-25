@@ -26,4 +26,4 @@ topic: cnb, reverse-engineering
 
 **How to apply**：任何"统计 CNB AI token 消耗"的需求都走上面的四步；组织全量含私有库需要 Owner 账号令牌（NPC 令牌读不了私有仓，可见性是硬边界）。结果示例口径：`{仓库, tokens, 请求数, 运行数}` + 按月 + 按模型（deepseek-v4.1-flash/space-bunny 等）拆分，输入/输出/思维链/缓存读分列。
 
-关联 [[npc-iterate-by-sending-failure-text-back]]、[[cnb-npc-dispatch-essentials]]。
+关联 [[cnb-npc-dispatch-channel-and-iteration]]、[[cnb-npc-dispatch-essentials]]。

@@ -144,3 +144,35 @@
 ## 2026-11-25
 - 合并 3 条 → `workflow/change-scope-boundary.md`：三条都在定义“最小改动”的边界，防止退化成不修或乱开战线。
   - 成员：minimal-change-and-no-scope-creep, minimal-change-degenerates-into-skipping-real-bugs, dont-open-frontline-for-edge-features
+
+## 2026-11-25
+- 合并 2 条 → `pitfalls/zcode-provider-config-enums-and-rules.md`：两篇都是 provider_config 被 Zod 整份拒载的字段/规则冲突。
+  - 成员：zcode-provider-config-group-enum-standard-personal, zcode-provider-config-smart-manual-rule-conflict
+
+## 2026-11-25
+- 合并 2 条 → `tools/zcode-session-prune-and-delete.md`：两篇都在操作同一张 ZCode 会话库，裁剪与删除是同一存储面。
+  - 成员：zcode-session-context-pruning-sqlite, zcode-session-delete-is-soft-delete-two-dbs
+
+## 2026-11-25
+- 合并 3 条 → `pitfalls/git-history-sync-traps.md`：三篇都是 Git 历史判断/同步时的反直觉行为。
+  - 成员：squash-merge-defeats-ancestor-check, fork-sync-force-update-wipes-local-customizations, upstream-merge-crlf-noise-and-anchor-patches
+
+## 2026-11-25
+- 合并 4 条 → `workflow/multi-agent-dispatch-and-parallelism.md`：四篇都是多 Agent 派单/并行的准入与契约。
+  - 成员：subagent-orchestration-lessons, check-inflight-work-before-dispatch, dispatch-requires-three-way-equality-and-artifact-hygiene, shared-guide-for-parallel-agents
+
+## 2026-11-25
+- 合并 2 条 → `workflow/two-agent-iteration-and-deadlock.md`：两篇都是双 Agent 协作的通信/死锁形态。
+  - 成员：two-agent-iteration-via-dispatch-board, two-agents-waiting-on-each-other-is-deadlock
+
+## 2026-11-25
+- 合并 2 条 → `tools/cnb-npc-dispatch-channel-and-iteration.md`：两篇都是 NPC 派单的通道/时长与失败回传；保留更长的 essentials 总条。
+  - 成员：cnb-npc-dispatch-channel-config-and-time-caps, npc-iterate-by-sending-failure-text-back
+
+## 2026-11-25
+- 合并 4 条 → `workflow/release-discipline.md`：四篇都围绕发版门禁、包、收尾与 tag/资产一致性。
+  - 成员：release-gate-requires-must-do-items-closed, release-package-must-pair-upgrade-and-rollback, post-release-housekeeping-mandatory, release-tag-must-match-published-artifact
+
+## 2026-11-25
+- 合并 2 条 → `pitfalls/video-generation-api-traps.md`：两篇都是视频生成 API 的计费/失败处理。
+  - 成员：video-credit-estimate-can-understate-2k, video-terminal-failure-needs-upstream-error-before-retry

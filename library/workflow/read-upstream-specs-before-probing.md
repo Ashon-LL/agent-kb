@@ -24,4 +24,4 @@ contextWindow / thinkingConfig / maxTokens）；3) **只有前两步没有的缺
 - 上游限流/不可达时，别拿"未实测"当"未验证"：改用**代码级证据链**——AST 抽取纯函数做形状断言、
   静态通路核对、二进制符号检查、服务端静态资源取回比对；并如实声明"行为证据未取到"。
 
-相关：[[research-upstream-before-fixing]]、[[upstream-merge-crlf-noise-and-anchor-patches]]。
+相关：[[research-upstream-before-fixing]]、[[git-history-sync-traps]]。

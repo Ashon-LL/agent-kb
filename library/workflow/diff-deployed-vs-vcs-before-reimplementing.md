@@ -18,4 +18,4 @@ topic: git, change-discipline
 
 **How to apply**：接手遗留工作的第一组命令就是 `ls -la` 两边 + `diff` 同名文件 + `git status`（未提交改动也是线索）；确认「实现只在部署面」后再动手。判断依据：文件大小/mtime 差异显著、仓库版缺部署版有的功能段。相关：[[hardlink-unify-shared-scripts-across-tools]]（副本治理）、[[ask-and-report]]。
 
-关联 [[fork-sync-force-update-wipes-local-customizations]]、[[git-remote-ownership-check]]。
+关联 [[git-history-sync-traps]]、[[git-remote-ownership-check]]。

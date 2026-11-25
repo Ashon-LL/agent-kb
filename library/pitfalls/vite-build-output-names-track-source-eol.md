@@ -14,4 +14,4 @@ topic: methodology
 
 **How to apply**：① 对拍构建产物先比「文件大小多重集」+「逐文件首个差异偏移」；若差异只落在哈希名/`data-v-*` 标记，按命名代差处理、不报内容问题。② 钉根因：对可疑组件各算一次 `sha256("src/.../Foo.vue" + 原文)`（LF 与 CRLF 两版），与产物中的 `data-v-*` 双向对照，命中即坐实。③ 要字节级一致：构建前先 `git checkout -- <files>` 把源文件行尾归一（eol=lf）再构建。相关：[[windows-scripting-terminal-gotchas]]（Edit/Write 保留原行尾、切分支后行尾可能已变）。
 
-关联 [[upstream-merge-crlf-noise-and-anchor-patches]]。
+关联 [[git-history-sync-traps]]。

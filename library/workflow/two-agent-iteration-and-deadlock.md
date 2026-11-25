@@ -1,14 +1,17 @@
 ---
-name: two-agent-iteration-via-dispatch-board
-description: 两个 Agent 通过仓库内派活板文件异步协作——派活方只改待办、执行方只改进行中/已完成、双方通过 commit 交流
+name: two-agent-iteration-and-deadlock
+description: 派活板异步协作；互相等待=死锁，破解靠明确到无解释空间的下一步
 type: workflow
-source: mh-agent-open
+source: 合并自 two-agent-iteration-via-dispatch-board, two-agents-waiting-on-each-other-is-deadlock；mh-agent-open; mh-agent-open
 date: 2026-10-03
 verified: 2026-10-03
 topic: agent-orchestration
 ---
+**经验**：派活板异步协作；互相等待=死锁，破解靠明确到无解释空间的下一步
 
-# 两个 Agent 分工迭代：用「派活板」代替人工转述
+> 本条由 2 条同族条目合并；原文判据、反例与实测命令保留在下面各节。
+
+## 两个 Agent 分工迭代：用「派活板」代替人工转述
 
 **场景**：一个 Agent 改代码/做调研，另一个（人或另一个 Agent）复核。派活靠人工复制粘贴时，
 会漏、会走样、对方不知道另一边的进度、历史散落在聊天记录里。
@@ -40,3 +43,13 @@ topic: agent-orchestration
 怎么算解决（可复算判据）/ 交付）。写太多"不许做 X"会把对方框死，
 它会为了守规矩而不做本该做的事（见 [[change-scope-boundary]]）。
 **明确标注"哪些不许碰"（如涉及产品口径变更的门禁）即可，其余给判断空间。**
+
+## two-agents-waiting-on-each-other-is-deadlock
+
+**经验**：两个 Agent 互相等的症状：writerOccupied:true、会话消息数N轮不变、工作区无改动、也无新提交。破解靠给一条明确到没有解释空间的下一步——不许做什么、剩余责任归谁、沉默的语义是什么。
+
+**Why**：发"本轮到此为止/先歇着"这种没有明确出口的话⇒对方回"等你下一条"；又把"等它确认收工"当成下一步继续等⇒闭环。单看每一步都合理（没下新指令、没新产出），合起来就是死锁。
+
+**How to apply**：收工指令模板——"本轮到此为止。不要再改任何仓库文件、不要新开任务。剩下的由我同步给用户。若你之后不再回话，即为正常收工，不是异常。"判"在等"要看三条同时成立：会话文件N分钟无写入 + writerOccupied:true + 我方无待发指令。会话文件mtime仍在动=他还在收尾，不是"在等"。
+
+关联 [[cnb-npc-dispatch-channel-and-iteration]]、[[authorization-and-scope]]、[[cross-agent-skill-dir-semantics]]。

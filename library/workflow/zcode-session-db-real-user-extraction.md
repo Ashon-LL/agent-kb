@@ -37,5 +37,5 @@ topic: methodology, database
 - 分析脚本与产物放项目内（如 `.analysis/`），大 JSONL 走 `.gitignore`。
 - 不要把「消息条数」当用户诉求数——同一诉求会重复多次，看趋势不看绝对值。
 
-关联 [[zcode-session-delete-is-soft-delete-two-dbs]]、[[kb-search-miss-is-not-kb-empty]]、
+关联 [[zcode-session-prune-and-delete]]、[[kb-search-miss-is-not-kb-empty]]、
 [[test-scope-must-be-pinned-by-index-not-walk]]。

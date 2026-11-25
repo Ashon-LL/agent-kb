@@ -1,14 +1,17 @@
 ---
-name: cnb-npc-dispatch-channel-config-and-time-caps
-description: CNB NPC 派单：@地址必须带完整仓库路径、CLI 评论可触发、配置源在 NPC 仓 .cnb.yml、timeout 不等于会话上限
-type: pitfall
-source: mh-agent-open
-date: 2026-10-21
+name: cnb-npc-dispatch-channel-and-iteration
+description: 派单通道/配置源/时长上限；失败时把断言原文+失败行回传同一分支
+type: tool
+source: 合并自 cnb-npc-dispatch-channel-config-and-time-caps, npc-iterate-by-sending-failure-text-back；mh-agent-open; CNB NPC 派单迭代 D38（2026-10-02 实测，回归用例 test_delivery_audit_split.py）
+date: 2026-10-02
 verified: 2026-10-21
-topic: cnb
+topic: cnb, agent-orchestration
 ---
+**经验**：派单通道/配置源/时长上限；失败时把断言原文+失败行回传同一分支
 
-# CNB NPC 派单：通道、配置源与时长上限（2026-10-21 实测）
+> 本条由 2 条同族条目合并；原文判据、反例与实测命令保留在下面各节。
+
+## CNB NPC 派单：通道、配置源与时长上限（2026-10-21 实测）
 
 **1. @ 地址必须带完整仓库路径**
 `@<NPC 所属仓>(<角色名>)`，例：`@apigogo/x(中书令)`。
@@ -58,5 +61,22 @@ topic: cnb
 **用户口径（2026-10-21）**：`6h` 是配置量级参考，**不是任务截止线**
 （原话「我没有说 <6h，没有说整个必须在 6h 内完成」）。
 
-关联 [[dispatch-requires-three-way-equality-and-artifact-hygiene]]、
-[[check-inflight-work-before-dispatch]]、[[no-assertion-without-measurement]]。
+关联 [[multi-agent-dispatch-and-parallelism]]、[[no-assertion-without-measurement]]。
+
+## npc-iterate-by-sending-failure-text-back
+
+**经验**：取回复算发现测试红之后，**不要自己动手改**——把失败原文整段回传给 NPC，让它修同一个分支。
+回传里必须包含三样：① 断言原文（含期望值 vs 实际值）② 失败的具体行 ③ 你期望的语义（不只是"让它绿"）。
+
+**Why**：自己改就退化成"我在替它写代码"，丢掉分工；而只说"有测试红了"会让它猜，容易只顾自己的新用例、
+漏掉被它改坏的**既有用例**。实测（20261002 D38）：它新契约红 + 既有用例 `test_delivery_audit_split.py`
+因 `_normalize_deliverable_name` 未 re-export 而断链；我在回传里把后者单独标为「必修 + 二选一修法」，
+它才能对准。
+
+**How to apply**：
+- 回传模板：`上一版分支 <branch> 我已取回复算；方向对，但有 N 条红：` → 逐条给「现象 / 原因 / 修法（可二选一，由你判断）」。
+- ⛔ 不许写「把断言放宽让它绿」——那是取消判据。
+- 让它**更新同一分支**（不新建），我这边 `git fetch` 后在同一 verify 分支上复跑即可。
+- 复算范围 = 改动到的 tests + 相关既有门禁用例，**必须全绿**才合入。
+
+关联 [[cnb-token-usage-audit]]、[[cnb-npc-dispatch-essentials]]。

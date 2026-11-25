@@ -148,4 +148,4 @@ topic: cnb, security
 
 **配额 / 自托管 Runner / CLI 新坑**已拆为独立条目：见 [[cnb-quota-runner-cli-notes]]。
 
-关联 [[squash-merge-defeats-ancestor-check]]、[[cnb-npc-dispatch-channel-config-and-time-caps]]。
+关联 [[git-history-sync-traps]]、[[cnb-npc-dispatch-channel-and-iteration]]。

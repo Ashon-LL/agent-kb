@@ -81,5 +81,5 @@ Turn 与 Compact 全挂。实测污染 279 个图片 artifact / 23 个会话，�
 - 脱敏检查清单只针对凭据与绝对路径，不要扩大成「凡是外部信息都删」。
 
 关联 [[token-and-secrets-hygiene]]、[[token-and-secrets-hygiene]]、
-[[dispatch-requires-three-way-equality-and-artifact-hygiene]]、
+[[multi-agent-dispatch-and-parallelism]]、
 [[user-input-contract]]。

@@ -18,4 +18,4 @@ topic: agent-orchestration, reporting
 
 **How to apply**：给新工具装技能的固定顺序——① `ls` 该工具 skills 目录看**既有条目的形态**（链接还是实体，跟多数走）；② 搜该工具文档确认 symlink 支持与目录名；③ 动手后让工具实际识别一次再收工。用户对平台行为的口头陈述是**线索不是定论**，先用 ①② 取证。**对其他平台/工具的能力，零实测就零断言**（2026-10-04 用户批评「你好像很容易想多，然后还容易想错」：同日接连臆测两件事——「workbuddy 没有 hooks 系统」「workbuddy 不读 ~/.agents」——均被用户否证）；用户纠正后做**最小修正**（只改臆测那几行），不借机扩大改动面。相关：[[hardlink-unify-shared-scripts-across-tools]]、[[zcode-platform-verified-facts]]。
 
-关联 [[npc-iterate-by-sending-failure-text-back]]、[[authorization-and-scope]]、[[two-agents-waiting-on-each-other-is-deadlock]]。
+关联 [[cnb-npc-dispatch-channel-and-iteration]]、[[authorization-and-scope]]、[[two-agent-iteration-and-deadlock]]。

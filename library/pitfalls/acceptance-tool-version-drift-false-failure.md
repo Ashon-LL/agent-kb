@@ -12,4 +12,4 @@ topic: verification, delivery
 
 **Why**：实测 `quick_post_install_check_v2919.py` 写死 v29.19 的 `ZCode-v29.19-PATCH` 与 `8383d9c4…`；用户正确安装 v29.21（`8b415929…`）后它报 `installed app.asar bytes: got 373524338 want 373506918` 并输出「请先运行 update-zcode.bat」——**假红会诱导用户重装甚至覆盖正确安装**。改用当前交付包跑 Go 检查器即 PASS。工具本身随版本漂移，与 [[runtime-acceptance-needs-user-install-not-static-proxies]]（静态全绿只是代理信号）互补：那条讲别把静态当运行态，这条讲别把过期工具的输出当真。
 
-**How to apply**：① 脚本参数化 `-patch-dir/-manifest`，默认值也取「当前 manifest 指向」而非固定字面量；② 输出里打印期望值来源与生成时刻；③ 发版卫生（[[post-release-housekeeping-mandatory]]）把「验收工具是否仍指向当前代」列为检查项；④ 遇到验收 FAIL 先核对工具期望值，再判断是不是装机问题，绝不据假红让用户重装；⑤ 保留旧脚本时注明「仅适用于 vX.Y」，或统一改为通用检查器。
+**How to apply**：① 脚本参数化 `-patch-dir/-manifest`，默认值也取「当前 manifest 指向」而非固定字面量；② 输出里打印期望值来源与生成时刻；③ 发版卫生（[[release-discipline]]）把「验收工具是否仍指向当前代」列为检查项；④ 遇到验收 FAIL 先核对工具期望值，再判断是不是装机问题，绝不据假红让用户重装；⑤ 保留旧脚本时注明「仅适用于 vX.Y」，或统一改为通用检查器。

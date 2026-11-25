@@ -58,6 +58,6 @@ topic: verification, methodology
 - 校验器会对「含时效状态句但无 ⏰/复核命令」的条目给 `[volatile]` 提示。
 
 关联 [[stated-provenance-needs-evidence-and-conditions]]、
-[[fork-sync-force-update-wipes-local-customizations]]、[[cnb-npc-dispatch-essentials]]、
+[[git-history-sync-traps]]、[[cnb-npc-dispatch-essentials]]、
 [[backlog-records-rot-verify-before-dispatch]]、
 [[automation-artifacts-lie-existence-and-freshness]]、[[kb-search-miss-is-not-kb-empty]]。

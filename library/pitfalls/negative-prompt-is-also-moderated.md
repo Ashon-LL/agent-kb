@@ -28,4 +28,4 @@ topic: llm, mcp
 > ⏰ 时效状态（2026-11-07 记录，**已实测一次对照**）：本机 `apishow-video` → MiniMax H3 端点上，含敏感词的 negative_prompt 触发 1026；删除 negative_prompt、正向不变后成功。具体触发词未逐词隔离。
 > ⚠️ 用前必须实测：对失败 task 调 `apishow_watch_video(task_id)` 读取 error；再用同正向、无 negative_prompt 的免费草稿做对照，确认是否仍报 1026。
 
-关联 [[video-terminal-failure-needs-upstream-error-before-retry]]、[[mcp-instructions-may-name-undeclared-tool-fields]]、[[no-assertion-without-measurement]]。
+关联 [[video-generation-api-traps]]、[[mcp-instructions-may-name-undeclared-tool-fields]]、[[no-assertion-without-measurement]]。

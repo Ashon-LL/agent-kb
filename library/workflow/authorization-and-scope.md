@@ -30,7 +30,7 @@ topic: preference, agent-orchestration, change-discipline
 多出来的一律不动；对流程载体再补一次"是否有 active 流程"的核对。
 与 [[authorization-and-scope]] 同族：**可逆 ≠ 可以顺手做**——
 "关 issue 能重开"不构成自行做的理由；它是「我打算做、等你点头」级别。
-与 [[check-inflight-work-before-dispatch]] 同源：**动手前先核当前在跑面**，那一条用在"派"，本条用在"关"。
+与 [[multi-agent-dispatch-and-parallelism]] 同源：**动手前先核当前在跑面**，那一条用在"派"，本条用在"关"。
 
 关联 [[ask-and-report]]、[[authorization-and-scope]]。
 

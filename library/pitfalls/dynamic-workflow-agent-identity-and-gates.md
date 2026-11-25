@@ -69,6 +69,6 @@ matches its cache by, so names must be unique.
 先问「我的采样区里有没有会污染判定的东西」。
 
 相关：[[automation-artifacts-lie-existence-and-freshness]]、[[defect-localization-methodology]]、
-[[subagent-orchestration-lessons]]、[[zcode-platform-verified-facts]]
+[[multi-agent-dispatch-and-parallelism]]、[[zcode-platform-verified-facts]]
 
 关联 [[scanner-flags-its-own-archived-output]]。

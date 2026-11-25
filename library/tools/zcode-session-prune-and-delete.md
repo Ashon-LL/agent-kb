@@ -1,12 +1,57 @@
 ---
-name: zcode-session-delete-is-soft-delete-two-dbs
-description: ZCode 的"删除会话"是纯软删——UI 状态在 v2/tasks-index.sqlite 的 tasks 表（archived/deleted/cli_deleted/pinned），正文全在 cli/db/db.sqlite 且**不随删除释放**，删完仍占空间；2026-10-27 复测：session 表已新增并写入 time_deleted（不再是"无任何删除标记"）；session.time_archived 仍是死列别信；定位存储时 grep -rlc 会假阴性
+name: zcode-session-prune-and-delete
+description: 超上下文时裁剪 db.sqlite part；删除会话是软删、正文仍占空间；含活跃上下文边界、备份与重启
 type: tool
-source: 2026-09-30 用户问「已归档且已删除/已删除的会话为什么仍然存在」，只读排查 ZCode 3.11 会话存储；2026-10-27 复测并实跑清理
+source: 合并自 zcode-session-context-pruning-sqlite, zcode-session-delete-is-soft-delete-two-dbs；本机实测 sess_3b1515a6（2026-11-16，输入 1.2M tokens 超限，compaction 连续 failed；裁剪后 tail 8.99MB→1.50MB）; 2026-09-30 用户问「已归档且已删除/已删除的会话为什么仍然存在」，只读排查 ZCode 3.11 会话存储；2026-10-27 复测并实跑清理
 date: 2026-09-30
-verified: 2026-10-27
-topic: zcode, database, sqlite
+verified: 2026-11-16
+topic: zcode, llm, database, sqlite
 ---
+**经验**：超上下文时裁剪 db.sqlite part；删除会话是软删、正文仍占空间；含活跃上下文边界、备份与重启
+
+> 本条由 2 条同族条目合并；原文判据、反例与实测命令保留在下面各节。
+
+## ZCode 会话超上下文：直接裁剪 db.sqlite
+
+### 经验
+
+- 会话正文在 `~/.zcode/cli/db/db.sqlite`，三张表：`session` / `message` / `part`。
+  文本、工具调用与输出都在 `part.data` 的 JSON 里；`message.data` 只是角色/模型/用量等元数据。
+- **活跃上下文 = 最后一次 `timelineStatus='completed'` 的 compaction 的 `message.sequence` 之后的 parts**。
+  `failed` / `interrupted` 的 compaction 不重置边界；compaction 失败时 ZCode 会继续拿全量 tail 重试，形成死循环。
+- tail 里 **tool 的 `state.metadata` 可能远大于 `state.output`**：实测 703 条 tool part 中 metadata 5.18MB、output 仅 1.26MB。只裁 output 效果有限，必须同时处理 metadata。
+- 可行的激进裁剪（仅 tail）：
+  - `state.output` → 前 200 字符 + `...[tool output pruned to fit context: original N chars]...`
+  - `state.metadata` → `{}`
+  - `reasoning.text` → 一行 `[reasoning pruned to fit context: original N chars]`
+  - 保留 `text`（用户/助手正文）、`step-*`、`timeline`
+  实测 tail 8.99MB → 1.50MB，`pragma quick_check` = ok，message/part 行数不变。
+- ZCode 的 token/字符比约为 **8 chars/token**（实测 tail 8.99MB ↔ 1,118,172 tokens），不要按 4 chars/token 估算裁剪量。
+
+### Why
+
+compaction 请求本身已经超过模型上限时（如 1.2M > 1.05M），压缩永远无法成功；必须先让原始 tail 降到上限以下，compaction 才有机会跑完。直接删会话会丢历史，所以最小侵入是原地裁剪 part 内容。
+
+### How to apply
+
+1. 定位会话与边界：
+   ```sql
+   select id,title from session where id='sess_xxx';
+   select p.time_created,m.sequence,json_extract(p.data,'$.timelineStatus')
+   from part p join message m on m.id=p.message_id
+   where p.session_id='sess_xxx'
+     and json_extract(p.data,'$.type')='compaction'
+   order by p.time_created;
+   ```
+   取最后一个 `timelineStatus='completed'` 的 `sequence`。
+2. 统计 tail 各 type 的 output/input/metadata 大小，确认大头（通常 tool metadata）。
+3. 把要改的 `part` 行 `id,data` 导出 JSON 备份；回滚按 `id` UPDATE `part.data`。
+4. 在事务里 UPDATE `part.data`（保持 JSON 结构，只替换字符串字段），提交后 `pragma quick_check`。
+5. **重启 ZCode / 重开该会话**，上下文从 DB 重建；重启前不要在该会话发新消息，否则可能用内存旧上下文再失败。
+
+相关：[[zcode-session-prune-and-delete]]、[[zcode-session-db-real-user-extraction]]、[[renderer-reload-is-not-context-loss]]。
+
+## zcode-session-delete-is-soft-delete-two-dbs
 
 **经验**：ZCode 的会话**删除/归档是纯软删，两个库分职**，排查前先认清这个分层，否则会一直在错的地方找：
 
