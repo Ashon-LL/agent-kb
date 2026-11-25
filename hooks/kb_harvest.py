@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""kb_harvest.py — 只读收割候选生成器（ZCode 会话库 + 当前工作区）。
+"""kb_harvest.py — 只读收割候选生成器（ZCode / OpenCode / 平台会话库 + 当前工作区）。
 
 只做「提取候选」，**不调用 LLM、不写入经验库**；确认与落盘仍由人和 kb 规程完成。
 设计参考：
@@ -17,11 +17,21 @@
     python kb_harvest.py --json candidates.json
     python kb_harvest.py --no-session           # 只扫工作区
     python kb_harvest.py --no-workspace         # 只扫会话库
+    python kb_harvest.py --no-zcode             # 跳过 ZCode 会话库
+    python kb_harvest.py --no-jsonl             # 跳过各平台 JSONL 会话
+    python kb_harvest.py --no-opencode          # 跳过 OpenCode 会话库
+    python kb_harvest.py --extra-sessions DIR   # 追加任意会话根（可重复）
     python kb_harvest.py --include-weak         # 连弱信号一起看（噪声较高）
+
+会话来源**平台无关**：自动发现 DSH（~/.dsh/sessions）、Claude Code（~/.claude/projects）、
+Codex（~/.codex/sessions）的 JSONL 会话，以及 --extra-sessions 指定的任意目录；
+ZCode 与 OpenCode 各走自己的 SQLite 库。用户与助手的文本都会看，
+子代理与系统注入按各自格式排除。
 """
 import argparse
 import json
 import re
+import sqlite3
 import sys
 import time
 import unicodedata
@@ -116,6 +126,154 @@ def collect_session_candidates(days=7, limit=100, db_path=None, include_weak=Fal
     return out, since
 
 
+# ── 平台无关的会话发现 ─────────────────────────────────────────────
+# (平台名, 根目录解析, 文件匹配)。新平台按需追加；也可用 --extra-sessions 指定任意根。
+SESSION_PLATFORM_ROOTS = (
+    ("dsh", lambda home: home / ".dsh" / "sessions",
+     lambda base: base.glob("*/session-*/session.v4.jsonl.zstd")),
+    ("claude-code", lambda home: home / ".claude" / "projects",
+     lambda base: base.glob("*/*.jsonl")),
+    ("codex", lambda home: home / ".codex" / "sessions",
+     lambda base: base.glob("**/*.jsonl")),
+)
+
+
+def _read_jsonl(path):
+    """读 plain / zstd 压缩的 JSONL，返回文本（zstd 缺失时抛 ImportError）。"""
+    raw = Path(path).read_bytes()
+    if str(path).endswith(".zstd"):
+        import zstandard
+        import io
+        raw = zstandard.ZstdDecompressor().stream_reader(io.BytesIO(raw)).read()
+    return raw.decode("utf-8", "replace")
+
+
+def _text_of(content):
+    """从字符串或内容块数组里取纯文本（只取 text 块，跳过 reasoning 等）。"""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for block in content:
+            if isinstance(block, str):
+                parts.append(block)
+            elif isinstance(block, dict) and block.get("type") == "text" and block.get("text"):
+                parts.append(block["text"])
+        return "\n".join(parts)
+    return ""
+
+
+def _to_ms(value):
+    """把毫秒 / 秒 / ISO 时间统一成毫秒；解析失败返回 0。"""
+    if isinstance(value, (int, float)):
+        return int(value * 1000) if value and value < 1e12 else int(value or 0)
+    if isinstance(value, str) and value:
+        try:
+            from datetime import datetime
+            return int(datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp() * 1000)
+        except Exception:
+            return 0
+    return 0
+
+
+def iter_dsh_messages(path):
+    """DSH session.v4.jsonl(.zstd)：顶层会话的 user / assistant 文本。"""
+    depth = 0
+    for line in _read_jsonl(path).splitlines():
+        try:
+            event = json.loads(line)
+        except Exception:
+            continue
+        kind = event.get("type")
+        if kind == "session":
+            depth = event.get("delegationDepth") or 0
+            continue
+        if depth:
+            continue
+        data = event.get("data") or {}
+        if kind == "user/message":
+            if (data.get("source") or {}).get("kind") != "user":
+                continue
+            yield "user", event.get("time") or 0, _text_of(data.get("content"))
+        elif kind == "assistant/message":
+            yield "assistant", event.get("time") or 0, _text_of((data.get("message") or {}).get("content"))
+
+
+def iter_generic_messages(path):
+    """通用 JSONL 会话适配：识别 role / message.role / type=user|assistant。"""
+    for line in _read_jsonl(path).splitlines():
+        try:
+            event = json.loads(line)
+        except Exception:
+            continue
+        if not isinstance(event, dict):
+            continue
+        role = event.get("role")
+        message = event.get("message") if isinstance(event.get("message"), dict) else None
+        if not role and message:
+            role = message.get("role")
+        if not role and event.get("type") in ("user", "assistant"):
+            role = event["type"]
+        if role not in ("user", "assistant"):
+            continue
+        source = message if message else event
+        text = _text_of(source.get("content")) or _text_of(event.get("text")) or _text_of(event.get("content"))
+        ts = event.get("time") or event.get("timestamp") or event.get("created_at") or event.get("created")
+        yield role, _to_ms(ts), text
+
+
+def collect_jsonl_candidates(days=7, limit=100, extra_roots=None, include_weak=False):
+    """扫描各平台会话文件（DSH / Claude Code / Codex / 通用 JSONL），平台无关。
+
+    只收**强信号**（TRIGGER_PATTERN）或显式打开 include_weak 时的弱信号；
+    用户与助手文本都看，子代理与系统注入按各自格式排除。
+    """
+    since = int(time.time() * 1000) - max(1, int(days)) * 86400000
+    home = Path.home()
+    files = []
+    for name, base_of, globber in SESSION_PLATFORM_ROOTS:
+        base = base_of(home)
+        if base.exists():
+            files.extend((name, p) for p in globber(base))
+    for extra in extra_roots or []:
+        base = Path(extra)
+        if not base.exists():
+            continue
+        files.extend(("custom", p) for p in base.rglob("*")
+                     if p.is_file() and (p.name.endswith(".jsonl") or p.name.endswith(".jsonl.zstd")))
+    out = []
+    for platform, path in sorted(files, key=lambda item: str(item[1])):
+        iterator = iter_dsh_messages(path) if platform == "dsh" else iter_generic_messages(path)
+        try:
+            for role, ts, text in iterator:
+                if ts and ts < since:
+                    continue
+                text = (text or "").strip()
+                if not text:
+                    continue
+                strong = bool(TRIGGER_PATTERN.search(text))
+                weak = bool(HEURISTIC.search(text))
+                if not strong and not (include_weak and weak):
+                    continue
+                out.append({
+                    "source": f"{platform}-session",
+                    "platform": platform,
+                    "role": role,
+                    "signal": "strong" if strong else "weak",
+                    "ts": ts,
+                    "time": time.strftime("%Y-%m-%d %H:%M", time.localtime(ts / 1000)) if ts else "",
+                    "suggest_dir": _suggest_dir(text),
+                    "reason": _reason(text),
+                    "text": _excerpt(text),
+                    "session": Path(path).parent.name,
+                })
+                if len(out) >= limit:
+                    return out, since
+        except Exception:
+            continue
+    return out, since
+
+
 def collect_workspace_candidates(root=".", limit=100, known=None):
     """扫描当前工作区的经验型 Markdown（文件名/目录启发式）。"""
     root = Path(root).resolve()
@@ -173,16 +331,17 @@ def render_markdown(session, workspace, meta):
         "",
         "## 会话候选",
         "",
-        "| # | 时间 | 信号 | 建议目录 | 类型 | 片段 |",
-        "|---|---|---|---|---|---|",
+        "| # | 时间 | 平台 | 角色 | 信号 | 建议目录 | 类型 | 片段 |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     if session:
         for i, c in enumerate(session, 1):
             lines.append(
-                f"| {i} | {c['time']} | {c['signal']} | `{c['suggest_dir']}` | {c['reason']} | {_cell(c['text'])} |"
+                f"| {i} | {c['time']} | {c.get('platform', 'zcode')} | {c.get('role', 'user')} | "
+                f"{c['signal']} | `{c['suggest_dir']}` | {c['reason']} | {_cell(c['text'])} |"
             )
     else:
-        lines.append("| — | — | — | — | — | （无） |")
+        lines.append("| — | — | — | — | — | — | — | （无） |")
 
     lines += [
         "",
@@ -217,6 +376,11 @@ def main(argv=None):
     ap.add_argument("--days", type=int, default=7, help="会话回看天数（默认 7）")
     ap.add_argument("--limit", type=int, default=100, help="每类候选上限（默认 100）")
     ap.add_argument("--db", default=None, help="ZCode 会话库路径（默认 ~/.zcode/cli/db/db.sqlite）")
+    ap.add_argument("--extra-sessions", action="append", default=[], metavar="DIR",
+                    help="额外会话根目录（可重复；递归找 *.jsonl / *.jsonl.zstd）")
+    ap.add_argument("--no-zcode", action="store_true", help="不扫 ZCode 会话库")
+    ap.add_argument("--no-jsonl", action="store_true",
+                    help="不扫各平台 JSONL 会话（DSH / Claude Code / Codex 等）")
     ap.add_argument("--workspace", default=".", help="工作区根目录（默认当前目录）")
     ap.add_argument("--out", default=None, help="Markdown 报告路径（默认 ~/.agents/kb/HARVEST-CANDIDATES.md）")
     ap.add_argument("--json", default=None, help="额外输出 JSON 路径")
@@ -231,14 +395,26 @@ def main(argv=None):
     session, workspace = [], []
     sources = []
 
-    if not args.no_session:
+    if not args.no_session and not args.no_zcode:
         try:
             session, since = collect_session_candidates(
                 args.days, args.limit, args.db, args.include_weak
             )
             sources.append(f"ZCode 会话库（最近 {args.days} 天）")
         except Exception as exc:
-            print(f"[WARN] 会话库不可读，降级跳过：{exc}", file=sys.stderr)
+            print(f"[WARN] ZCode 会话库不可读，降级跳过：{exc}", file=sys.stderr)
+
+    if not args.no_session and not args.no_jsonl:
+        try:
+            jsonl_rows, _ = collect_jsonl_candidates(
+                args.days, args.limit, args.extra_sessions, args.include_weak
+            )
+            session.extend(jsonl_rows)
+            platforms = sorted({row["platform"] for row in jsonl_rows})
+            if platforms:
+                sources.append(f"平台会话库 {', '.join(platforms)}（最近 {args.days} 天）")
+        except Exception as exc:
+            print(f"[WARN] 平台会话库不可读，降级跳过：{exc}", file=sys.stderr)
 
     if not args.no_workspace:
         workspace = collect_workspace_candidates(args.workspace, args.limit, known)
@@ -268,7 +444,11 @@ def main(argv=None):
             print(f"[WARN] JSON 写入失败：{exc}", file=sys.stderr)
 
     print(f"[OK] 候选报告 -> {out}")
-    print(f"     会话 {len(session)} 条 / 工作区 {len(workspace)} 条（未写入经验库）")
+    by_source = {}
+    for row in session:
+        by_source[row["source"]] = by_source.get(row["source"], 0) + 1
+    detail = " / ".join(f"{k} {v}" for k, v in sorted(by_source.items())) or "0"
+    print(f"     会话 {len(session)} 条（{detail}）/ 工作区 {len(workspace)} 条（未写入经验库）")
     return 0
 
 

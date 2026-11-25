@@ -135,6 +135,7 @@ class TestHarvest(unittest.TestCase):
             rc = kb_harvest.main([
                 "--days", "1", "--db", str(self.db),
                 "--workspace", str(self.ws),
+                "--no-jsonl",
                 "--out", str(out), "--json", str(jsonout),
             ])
         self.assertEqual(rc, 0)
